@@ -1,6 +1,7 @@
-import Image from "next/image";
+import type { ReactElement } from "react";
+import Logo from "@/components/ui/Logo";
 
-const SOCIALS: { label: string; href: string; icon: JSX.Element }[] = [
+const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/",
@@ -86,14 +87,7 @@ export default function Footer() {
 
       {/* Filas 2 y 3: logo + copyright centrados, juntos */}
       <div className="flex flex-col items-center gap-2">
-        <Image
-          src="/fixtheops-logo.png"
-          alt="fixtheops.com"
-          width={800}
-          height={151}
-          style={{ height: 28, width: "auto", display: "block" }}
-          priority={false}
-        />
+        <Logo size={26} />
         <p className="text-xs">
           © {year} · Todos los derechos reservados
         </p>

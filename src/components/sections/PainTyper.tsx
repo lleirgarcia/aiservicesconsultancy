@@ -121,10 +121,10 @@ export default function PainTyper() {
 
   return (
     <section
-      className="px-8 py-10 md:py-14 flex flex-col gap-2"
       style={{ borderBottom: "1px solid var(--border)" }}
       aria-live="polite"
     >
+      <div className="px-8 py-10 md:py-14 flex flex-col gap-2">
       {lines.map((committed, i) => {
         const isActive = i === activeSlot;
         const content = isActive ? typing : committed;
@@ -146,6 +146,7 @@ export default function PainTyper() {
           </p>
         );
       })}
+      </div>
     </section>
   );
 }

@@ -242,7 +242,7 @@ function SketchyEdge({
       seed: hashSeed(id),
       roughness: 2.8,
       bowing: 3,
-      stroke: '#6f6f6f',
+      stroke: '#6B6B72',
       strokeWidth: 1.1,
       disableMultiStroke: false,
     });
@@ -411,7 +411,7 @@ export default function WorkflowDiagram() {
           className="text-xs font-medium uppercase tracking-widest mb-8"
           style={{ color: 'var(--muted)' }}
         >
-          Sin sistema — situación actual
+          Sin sistema o a medias — situación actual
         </p>
         <div className="wf-flow wf-flow-sketchy" style={{ height: 420 }}>
           {mounted && (

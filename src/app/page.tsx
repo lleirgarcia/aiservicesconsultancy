@@ -7,6 +7,8 @@ import Footer from "@/components/sections/Footer";
 import WorkflowDiagram from "@/components/sections/WorkflowDiagram";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import ContactTrigger from "@/components/ui/ContactTrigger";
+import Logo from "@/components/ui/Logo";
+import SectionLabel from "@/components/ui/SectionLabel";
 
 export default function Home() {
   return (
@@ -17,14 +19,7 @@ export default function Home() {
         style={{ borderBottom: "1px solid var(--border)" }}
       >
         <a href="/" aria-label="fixtheops.com" className="inline-flex">
-          <Image
-            src="/fixtheops-logo.png"
-            alt="fixtheops.com"
-            width={800}
-            height={151}
-            style={{ height: 22, width: "auto", display: "block" }}
-            priority
-          />
+          <Logo size={22} />
         </a>
         <div className="flex items-center gap-8 text-center">
           <ContactTrigger />
@@ -34,7 +29,7 @@ export default function Home() {
 
       {/* Título previo a la tabla de pains */}
       <div
-        className="px-8 py-14"
+        className="px-8 py-14 section-accent-left"
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
       >
         <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
@@ -57,14 +52,14 @@ export default function Home() {
 
       {/* Título gancho */}
       <div
-        className="px-8 py-14 flex items-center gap-6"
+        className="px-8 py-14 flex items-center gap-6 section-accent-left"
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
       >
-        <span className="text-lg animate-bounce flex-shrink-0" style={{ color: "var(--muted)" }}>↓</span>
+        <span className="text-lg animate-bounce flex-shrink-0" style={{ color: "var(--accent)" }}>↓</span>
         <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase text-center flex-1">
-          Si algo de lo leído te suena, sigue leyendo
+          Resuena contigo, sigue leyendo
         </h2>
-        <span className="text-lg animate-bounce flex-shrink-0" style={{ color: "var(--muted)" }}>↓</span>
+        <span className="text-lg animate-bounce flex-shrink-0" style={{ color: "var(--accent)" }}>↓</span>
       </div>
 
       {/* Sección de contexto */}
@@ -72,16 +67,14 @@ export default function Home() {
 
         {/* Fila 1: contexto */}
         <div
-          className="grid md:grid-cols-[280px_1fr]"
+          className="grid md:grid-cols-[280px_1fr] section-accent-left"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
           >
-            <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--muted)" }}>
-              De qué va esto
-            </p>
+            <SectionLabel icon="info">De qué va esto</SectionLabel>
           </div>
           <div className="px-8 pt-6 pb-10 md:pt-8 md:pb-12 flex flex-col gap-8">
             <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
@@ -103,14 +96,12 @@ export default function Home() {
         </div>
 
         {/* Fila 2: por qué lo hacemos */}
-        <div className="grid md:grid-cols-[280px_1fr]" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="grid md:grid-cols-[280px_1fr] section-accent-left" style={{ borderBottom: "1px solid var(--border)" }}>
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
           >
-            <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--muted)" }}>
-              Por qué lo hacemos
-            </p>
+            <SectionLabel icon="target">Por qué lo hacemos</SectionLabel>
           </div>
           <div className="px-8 pt-6 pb-10 md:pt-8 md:pb-12 flex flex-col gap-5">
             <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
@@ -132,14 +123,12 @@ export default function Home() {
         </div>
 
         {/* Fila 3: cómo lo hacemos */}
-        <div className="grid md:grid-cols-[280px_1fr]">
+        <div className="grid md:grid-cols-[280px_1fr] section-accent-left">
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
           >
-            <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--muted)" }}>
-              Cómo lo hacemos
-            </p>
+            <SectionLabel icon="workflow">Cómo lo hacemos</SectionLabel>
           </div>
           <div className="px-8 pt-6 pb-10 md:pt-8 md:pb-12 flex flex-col gap-5">
             <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
@@ -166,7 +155,7 @@ export default function Home() {
 
         {/* Título de sección */}
         <div
-          className="px-8 flex items-center gap-8 relative overflow-hidden"
+          className="px-8 flex items-center gap-8 relative overflow-hidden section-accent-left"
           style={{ paddingTop: 36, paddingBottom: 36, borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
         >
           <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
@@ -371,7 +360,7 @@ export default function Home() {
 
         {/* Título de sección */}
         <div
-          className="px-8 py-14"
+          className="px-8 py-14 section-accent-left"
           style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
         >
           <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
@@ -381,16 +370,14 @@ export default function Home() {
 
         {/* Fila 1: Quiénes somos */}
         <div
-          className="grid md:grid-cols-[280px_1fr]"
+          className="grid md:grid-cols-[280px_1fr] section-accent-left"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
           >
-            <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--muted)" }}>
-              Quiénes somos
-            </p>
+            <SectionLabel icon="team">Quiénes somos</SectionLabel>
           </div>
           <div className="px-8 pt-6 pb-10 md:pt-8 md:pb-12 flex flex-col gap-5">
             <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
@@ -406,14 +393,15 @@ export default function Home() {
         </div>
 
         {/* Fila 2: Qué hacemos por ti */}
-        <div className="grid md:grid-cols-[280px_1fr]">
+        <div
+          className="grid md:grid-cols-[280px_1fr] section-accent-left"
+          style={{ borderBottom: "1px solid var(--border)" }}
+        >
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
           >
-            <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--muted)" }}>
-              Qué hacemos por ti
-            </p>
+            <SectionLabel icon="gear">Qué hacemos por ti</SectionLabel>
           </div>
           <div className="px-8 pt-6 pb-10 md:pt-8 md:pb-12 flex flex-col gap-5">
             <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
@@ -423,6 +411,27 @@ export default function Home() {
             <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
               El objetivo es claro: ahorrarte quebraderos de cabeza, tiempo, costes y
               recursos, y mejorar la productividad real de cada persona de tu equipo.
+            </p>
+          </div>
+        </div>
+
+        {/* Fila 3: Mostramos lo que podemos hacer */}
+        <div className="grid md:grid-cols-[280px_1fr] section-accent-left">
+          <div
+            className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
+            style={{ borderRight: "1px solid var(--border)" }}
+          >
+            <SectionLabel icon="eye">Mostramos lo que podemos hacer</SectionLabel>
+          </div>
+          <div className="px-8 pt-6 pb-10 md:pt-8 md:pb-12 flex flex-col gap-5">
+            <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
+              Verás ejemplos concretos de procesos que se pueden simplificar y automatizar;
+              esta es la mejor manera de entender qué hacemos y qué podríamos llegar a hacer
+              en tu empresa. El conocimiento de ambas partes detecta los problemas y define
+              las soluciones finales.
+            </p>
+            <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
+              Es por eso que te enseñamos potenciales soluciones a problemas.
             </p>
           </div>
         </div>

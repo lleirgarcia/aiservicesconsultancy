@@ -88,10 +88,7 @@ export default function Summary() {
           className="px-8 pt-8 pb-10 md:pt-10 md:pb-12"
           style={{ borderRight: "1px solid var(--border)" }}
         >
-          <p
-            className="text-xs font-medium uppercase tracking-widest mb-8"
-            style={{ color: "var(--muted)" }}
-          >
+          <p className="label-accent text-xs font-medium uppercase tracking-widest mb-8">
             Lo que has visto
           </p>
 
@@ -102,7 +99,7 @@ export default function Summary() {
                   className="text-xs font-semibold pt-0.5"
                   style={{
                     fontFamily: "var(--font-geist-mono), monospace",
-                    color: "var(--muted)",
+                    color: "var(--accent)",
                   }}
                 >
                   {String(i + 1).padStart(2, "0")}
@@ -123,10 +120,7 @@ export default function Summary() {
 
         {/* RIGHT: Lo que recibes */}
         <div className="px-8 pt-8 pb-10 md:pt-10 md:pb-12">
-          <p
-            className="text-xs font-medium uppercase tracking-widest mb-8"
-            style={{ color: "var(--muted)" }}
-          >
+          <p className="label-accent text-xs font-medium uppercase tracking-widest mb-8">
             Lo que recibes
           </p>
 
@@ -137,7 +131,7 @@ export default function Summary() {
                   className="text-xs font-semibold pt-0.5"
                   style={{
                     fontFamily: "var(--font-geist-mono), monospace",
-                    color: "var(--muted)",
+                    color: "var(--accent)",
                   }}
                 >
                   {String(i + 1).padStart(2, "0")}

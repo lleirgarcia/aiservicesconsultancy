@@ -51,7 +51,9 @@ export default function ContactTrigger() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.5)",
+            background: "rgba(0,0,0,0.35)",
+            backdropFilter: "blur(10px) saturate(120%)",
+            WebkitBackdropFilter: "blur(10px) saturate(120%)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
