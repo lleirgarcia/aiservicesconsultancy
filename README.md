@@ -1,5 +1,11 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Key dependencies
+
+- **Next.js 16** + **React 19** + **TypeScript**
+- **Tailwind CSS 4** for styling
+- **[@xyflow/react](https://reactflow.dev)** (React Flow v12) — renders the "Así funciona hoy" / "Así podría funcionar mañana" workflow diagrams in `src/components/sections/WorkflowDiagram.tsx` with custom node types (`chaos`, `input`, `center`, `output`, `result`) and a custom wavy edge. The diagrams are display-only (pan/zoom/drag disabled) and auto-fit to the viewport.
+
 ## Getting Started
 
 First, run the development server:
