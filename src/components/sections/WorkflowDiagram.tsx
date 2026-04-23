@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ComponentType } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import rough from 'roughjs';
 import type { PathInfo } from 'roughjs/bin/core';
 import {
@@ -8,6 +8,7 @@ import {
   Handle,
   Position,
   MarkerType,
+  getBezierPath,
   type Node,
   type Edge,
   type NodeProps,
@@ -29,8 +30,8 @@ function hashSeed(id: string): number {
 /* ─── Data types ─────────────────────────────────── */
 
 type IconKey = 'hourglass';
-type BoxData = { lines: string[]; icon?: IconKey };
-type ResultData = { title: string; items: string[] };
+type BoxData = { lines: string[]; icon?: IconKey; animDelay?: number; triggered?: boolean };
+type ResultData = { title: string; items: string[]; animDelay?: number; triggered?: boolean };
 type BoxNode = Node<BoxData>;
 type ResultNode = Node<ResultData>;
 
@@ -138,6 +139,9 @@ function SketchyChaosNode({ id, data }: NodeProps<BoxNode>) {
         width: CHAOS_W,
         height: CHAOS_H,
         transform: `rotate(${rotation}deg)`,
+        opacity: 0,
+        animation: data.triggered ? 'wf-node-appear 0.45s ease forwards' : 'none',
+        animationDelay: `${data.animDelay ?? 0}ms`,
       }}
     >
       <Handle type="target" position={Position.Top} id="t" />
@@ -158,7 +162,13 @@ function SketchyResultNode({ id, data }: NodeProps<ResultNode>) {
   return (
     <div
       className="wf-sketchy-result"
-      style={{ width: RESULT_W, height: RESULT_H }}
+      style={{
+        width: RESULT_W,
+        height: RESULT_H,
+        opacity: 0,
+        animation: data.triggered ? 'wf-node-appear 0.55s ease forwards' : 'none',
+        animationDelay: `${data.animDelay ?? 0}ms`,
+      }}
     >
       <Handle type="target" position={Position.Left} id="l" />
       <Handle type="target" position={Position.Top} id="t" />
@@ -229,7 +239,12 @@ function SketchyEdge({
   sourceY,
   targetX,
   targetY,
+  data,
 }: EdgeProps) {
+  const edgeData = data as { animDelay?: number; triggered?: boolean } | null;
+  const triggered = edgeData?.triggered ?? false;
+  const animDelay = edgeData?.animDelay ?? 0;
+
   const paths: PathInfo[] = useMemo(() => {
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
@@ -259,9 +274,85 @@ function SketchyEdge({
           stroke={p.stroke}
           strokeWidth={p.strokeWidth}
           strokeLinecap="round"
+          strokeDasharray={triggered ? '3000' : undefined}
+          strokeDashoffset={triggered ? '3000' : undefined}
+          style={
+            triggered
+              ? {
+                  animation: 'wf-edge-draw 0.8s ease forwards',
+                  animationDelay: `${animDelay}ms`,
+                }
+              : { opacity: 0 }
+          }
         />
       ))}
     </g>
+  );
+}
+
+/* ─── Clean edge with left-to-right draw-in animation ──── */
+
+function CleanEdge({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  markerEnd,
+  data,
+}: EdgeProps) {
+  const edgeData = data as
+    | { animDelay?: number; duration?: number; triggered?: boolean }
+    | null;
+  const triggered = edgeData?.triggered ?? false;
+  const animDelay = edgeData?.animDelay ?? 0;
+  const duration = edgeData?.duration ?? 1000;
+
+  const [edgePath] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  if (!triggered) {
+    return (
+      <path
+        id={id}
+        className="react-flow__edge-path"
+        d={edgePath}
+        fill="none"
+        stroke="var(--fg)"
+        strokeWidth={1.4}
+        strokeLinecap="round"
+        style={{ opacity: 0 }}
+      />
+    );
+  }
+
+  return (
+    <path
+      key={`${id}-trig`}
+      id={id}
+      className="react-flow__edge-path"
+      d={edgePath}
+      fill="none"
+      stroke="var(--fg)"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      markerEnd={markerEnd}
+      pathLength={1}
+      strokeDasharray="1"
+      strokeDashoffset="1"
+      style={{
+        animation: `wf-edge-draw ${duration}ms ease both`,
+        animationDelay: `${animDelay}ms`,
+      }}
+    />
   );
 }
 
@@ -277,34 +368,10 @@ const nodeTypes: NodeTypes = {
 
 const edgeTypes: EdgeTypes = {
   sketchy: SketchyEdge,
+  clean: CleanEdge,
 };
 
-/* ─── Chaos diagram data ─────────────────────────── */
-
-const chaosNodes: Node[] = [
-  { id: 'a', type: 'chaos', position: { x: 20,  y: 30 },  data: { lines: ['Pedidos', 'WhatsApp'] } },
-  { id: 'b', type: 'chaos', position: { x: 260, y: 0 },   data: { lines: ['Facturas', 'a mano'] } },
-  { id: 'c', type: 'chaos', position: { x: 500, y: 55 },  data: { lines: ['Excel', 'desactualizado'] } },
-  { id: 'd', type: 'chaos', position: { x: 50,  y: 150 }, data: { lines: ['Emails', 'sin control'] } },
-  { id: 'e', type: 'chaos', position: { x: 320, y: 128 }, data: { lines: ['Datos', 'dispersos'] } },
-  { id: 'f', type: 'chaos', position: { x: 540, y: 172 }, data: { lines: ['Nadie', 'controla'] } },
-  { id: 'g', type: 'chaos', position: { x: 190, y: 260 }, data: { lines: ['El dueño', 'lo sabe todo'] } },
-  { id: 'h', type: 'chaos', position: { x: 430, y: 270 }, data: { lines: ['Sin', 'reporting'] } },
-  {
-    id: 'result',
-    type: 'result',
-    position: { x: 760, y: 80 },
-    data: {
-      title: 'Resultado',
-      items: [
-        'Tiempo perdido',
-        'Dinero malgastado',
-        'Sin visibilidad',
-        'Sin control',
-      ],
-    },
-  },
-];
+/* ─── Chaos diagram data (base — sin triggered) ──── */
 
 const chaosPairs: Array<[string, string, string, string]> = [
   ['a', 'e', 'r', 'l'],
@@ -323,7 +390,28 @@ const chaosPairs: Array<[string, string, string, string]> = [
   ['f', 'e', 'l', 'r'],
 ];
 
-const chaosEdges: Edge[] = [
+const chaosNodesBase: Node[] = [
+  { id: 'a', type: 'chaos', position: { x: 20,  y: 30 },  data: { lines: ['Pedidos', 'WhatsApp'],       animDelay: 150  } },
+  { id: 'b', type: 'chaos', position: { x: 260, y: 0 },   data: { lines: ['Facturas', 'a mano'],         animDelay: 400  } },
+  { id: 'c', type: 'chaos', position: { x: 500, y: 55 },  data: { lines: ['Excel', 'desactualizado'],    animDelay: 850  } },
+  { id: 'd', type: 'chaos', position: { x: 50,  y: 150 }, data: { lines: ['Emails', 'sin control'],      animDelay: 0    } },
+  { id: 'e', type: 'chaos', position: { x: 320, y: 128 }, data: { lines: ['Datos', 'dispersos'],         animDelay: 550  } },
+  { id: 'f', type: 'chaos', position: { x: 540, y: 172 }, data: { lines: ['Nadie', 'controla'],          animDelay: 1000 } },
+  { id: 'g', type: 'chaos', position: { x: 190, y: 260 }, data: { lines: ['El dueño', 'lo sabe todo'],  animDelay: 280  } },
+  { id: 'h', type: 'chaos', position: { x: 430, y: 270 }, data: { lines: ['Sin', 'reporting'],           animDelay: 700  } },
+  {
+    id: 'result',
+    type: 'result',
+    position: { x: 760, y: 80 },
+    data: {
+      title: 'Resultado',
+      items: ['Tiempo perdido', 'Dinero malgastado', 'Sin visibilidad', 'Sin control'],
+      animDelay: 1350,
+    },
+  },
+];
+
+const chaosEdgesBase: Edge[] = [
   ...chaosPairs.map(([s, t, sh, th], i) => ({
     id: `c-${i}-${s}-${t}`,
     source: s,
@@ -331,14 +419,16 @@ const chaosEdges: Edge[] = [
     sourceHandle: sh,
     targetHandle: th,
     type: 'sketchy',
+    data: { animDelay: 250 + i * 45 },
   })),
-  ...(['c', 'e', 'f', 'h'] as const).map(s => ({
+  ...(['c', 'e', 'f', 'h'] as const).map((s, i) => ({
     id: `c-out-${s}`,
     source: s,
     target: 'result',
     sourceHandle: 'r',
     targetHandle: 'l',
     type: 'sketchy',
+    data: { animDelay: 1100 + i * 60 },
   })),
 ];
 
@@ -361,13 +451,22 @@ const cleanArrow = {
   height: 16,
 };
 
-const cleanEdges: Edge[] = [
-  { id: 'i1-cx', source: 'i1', target: 'cx', style: { stroke: 'var(--fg)', strokeWidth: 1.4 }, markerEnd: cleanArrow },
-  { id: 'i2-cx', source: 'i2', target: 'cx', style: { stroke: 'var(--fg)', strokeWidth: 1.4 }, markerEnd: cleanArrow },
-  { id: 'i3-cx', source: 'i3', target: 'cx', style: { stroke: 'var(--fg)', strokeWidth: 1.4 }, markerEnd: cleanArrow },
-  { id: 'cx-o1', source: 'cx', target: 'o1', style: { stroke: 'var(--fg)', strokeWidth: 1.4 }, markerEnd: cleanArrow },
-  { id: 'cx-o2', source: 'cx', target: 'o2', style: { stroke: 'var(--fg)', strokeWidth: 1.4 }, markerEnd: cleanArrow },
-  { id: 'cx-o3', source: 'cx', target: 'o3', style: { stroke: 'var(--fg)', strokeWidth: 1.4 }, markerEnd: cleanArrow },
+// Left group (inputs → center): staggered 0–1150ms
+// Right group (center → outputs): staggered 1300–2450ms
+// Each edge takes 850ms to fully draw → total sequence ≈ 2.4s.
+const EDGE_DRAW_MS = 850;
+const LEFT_START_MS = 0;
+const LEFT_STAGGER_MS = 150;
+const RIGHT_START_MS = LEFT_START_MS + EDGE_DRAW_MS + 300;
+const RIGHT_STAGGER_MS = 150;
+
+const cleanEdgesBase: Edge[] = [
+  { id: 'i1-cx', source: 'i1', target: 'cx', type: 'clean', markerEnd: cleanArrow, data: { animDelay: LEFT_START_MS + LEFT_STAGGER_MS * 0, duration: EDGE_DRAW_MS } },
+  { id: 'i2-cx', source: 'i2', target: 'cx', type: 'clean', markerEnd: cleanArrow, data: { animDelay: LEFT_START_MS + LEFT_STAGGER_MS * 1, duration: EDGE_DRAW_MS } },
+  { id: 'i3-cx', source: 'i3', target: 'cx', type: 'clean', markerEnd: cleanArrow, data: { animDelay: LEFT_START_MS + LEFT_STAGGER_MS * 2, duration: EDGE_DRAW_MS } },
+  { id: 'cx-o1', source: 'cx', target: 'o1', type: 'clean', markerEnd: cleanArrow, data: { animDelay: RIGHT_START_MS + RIGHT_STAGGER_MS * 0, duration: EDGE_DRAW_MS } },
+  { id: 'cx-o2', source: 'cx', target: 'o2', type: 'clean', markerEnd: cleanArrow, data: { animDelay: RIGHT_START_MS + RIGHT_STAGGER_MS * 1, duration: EDGE_DRAW_MS } },
+  { id: 'cx-o3', source: 'cx', target: 'o3', type: 'clean', markerEnd: cleanArrow, data: { animDelay: RIGHT_START_MS + RIGHT_STAGGER_MS * 2, duration: EDGE_DRAW_MS } },
 ];
 
 /* ─── Shared flow props (display-only) ───────────── */
@@ -395,12 +494,69 @@ const cleanFitView = { padding: 0.08 };
 
 export default function WorkflowDiagram() {
   const [mounted, setMounted] = useState(false);
+  const [triggered, setTriggered] = useState(false);
+  const [cleanTriggered, setCleanTriggered] = useState(false);
+  const chaosRef = useRef<HTMLDivElement>(null);
+  const cleanRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const el = chaosRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTriggered(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = cleanRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setCleanTriggered(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const chaosNodes = useMemo(
+    () => chaosNodesBase.map(n => ({ ...n, data: { ...n.data, triggered } })),
+    [triggered],
+  );
+
+  const chaosEdges = useMemo(
+    () => chaosEdgesBase.map(e => ({ ...e, data: { ...e.data, triggered } })),
+    [triggered],
+  );
+
+  const cleanEdges = useMemo(
+    () =>
+      cleanEdgesBase.map(e => ({
+        ...e,
+        data: { ...e.data, triggered: cleanTriggered },
+      })),
+    [cleanTriggered],
+  );
 
   return (
     <div style={{ borderBottom: '1px solid var(--border)' }}>
       {/* Chaotic — hand-drawn */}
       <div
+        ref={chaosRef}
         className="px-8 py-10"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
@@ -428,7 +584,7 @@ export default function WorkflowDiagram() {
       </div>
 
       {/* Clean */}
-      <div className="px-8 py-10">
+      <div ref={cleanRef} className="px-8 py-10">
         <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase mb-2">
           Así podría funcionar mañana.
         </h2>
@@ -444,6 +600,7 @@ export default function WorkflowDiagram() {
               nodes={cleanNodes}
               edges={cleanEdges}
               nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
               {...staticFlowProps}
               fitViewOptions={cleanFitView}
             />

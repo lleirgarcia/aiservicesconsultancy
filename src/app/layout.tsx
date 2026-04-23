@@ -20,9 +20,9 @@ const orbitron = Orbitron({
 
 
 export const metadata: Metadata = {
-  title: "Calculadora de ahorro en procesos — Empresas industriales y distribución",
+  title: "Optimizamos el caos para crear claridad en tu negocio · Osona, Barcelona",
   description:
-    "Calcula en 2 minutos cuánto dinero y tiempo estás perdiendo en procesos manuales. Para empresas industriales, de distribución y logística.",
+    "Optimizamos el caos para crear claridad en tu negocio. La claridad ahorra tiempo y dinero · Osona, Barcelona",
 };
 
 export default function RootLayout({

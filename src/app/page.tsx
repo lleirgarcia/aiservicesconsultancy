@@ -67,7 +67,7 @@ export default function Home() {
 
         {/* Fila 1: contexto */}
         <div
-          className="grid md:grid-cols-[280px_1fr] section-accent-left"
+          className="grid md:grid-cols-[280px_1fr]"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div
@@ -96,7 +96,7 @@ export default function Home() {
         </div>
 
         {/* Fila 2: por qué lo hacemos */}
-        <div className="grid md:grid-cols-[280px_1fr] section-accent-left" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="grid md:grid-cols-[280px_1fr]" style={{ borderBottom: "1px solid var(--border)" }}>
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
@@ -123,7 +123,7 @@ export default function Home() {
         </div>
 
         {/* Fila 3: cómo lo hacemos */}
-        <div className="grid md:grid-cols-[280px_1fr] section-accent-left">
+        <div className="grid md:grid-cols-[280px_1fr]">
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
@@ -370,7 +370,7 @@ export default function Home() {
 
         {/* Fila 1: Quiénes somos */}
         <div
-          className="grid md:grid-cols-[280px_1fr] section-accent-left"
+          className="grid md:grid-cols-[280px_1fr]"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div
@@ -394,7 +394,7 @@ export default function Home() {
 
         {/* Fila 2: Qué hacemos por ti */}
         <div
-          className="grid md:grid-cols-[280px_1fr] section-accent-left"
+          className="grid md:grid-cols-[280px_1fr]"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div
@@ -416,7 +416,7 @@ export default function Home() {
         </div>
 
         {/* Fila 3: Mostramos lo que podemos hacer */}
-        <div className="grid md:grid-cols-[280px_1fr] section-accent-left">
+        <div className="grid md:grid-cols-[280px_1fr]">
           <div
             className="px-8 pt-6 pb-10 md:pt-8 md:pb-12"
             style={{ borderRight: "1px solid var(--border)" }}
@@ -458,6 +458,17 @@ export default function Home() {
         {/* <PainPoints /> — oculto temporalmente */}
         {/* <SimulatorClient /> — oculto temporalmente */}
         <Summary />
+
+        {/* Título de sección: CTA al formulario */}
+        <div
+          className="px-8 py-14 section-accent-left"
+          style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
+        >
+          <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
+            Deja tus datos y nuestro agente te contactará
+          </h2>
+        </div>
+
         <ContactForm />
       </div>
 

@@ -103,7 +103,7 @@ export default function ContactTrigger() {
               className="flex flex-col gap-1 px-6 py-5 transition-colors"
               style={{ borderBottom: "1px solid var(--border)" }}
             >
-              <span className="text-xs font-medium uppercase tracking-widest">
+              <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
                 Llamar
               </span>
               <span className="text-sm" style={{ color: "var(--muted)" }}>
@@ -117,7 +117,7 @@ export default function ContactTrigger() {
               className="flex flex-col gap-1 px-6 py-5 transition-colors"
               style={{ borderBottom: "1px solid var(--border)" }}
             >
-              <span className="text-xs font-medium uppercase tracking-widest">
+              <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
                 Enviar email
               </span>
               <span className="text-sm" style={{ color: "var(--muted)" }}>
@@ -132,7 +132,7 @@ export default function ContactTrigger() {
               onClick={() => setOpen(false)}
               className="flex flex-col gap-1 px-6 py-5 transition-colors"
             >
-              <span className="text-xs font-medium uppercase tracking-widest">
+              <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
                 Enviar WhatsApp
               </span>
             </a>

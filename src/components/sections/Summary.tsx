@@ -64,7 +64,7 @@ export default function Summary() {
     >
       {/* Título de sección */}
       <div
-        className="px-8 py-14"
+        className="px-8 py-14 section-accent-left"
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
       >
         <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
