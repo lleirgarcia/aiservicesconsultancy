@@ -9,10 +9,14 @@ import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import ContactTrigger from "@/components/ui/ContactTrigger";
 import Logo from "@/components/ui/Logo";
 import SectionLabel from "@/components/ui/SectionLabel";
+import CollapseIntro from "@/components/ui/CollapseIntro";
 
 export default function Home() {
   return (
     <div className="max-w-5xl mx-auto" style={{ borderLeft: "1px solid var(--border)", borderRight: "1px solid var(--border)", minHeight: "100vh" }}>
+      {/* Intro: todas las secciones arrancan plegadas y se despliegan a los 2s */}
+      <CollapseIntro delay={2000} />
+
       {/* Header */}
       <header
         className="px-6 py-4 flex items-center justify-between gap-4"
@@ -48,7 +52,9 @@ export default function Home() {
       </div>
 
       {/* Frases reales del jefe (pains en lenguaje natural) tecleadas en pantalla */}
-      <PainTyper />
+      <div data-collapsible style={{ ["--collapse-delay" as string]: "0ms" }}>
+        <PainTyper />
+      </div>
 
       {/* Título gancho */}
       <div
@@ -63,6 +69,7 @@ export default function Home() {
       </div>
 
       {/* Sección de contexto */}
+      <div data-collapsible style={{ ["--collapse-delay" as string]: "150ms" }}>
       <div style={{ borderBottom: "1px solid var(--border)" }}>
 
         {/* Fila 1: contexto */}
@@ -149,6 +156,7 @@ export default function Home() {
         </div>
 
       </div>
+      </div>
 
       {/* EJEMPLOS Y CASOS DE USO */}
       <div style={{ borderBottom: "1px solid var(--border)" }}>
@@ -190,6 +198,7 @@ export default function Home() {
         </div>
 
         {/* Grid de casos */}
+        <div data-collapsible style={{ ["--collapse-delay" as string]: "300ms" }}>
         <div className="grid grid-cols-1 md:grid-cols-3">
 
           {/* Caso 1 */}
@@ -349,6 +358,7 @@ export default function Home() {
           </div>
 
         </div>
+        </div>
 
       </div>
 
@@ -368,6 +378,7 @@ export default function Home() {
           </h2>
         </div>
 
+        <div data-collapsible style={{ ["--collapse-delay" as string]: "450ms" }}>
         {/* Fila 1: Quiénes somos */}
         <div
           className="grid md:grid-cols-[280px_1fr]"
@@ -435,6 +446,7 @@ export default function Home() {
             </p>
           </div>
         </div>
+        </div>
 
       </div>
 
@@ -469,7 +481,9 @@ export default function Home() {
           </h2>
         </div>
 
-        <ContactForm />
+        <div data-collapsible style={{ ["--collapse-delay" as string]: "600ms" }}>
+          <ContactForm />
+        </div>
       </div>
 
       <Footer />

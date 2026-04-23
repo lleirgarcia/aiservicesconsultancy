@@ -64,7 +64,7 @@ body {
 }
 
 /* ── Input base ───────────────────────────────── */
-input, textarea {
+input, textarea, select {
   font-family: inherit;
   font-size: 14px;
   color: var(--fg);
@@ -74,6 +74,7 @@ input, textarea {
   padding: 8px 10px;
   width: 100%;
   outline: none;
+  caret-color: var(--accent);
   transition: border-color 0.15s;
 }
 input:focus, textarea:focus {
@@ -299,4 +300,41 @@ input[type="number"] { -moz-appearance: textfield; }
 
 @keyframes wf-edge-draw {
   to { stroke-dashoffset: 0; }
+}
+
+/* ── Intro: secciones plegadas al cargar ──────────── */
+/*
+ * Cada bloque con `data-collapsible` arranca con altura 0 (truco grid
+ * 0fr → 1fr, que sí es animable) y opacidad 0. Cuando `<html>` recibe
+ * la clase `sections-expanded` (vía CollapseIntro tras 2s), todos se
+ * despliegan de forma escalonada gracias a `transition-delay`.
+ *
+ * Sólo activamos el modo plegado mientras `collapse-intro-armed` esté
+ * presente — antes de montar React (SSR + JS deshabilitado) el contenido
+ * es totalmente visible, evitando flashes de contenido oculto.
+ */
+html.collapse-intro-armed [data-collapsible] {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    grid-template-rows 1400ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 1100ms ease-out;
+  transition-delay: var(--collapse-delay, 0ms);
+}
+
+html.collapse-intro-armed [data-collapsible] > * {
+  min-height: 0;
+}
+
+html.collapse-intro-armed.sections-expanded [data-collapsible] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.collapse-intro-armed [data-collapsible] {
+    transition: none;
+  }
 }

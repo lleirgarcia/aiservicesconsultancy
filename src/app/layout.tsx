@@ -20,9 +20,9 @@ const orbitron = Orbitron({
 
 
 export const metadata: Metadata = {
-  title: "Optimizamos el caos para crear claridad en tu negocio · Osona, Barcelona",
+  title: "Calculadora de ahorro en procesos — Empresas industriales y distribución",
   description:
-    "Optimizamos el caos para crear claridad en tu negocio. La claridad ahorra tiempo y dinero · Osona, Barcelona",
+    "Calcula en 2 minutos cuánto dinero y tiempo estás perdiendo en procesos manuales. Para empresas industriales, de distribución y logística.",
 };
 
 export default function RootLayout({
@@ -31,7 +31,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable}`}>
+    <html
+      lang="es"
+      className={`collapse-intro-armed ${geistSans.variable} ${geistMono.variable} ${orbitron.variable}`}
+    >
+      <head>
+        {/* Sin JS, anula el plegado inicial para que el contenido sea visible */}
+        <noscript>
+          <style>{`html.collapse-intro-armed [data-collapsible]{grid-template-rows:1fr!important;opacity:1!important;}`}</style>
+        </noscript>
+      </head>
       <body className="min-h-screen">{children}</body>
     </html>
   );

@@ -79,6 +79,7 @@ export default function Summary() {
       </div>
 
       {/* Dos columnas: recap narrativa + deliverables */}
+      <div data-collapsible style={{ ["--collapse-delay" as string]: "500ms" }}>
       <div
         className="grid grid-cols-1 md:grid-cols-2"
         style={{ borderBottom: "1px solid var(--border)" }}
@@ -149,6 +150,7 @@ export default function Summary() {
             ))}
           </ol>
         </div>
+      </div>
       </div>
     </section>
   );

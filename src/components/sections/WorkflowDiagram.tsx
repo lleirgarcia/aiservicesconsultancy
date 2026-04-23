@@ -499,7 +499,32 @@ export default function WorkflowDiagram() {
   const chaosRef = useRef<HTMLDivElement>(null);
   const cleanRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setMounted(true), []);
+  // Retrasamos el montaje de ReactFlow hasta que las secciones se despliegan
+  // (clase `sections-expanded` en <html>). Si esperamos, el contenedor ya
+  // tendrá su altura final cuando `fitView` se ejecute — de lo contrario
+  // mediría 0 px mientras la animación de despliegue está en curso.
+  useEffect(() => {
+    const root = document.documentElement;
+
+    const shouldMount = () =>
+      !root.classList.contains("collapse-intro-armed") ||
+      root.classList.contains("sections-expanded");
+
+    if (shouldMount()) {
+      setMounted(true);
+      return;
+    }
+
+    const obs = new MutationObserver(() => {
+      if (shouldMount()) {
+        setMounted(true);
+        obs.disconnect();
+      }
+    });
+
+    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
 
   useEffect(() => {
     const el = chaosRef.current;
@@ -569,17 +594,22 @@ export default function WorkflowDiagram() {
         >
           Sin sistema o a medias — situación actual
         </p>
-        <div className="wf-flow wf-flow-sketchy" style={{ height: 420 }}>
-          {mounted && (
-            <ReactFlow
-              nodes={chaosNodes}
-              edges={chaosEdges}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
-              {...staticFlowProps}
-              fitViewOptions={chaosFitView}
-            />
-          )}
+        <div
+          data-collapsible
+          style={{ ['--collapse-delay' as string]: '250ms' }}
+        >
+          <div className="wf-flow wf-flow-sketchy" style={{ height: 420 }}>
+            {mounted && (
+              <ReactFlow
+                nodes={chaosNodes}
+                edges={chaosEdges}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                {...staticFlowProps}
+                fitViewOptions={chaosFitView}
+              />
+            )}
+          </div>
         </div>
       </div>
 
@@ -594,17 +624,22 @@ export default function WorkflowDiagram() {
         >
           Con sistema — flujo automatizado
         </p>
-        <div className="wf-flow" style={{ height: 340 }}>
-          {mounted && (
-            <ReactFlow
-              nodes={cleanNodes}
-              edges={cleanEdges}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
-              {...staticFlowProps}
-              fitViewOptions={cleanFitView}
-            />
-          )}
+        <div
+          data-collapsible
+          style={{ ['--collapse-delay' as string]: '400ms' }}
+        >
+          <div className="wf-flow" style={{ height: 340 }}>
+            {mounted && (
+              <ReactFlow
+                nodes={cleanNodes}
+                edges={cleanEdges}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                {...staticFlowProps}
+                fitViewOptions={cleanFitView}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
