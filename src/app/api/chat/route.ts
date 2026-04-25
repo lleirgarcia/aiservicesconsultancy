@@ -14,13 +14,7 @@ interface MessagePayload {
 interface ChatRequest {
   messages: MessagePayload[];
   leadId?: string;
-  contactData?: {
-    nombre?: string;
-    empresa?: string;
-    tamano?: string;
-    email?: string;
-    telefono?: string;
-  };
+  isManualSave?: boolean;
 }
 
 async function loadKnowledgeBase() {
@@ -48,24 +42,10 @@ async function loadKnowledgeBase() {
   return Object.values(knowledge).join('\n\n---\n\n');
 }
 
-function extractContactData(messages: MessagePayload[]): Partial<ChatRequest['contactData']> {
-  const combinedText = messages.map(m => m.content).join('\n').toLowerCase();
-  
-  const data: Partial<ChatRequest['contactData']> = {};
-  
-  const emailMatch = combinedText.match(/[\w\.-]+@[\w\.-]+\.\w+/);
-  if (emailMatch) data.email = emailMatch[0];
-  
-  const phoneMatch = combinedText.match(/(\+34|0034|34)?[\s-]?[679]\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{2}/);
-  if (phoneMatch) data.telefono = phoneMatch[0].replace(/[\s-]/g, '');
-  
-  return data;
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body: ChatRequest = await request.json();
-    const { messages, leadId, contactData = {} } = body;
+    const { messages, leadId, isManualSave } = body;
 
     if (!messages || messages.length === 0) {
       return NextResponse.json(
@@ -74,34 +54,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let finalLeadId = leadId;
-    const extractedData = extractContactData(messages);
-    const mergedData = { ...extractedData, ...contactData };
-
-    if (!finalLeadId && mergedData.email && mergedData.nombre && mergedData.empresa && mergedData.tamano) {
+    // Si es solo para guardar (isManualSave), guarda y retorna
+    if (isManualSave) {
       try {
-        const lead = await createLead({
-          nombre: mergedData.nombre,
-          empresa: mergedData.empresa,
-          tamano: mergedData.tamano,
-          email: mergedData.email,
-          telefono: mergedData.telefono,
-          messages: messages.map((msg) => ({
+        if (leadId) {
+          await updateLeadMessages(leadId, messages.map((msg) => ({
             ...msg,
             timestamp: new Date().toISOString(),
-          })),
-        });
-        finalLeadId = lead.id;
+          })));
+        } else {
+          const newLead = await createLead({
+            nombre: 'Anónimo',
+            empresa: 'Por especificar',
+            tamano: 'Por especificar',
+            email: 'sin-email@example.com',
+            messages: messages.map((msg) => ({
+              ...msg,
+              timestamp: new Date().toISOString(),
+            })),
+          });
+          return NextResponse.json({ leadId: newLead.id });
+        }
+        return NextResponse.json({ leadId });
       } catch (err) {
-        console.warn('No se pudo crear lead:', err);
+        console.warn('Error guardando chat:', err);
+        return NextResponse.json({ leadId });
       }
     }
+
+    // Si no es solo para guardar, generar respuesta del agente
+    let finalLeadId = leadId;
 
     const knowledgeBase = await loadKnowledgeBase();
 
     const encoder = new TextEncoder();
     let buffer = '';
-    let isFirstChunk = true;
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -122,41 +109,35 @@ Sé empático, haz preguntas específicas sobre su operativa actual, e identific
             if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
               const text = event.delta.text;
               buffer += text;
-              
-              if (isFirstChunk) {
-                isFirstChunk = false;
-              }
-              
               controller.enqueue(encoder.encode(text));
             }
           }
 
-          if (finalLeadId && buffer.length > 0) {
-            const updatedMessages = [
-              ...messages,
-              {
-                role: 'assistant' as const,
-                content: buffer,
-                timestamp: new Date().toISOString(),
-              },
-            ];
-            try {
-              await updateLeadMessages(finalLeadId, updatedMessages);
-            } catch (err) {
-              console.warn('No se pudo actualizar lead:', err);
-            }
-          }
+          // Guardar en BD después de recibir respuesta
+          const finalMessages = [
+            ...messages,
+            {
+              role: 'assistant' as const,
+              content: buffer,
+              timestamp: new Date().toISOString(),
+            },
+          ];
 
-          if (!finalLeadId && mergedData.email && mergedData.nombre && mergedData.empresa && mergedData.tamano) {
-            const lead = await createLead({
-              nombre: mergedData.nombre,
-              empresa: mergedData.empresa,
-              tamano: mergedData.tamano,
-              email: mergedData.email,
-              telefono: mergedData.telefono,
-              messages: [...messages, { role: 'assistant', content: buffer, timestamp: new Date().toISOString() }],
-            });
-            finalLeadId = lead.id;
+          try {
+            if (finalLeadId) {
+              await updateLeadMessages(finalLeadId, finalMessages);
+            } else {
+              const newLead = await createLead({
+                nombre: 'Anónimo',
+                empresa: 'Por especificar',
+                tamano: 'Por especificar',
+                email: 'sin-email@example.com',
+                messages: finalMessages,
+              });
+              finalLeadId = newLead.id;
+            }
+          } catch (err) {
+            console.warn('Error guardando en BD:', err);
           }
 
           controller.close();

@@ -190,6 +190,7 @@ export default function ChatAgent() {
   const [resetsUsed, setResetsUsed] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [convClosed, setConvClosed] = useState(false);
+  const [leadId, setLeadId] = useState<string | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const rawContentRef = useRef("");
@@ -241,33 +242,51 @@ export default function ChatAgent() {
     el.style.height = `${next}px`;
   }, [input]);
 
-  function saveLead(msgs: Message[]) {
-    if (savedRef.current || msgs.length <= 1) return;
-    savedRef.current = true;
-    fetch("/api/save-lead", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: msgs }),
-    }).catch(() => {});
+  async function saveChat(msgs: Message[]) {
+    if (msgs.length <= 1) return;
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: msgs,
+          leadId: leadId,
+          isManualSave: true
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.leadId && !leadId) {
+          setLeadId(data.leadId);
+        }
+      }
+    } catch (err) {
+      console.error("Error guardando chat:", err);
+    }
   }
 
-  function resetChat() {
+  async function resetChat() {
     if (!canReset) return;
-    saveLead(latestMessagesRef.current);
+    await saveChat(latestMessagesRef.current);
     savedRef.current = false;
     const nextUsed = incrementSessionCount();
     setResetsUsed(nextUsed);
     setMessages([INITIAL_MESSAGE]);
     setInput("");
     setShowModal(false);
+    setLeadId(null);
     if (nextUsed < MAX_RESETS) inputRef.current?.focus();
   }
 
-  function resetAfterClosure() {
+  async function resetAfterClosure() {
+    await saveChat(latestMessagesRef.current);
     savedRef.current = false;
     setConvClosed(false);
     setMessages([INITIAL_MESSAGE]);
     setInput("");
+    setLeadId(null);
     inputRef.current?.focus();
   }
 
@@ -282,20 +301,22 @@ export default function ChatAgent() {
     setLoading(true);
 
     const assistantMessage: Message = { role: "assistant", content: "" };
-    setMessages([...next, assistantMessage]);
+    const withAssistant = [...next, assistantMessage];
+    setMessages(withAssistant);
     rawContentRef.current = "";
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ messages: next, leadId }),
       });
 
       if (!res.ok || !res.body) throw new Error("Error en la respuesta");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
+      let newLeadId: string | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -305,9 +326,14 @@ export default function ChatAgent() {
         setMessages((prev) => {
           const updated = [...prev];
           updated[updated.length - 1] = { role: "assistant", content: display };
+          latestMessagesRef.current = updated;
           return updated;
         });
       }
+
+      // Guardar chat después de recibir respuesta
+      const finalMessages = [...next, { role: "assistant" as const, content: rawContentRef.current.replace(CONV_END_MARKER, "").trimEnd() }];
+      await saveChat(finalMessages);
     } catch {
       setMessages((prev) => {
         const updated = [...prev];
@@ -320,10 +346,8 @@ export default function ChatAgent() {
     } finally {
       setLoading(false);
       if (rawContentRef.current.includes(CONV_END_MARKER)) {
-        saveLead(latestMessagesRef.current);
         setConvClosed(true);
       } else if (messages.length + 1 >= MAX_MESSAGES) {
-        saveLead(latestMessagesRef.current);
         setShowModal(true);
       }
       inputRef.current?.focus();
