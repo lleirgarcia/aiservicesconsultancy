@@ -30,10 +30,7 @@ export async function POST(request: NextRequest) {
           empresa: 'Por especificar',
           tamano: 'Por especificar',
           email,
-          messages: messages.map((msg) => ({
-            ...msg,
-            timestamp: new Date().toISOString(),
-          })),
+          messages: messages.map((msg) => msg.content),
         });
       } catch (err) {
         console.warn('No se pudo crear lead:', err);
