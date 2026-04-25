@@ -12,11 +12,7 @@ export interface Lead {
   tamano: string;
   email: string;
   telefono?: string;
-  messages?: Array<{
-    role: 'user' | 'assistant';
-    content: string;
-    timestamp: string;
-  }>;
+  messages?: string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -29,7 +25,7 @@ export async function createLead(lead: Lead) {
 
 export async function updateLeadMessages(
   leadId: string,
-  messages: Lead['messages']
+  messages: string[]
 ) {
   const { data, error } = await supabase
     .from('leads')

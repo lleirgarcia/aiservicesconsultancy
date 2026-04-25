@@ -42,6 +42,10 @@ async function loadKnowledgeBase() {
   return Object.values(knowledge).join('\n\n---\n\n');
 }
 
+function messagesToTexts(messages: MessagePayload[]): string[] {
+  return messages.map(msg => msg.content);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: ChatRequest = await request.json();
@@ -57,21 +61,16 @@ export async function POST(request: NextRequest) {
     // Si es solo para guardar (isManualSave), guarda y retorna
     if (isManualSave) {
       try {
+        const texts = messagesToTexts(messages);
         if (leadId) {
-          await updateLeadMessages(leadId, messages.map((msg) => ({
-            ...msg,
-            timestamp: new Date().toISOString(),
-          })));
+          await updateLeadMessages(leadId, texts);
         } else {
           const newLead = await createLead({
             nombre: 'Anónimo',
             empresa: 'Por especificar',
             tamano: 'Por especificar',
             email: 'sin-email@example.com',
-            messages: messages.map((msg) => ({
-              ...msg,
-              timestamp: new Date().toISOString(),
-            })),
+            messages: texts,
           });
           return NextResponse.json({ leadId: newLead.id });
         }
@@ -119,20 +118,20 @@ Sé empático, haz preguntas específicas sobre su operativa actual, e identific
             {
               role: 'assistant' as const,
               content: buffer,
-              timestamp: new Date().toISOString(),
             },
           ];
 
           try {
+            const texts = messagesToTexts(finalMessages);
             if (finalLeadId) {
-              await updateLeadMessages(finalLeadId, finalMessages);
+              await updateLeadMessages(finalLeadId, texts);
             } else {
               const newLead = await createLead({
                 nombre: 'Anónimo',
                 empresa: 'Por especificar',
                 tamano: 'Por especificar',
                 email: 'sin-email@example.com',
-                messages: finalMessages,
+                messages: texts,
               });
               finalLeadId = newLead.id;
             }
