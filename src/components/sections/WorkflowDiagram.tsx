@@ -15,6 +15,7 @@ import {
   type EdgeProps,
   type NodeTypes,
   type EdgeTypes,
+  type ReactFlowInstance,
 } from '@xyflow/react';
 
 /* ─── Utils ──────────────────────────────────────── */
@@ -482,15 +483,42 @@ const staticFlowProps = {
   zoomOnDoubleClick: false,
   preventScrolling: false,
   fitView: true,
+  minZoom: 0.1,
+  maxZoom: 1.5,
   proOptions: { hideAttribution: true },
 } as const;
 
 const chaosFitView = {
   padding: { top: 0.05, right: 0.12, bottom: 0.05, left: 0.05 },
+  minZoom: 0.1,
+  maxZoom: 1.5,
 };
-const cleanFitView = { padding: 0.08 };
+const cleanFitView = { padding: 0.08, minZoom: 0.1, maxZoom: 1.5 };
 
 /* ─── Main component ─────────────────────────────── */
+
+function useViewportWidth() {
+  const [w, setW] = useState<number>(() =>
+    typeof window === 'undefined' ? 1024 : window.innerWidth,
+  );
+  useEffect(() => {
+    const onResize = () => setW(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
+  }, []);
+  return w;
+}
+
+function useDiagramHeights() {
+  const w = useViewportWidth();
+  if (w <= 480) return { chaos: 200, clean: 180 };
+  if (w <= 768) return { chaos: 260, clean: 220 };
+  return { chaos: 420, clean: 340 };
+}
 
 export default function WorkflowDiagram() {
   const [mounted, setMounted] = useState(false);
@@ -498,6 +526,9 @@ export default function WorkflowDiagram() {
   const [cleanTriggered, setCleanTriggered] = useState(false);
   const chaosRef = useRef<HTMLDivElement>(null);
   const cleanRef = useRef<HTMLDivElement>(null);
+  const chaosInstanceRef = useRef<ReactFlowInstance | null>(null);
+  const cleanInstanceRef = useRef<ReactFlowInstance | null>(null);
+  const heights = useDiagramHeights();
 
   // Retrasamos el montaje de ReactFlow hasta que las secciones se despliegan
   // (clase `sections-expanded` en <html>). Si esperamos, el contenedor ya
@@ -577,28 +608,45 @@ export default function WorkflowDiagram() {
     [cleanTriggered],
   );
 
+  // Re-fit the diagrams whenever the container height changes (viewport
+  // breakpoint crossed) so the graph shrinks to stay fully visible.
+  useEffect(() => {
+    if (!mounted) return;
+    const raf = requestAnimationFrame(() => {
+      chaosInstanceRef.current?.fitView(chaosFitView);
+      cleanInstanceRef.current?.fitView(cleanFitView);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [mounted, heights.chaos, heights.clean]);
+
   return (
-    <div style={{ borderBottom: '1px solid var(--border)' }}>
-      {/* Chaotic — hand-drawn */}
-      <div
-        ref={chaosRef}
-        className="px-8 py-10"
-        style={{ borderBottom: '1px solid var(--border)' }}
-      >
-        <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase mb-2">
-          Así funciona hoy.
-        </h2>
-        <p
-          className="text-xs font-medium uppercase tracking-widest mb-8"
-          style={{ color: 'var(--muted)' }}
-        >
-          Sin sistema o a medias — situación actual
-        </p>
+    <div
+      data-collapsible
+      style={{ ['--collapse-delay' as string]: '250ms' }}
+    >
+      <div>
+        {/* Chaotic — hand-drawn */}
         <div
-          data-collapsible
-          style={{ ['--collapse-delay' as string]: '250ms' }}
+          ref={chaosRef}
+          className="px-4 sm:px-8 py-8 sm:py-10"
+          style={{ borderBottom: '1px solid var(--border)' }}
         >
-          <div className="wf-flow wf-flow-sketchy" style={{ height: 420 }}>
+          <h3
+            className="text-xl md:text-2xl font-bold leading-tight tracking-tight uppercase mb-2"
+            style={{ marginLeft: 5 }}
+          >
+            Así funciona hoy
+          </h3>
+          <p
+            className="text-xs font-medium uppercase tracking-widest mb-8"
+            style={{ color: 'var(--muted)', marginLeft: 5 }}
+          >
+            Sin sistema o sistemas a medias — situación actual
+          </p>
+          <div
+            className="wf-flow wf-flow-sketchy"
+            style={{ height: heights.chaos }}
+          >
             {mounted && (
               <ReactFlow
                 nodes={chaosNodes}
@@ -607,28 +655,30 @@ export default function WorkflowDiagram() {
                 edgeTypes={edgeTypes}
                 {...staticFlowProps}
                 fitViewOptions={chaosFitView}
+                onInit={(inst) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  chaosInstanceRef.current = inst as any;
+                }}
               />
             )}
           </div>
         </div>
-      </div>
 
-      {/* Clean */}
-      <div ref={cleanRef} className="px-8 py-10">
-        <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase mb-2">
-          Así podría funcionar mañana.
-        </h2>
-        <p
-          className="text-xs font-medium uppercase tracking-widest mb-8"
-          style={{ color: 'var(--muted)' }}
-        >
-          Con sistema — flujo automatizado
-        </p>
-        <div
-          data-collapsible
-          style={{ ['--collapse-delay' as string]: '400ms' }}
-        >
-          <div className="wf-flow" style={{ height: 340 }}>
+        {/* Clean */}
+        <div ref={cleanRef} className="px-4 sm:px-8 py-8 sm:py-10">
+          <h3
+            className="text-xl md:text-2xl font-bold leading-tight tracking-tight uppercase mb-2"
+            style={{ marginLeft: 5 }}
+          >
+            Así podría funcionar mañana
+          </h3>
+          <p
+            className="text-xs font-medium uppercase tracking-widest mb-8"
+            style={{ color: 'var(--muted)', marginLeft: 5 }}
+          >
+            Con sistema — flujo automatizado
+          </p>
+          <div className="wf-flow" style={{ height: heights.clean }}>
             {mounted && (
               <ReactFlow
                 nodes={cleanNodes}
@@ -637,6 +687,10 @@ export default function WorkflowDiagram() {
                 edgeTypes={edgeTypes}
                 {...staticFlowProps}
                 fitViewOptions={cleanFitView}
+                onInit={(inst) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  cleanInstanceRef.current = inst as any;
+                }}
               />
             )}
           </div>

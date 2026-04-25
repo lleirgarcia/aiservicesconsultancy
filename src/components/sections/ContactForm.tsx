@@ -29,6 +29,12 @@ const TAMANO_OPTIONS = [
   "Más de 200 personas",
 ];
 
+const FIELD_STYLE: React.CSSProperties = {
+  background: "var(--bg-soft)",
+  color: "var(--fg)",
+  border: "1px solid var(--border)",
+};
+
 export default function ContactForm() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [sent, setSent] = useState(false);
@@ -77,11 +83,11 @@ export default function ContactForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>Nombre</label>
-              <input type="text" required value={form.nombre} onChange={set("nombre")} />
+              <input type="text" required value={form.nombre} onChange={set("nombre")} style={FIELD_STYLE} />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>Empresa</label>
-              <input type="text" required value={form.empresa} onChange={set("empresa")} />
+              <input type="text" required value={form.empresa} onChange={set("empresa")} style={FIELD_STYLE} />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>Tamaño empresa</label>
@@ -90,12 +96,10 @@ export default function ContactForm() {
                 value={form.tamano}
                 onChange={set("tamano")}
                 style={{
-                  background: "var(--bg)",
-                  color: "var(--fg)",
-                  border: "1px solid var(--border)",
+                  ...FIELD_STYLE,
                   padding: "0.5rem 0.75rem",
                   fontSize: "0.875rem",
-                  borderRadius: 0,
+                  borderRadius: 4,
                   appearance: "none",
                 }}
               >
@@ -111,11 +115,11 @@ export default function ContactForm() {
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>Email</label>
-              <input type="email" required value={form.email} onChange={set("email")} />
+              <input type="email" required value={form.email} onChange={set("email")} style={FIELD_STYLE} />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--muted)" }}>Teléfono</label>
-              <input type="tel" value={form.telefono} onChange={set("telefono")} />
+              <input type="tel" value={form.telefono} onChange={set("telefono")} style={FIELD_STYLE} />
             </div>
           </div>
           <div className="flex flex-col gap-1">
@@ -125,7 +129,7 @@ export default function ContactForm() {
             </label>
             <textarea
               rows={4}
-              style={{ resize: "vertical" }}
+              style={{ ...FIELD_STYLE, resize: "vertical" }}
               value={form.mensaje}
               onChange={set("mensaje")}
             />

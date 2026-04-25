@@ -68,14 +68,14 @@ export default function Summary() {
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
       >
         <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
-          En resumen.
-          <span
-            className="block font-bold"
-            style={{ fontSize: "calc(1em - 5px)" }}
-          >
-            Qué has visto y qué recibes si trabajamos juntos
-          </span>
+          En resumen
         </h2>
+        <p
+          className="text-xs font-medium uppercase tracking-widest mt-3"
+          style={{ color: "var(--muted)" }}
+        >
+          Qué has visto y qué recibes si trabajamos juntos
+        </p>
       </div>
 
       {/* Dos columnas: recap narrativa + deliverables */}

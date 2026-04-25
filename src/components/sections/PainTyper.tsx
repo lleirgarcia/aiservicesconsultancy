@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 
 /**
  * Frases que podría decir el jefe/dueño en su día a día.
@@ -47,7 +47,7 @@ const PHRASES: string[] = [
 const MAX_LINES = 10;
 const TYPE_SPEED_MS = 14;
 const TYPE_JITTER_MS = 18;
-const HOLD_MS = 1800;
+const HOLD_MS = 1000;
 // Duración del desvanecimiento verde → blanco tras terminar de escribir.
 // Debe ser < HOLD_MS para que la cola llegue a apagarse por completo
 // antes de saltar al siguiente slot.
@@ -57,7 +57,20 @@ const FADE_MS = 1200;
 // a medida que se tecleen más letras detrás.
 const TAIL_GLOW = 12;
 
+// Cuántas frases se tecleen simultáneamente y cuánto se retrasan entre sí.
+// Cada typer arranca desfasado STAGGER_MS respecto al anterior, para evitar
+// que letras y pausas caigan sincronizadas.
+const TYPER_COUNT = 2;
+const STAGGER_MS = 400;
+
 type Phase = "typing" | "holding";
+
+type Typer = {
+  slot: number;
+  phraseIdx: number;
+  typing: string;
+  phase: Phase;
+};
 
 function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice();
@@ -110,129 +123,218 @@ function renderActiveLine(text: string) {
 }
 
 export default function PainTyper() {
+  // Orden inicial aleatorio para que cada carga muestre frases distintas.
   const phrases = useMemo(() => shuffle(PHRASES), []);
-  // Líneas fijas ya tecleadas completamente (FIFO circular por índice).
-  const [lines, setLines] = useState<string[]>(() => Array(MAX_LINES).fill(""));
-  // Marca si la línea ya ha sido sobrescrita al menos una vez (ciclo >=2 => bold).
-  const [bold, setBold] = useState<boolean[]>(() => Array(MAX_LINES).fill(false));
-  // Slot que se está tecleando ahora mismo.
-  const [activeSlot, setActiveSlot] = useState(0);
-  // Índice dentro del array de frases (avanza secuencialmente).
-  const [phraseIdx, setPhraseIdx] = useState(0);
-  // Nº de ciclo completo (0 = primera pasada rellenando, 1+ = sobrescribiendo).
-  const [cycle, setCycle] = useState(0);
-  // Texto que se está tecleando en el slot activo.
-  const [typing, setTyping] = useState("");
-  const [phase, setPhase] = useState<Phase>("typing");
+
+  // Historial de texto ya tecleado por slot. Mutado vía ref para evitar
+  // renders pesados y sincronizado al DOM con `forceRender` cuando procede.
+  const linesRef = useRef<string[]>(Array(MAX_LINES).fill(""));
+
+  // Estado de cada typer (N concurrentes). Se arranca en slots distintos y
+  // en frases distintas para evitar colisiones desde el primer frame.
+  const typersRef = useRef<Typer[]>(
+    Array.from({ length: TYPER_COUNT }, (_, i) => ({
+      slot: i,
+      phraseIdx: i,
+      typing: "",
+      phase: "typing" as Phase,
+    }))
+  );
+
+  // Historial circular de los últimos índices usados. Se usa para evitar
+  // repetir frases que aún estén visibles en pantalla.
+  const recentIdxRef = useRef<number[]>(
+    Array.from({ length: TYPER_COUNT }, (_, i) => i)
+  );
+
   // Un <p> por slot. Animamos --glow directamente sobre el elemento
-  // activo para no depender de transiciones CSS sobre custom properties
-  // (que requieren @property y no son fiables entre motores).
+  // activo para no depender de transiciones CSS sobre custom properties.
   const pRefs = useRef<(HTMLParagraphElement | null)[]>([]);
 
-  // Tecleo letra a letra.
-  useEffect(() => {
-    if (phase !== "typing") return;
-    const target = phrases[phraseIdx];
-    if (typing.length >= target.length) {
-      setLines((prev) => {
-        const next = prev.slice();
-        next[activeSlot] = target;
-        return next;
-      });
-      const shouldBold = cycle % 2 === 1;
-      setBold((prev) => {
-        if (prev[activeSlot] === shouldBold) return prev;
-        const next = prev.slice();
-        next[activeSlot] = shouldBold;
-        return next;
-      });
-      setPhase("holding");
-      return;
-    }
-    const delay = TYPE_SPEED_MS + Math.random() * TYPE_JITTER_MS;
-    const id = setTimeout(() => {
-      setTyping(target.slice(0, typing.length + 1));
-    }, delay);
-    return () => clearTimeout(id);
-  }, [phase, typing, phraseIdx, activeSlot, phrases, cycle]);
+  const [, forceRender] = useReducer((x: number) => x + 1, 0);
 
-  // Fade manual de --glow (1 → 0) al terminar de escribir.
-  // Actualizamos la custom property vía rAF en lugar de confiar en
-  // `transition: --glow …`, que depende de @property y no anima
-  // consistentemente cuando React reescribe el style inline.
   useEffect(() => {
-    const el = pRefs.current[activeSlot];
-    if (!el) return;
-    if (phase === "typing") {
-      el.style.setProperty("--glow", "1");
-      return;
-    }
-    const start =
-      typeof performance !== "undefined" ? performance.now() : Date.now();
-    let rafId = 0;
-    const step = (now: number) => {
-      const t = Math.min(1, (now - start) / FADE_MS);
-      // ease-out cubic: se desvanece rápido al principio y se va suavizando.
-      const eased = 1 - Math.pow(1 - t, 3);
-      el.style.setProperty("--glow", String(1 - eased));
-      if (t < 1) rafId = requestAnimationFrame(step);
+    let cancelled = false;
+    const timers: number[] = [];
+    const rafIds: number[] = [];
+
+    const pickNextPhraseIdx = (): number => {
+      const recent = new Set(recentIdxRef.current);
+      const available: number[] = [];
+      for (let i = 0; i < phrases.length; i++) {
+        if (!recent.has(i)) available.push(i);
+      }
+      const pool = available.length > 0 ? available : phrases.map((_, i) => i);
+      return pool[Math.floor(Math.random() * pool.length)];
     };
-    rafId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafId);
-  }, [phase, activeSlot]);
 
-  // Pausa y salto al siguiente slot.
-  useEffect(() => {
-    if (phase !== "holding") return;
-    const id = setTimeout(() => {
-      setTyping("");
-      setActiveSlot((s) => {
-        const nextSlot = (s + 1) % MAX_LINES;
-        if (nextSlot === 0) setCycle((c) => c + 1);
-        return nextSlot;
+    // Elige el siguiente slot evitando el propio y los que ocupan otros typers.
+    // Prioriza slots vacíos mientras queden; si no hay, reutiliza uno libre.
+    const pickNextSlot = (idx: number): number => {
+      const typers = typersRef.current;
+      const occupied = new Set<number>();
+      typers.forEach((other, j) => {
+        if (j !== idx) occupied.add(other.slot);
       });
-      setPhraseIdx((p) => (p + 1) % phrases.length);
-      setPhase("typing");
-    }, HOLD_MS);
-    return () => clearTimeout(id);
-  }, [phase, phrases.length]);
+      occupied.add(typers[idx].slot);
+
+      const lines = linesRef.current;
+      const empty: number[] = [];
+      for (let i = 0; i < MAX_LINES; i++) {
+        if (!occupied.has(i) && lines[i] === "") empty.push(i);
+      }
+      if (empty.length > 0) {
+        return empty[Math.floor(Math.random() * empty.length)];
+      }
+
+      const free: number[] = [];
+      for (let i = 0; i < MAX_LINES; i++) {
+        if (!occupied.has(i)) free.push(i);
+      }
+      if (free.length > 0) {
+        return free[Math.floor(Math.random() * free.length)];
+      }
+
+      // Caso degenerado: todos los slots ocupados por typers activos.
+      // Elige cualquiera que no sea el propio para forzar el cambio.
+      const fallback: number[] = [];
+      for (let i = 0; i < MAX_LINES; i++) {
+        if (i !== typers[idx].slot) fallback.push(i);
+      }
+      return fallback[Math.floor(Math.random() * fallback.length)];
+    };
+
+    // Anima --glow de 1 → 0 en el slot recién completado para que el verde
+    // residual se desvanezca a blanco durante HOLD_MS.
+    const startFade = (slot: number) => {
+      const el = pRefs.current[slot];
+      if (!el) return;
+      const start =
+        typeof performance !== "undefined" ? performance.now() : Date.now();
+      const anim = (now: number) => {
+        if (cancelled) return;
+        const tt = Math.min(1, (now - start) / FADE_MS);
+        // ease-out cubic
+        const eased = 1 - Math.pow(1 - tt, 3);
+        el.style.setProperty("--glow", String(1 - eased));
+        if (tt < 1) {
+          const rid = requestAnimationFrame(anim);
+          rafIds.push(rid);
+        }
+      };
+      const rid = requestAnimationFrame(anim);
+      rafIds.push(rid);
+    };
+
+    const step = (idx: number) => {
+      if (cancelled) return;
+      const t = typersRef.current[idx];
+      const target = phrases[t.phraseIdx];
+
+      // Frase completada: commit + hold + siguiente ciclo.
+      if (t.typing.length >= target.length) {
+        linesRef.current[t.slot] = target;
+        t.phase = "holding";
+        forceRender();
+        startFade(t.slot);
+
+        const id = window.setTimeout(() => {
+          if (cancelled) return;
+          const nextSlot = pickNextSlot(idx);
+          const nextPhrase = pickNextPhraseIdx();
+
+          const history = recentIdxRef.current;
+          history.push(nextPhrase);
+          if (history.length > MAX_LINES) history.shift();
+
+          t.slot = nextSlot;
+          t.phraseIdx = nextPhrase;
+          t.typing = "";
+          t.phase = "typing";
+
+          const el = pRefs.current[nextSlot];
+          if (el) el.style.setProperty("--glow", "1");
+
+          forceRender();
+          step(idx);
+        }, HOLD_MS);
+        timers.push(id);
+        return;
+      }
+
+      // Añade la siguiente letra.
+      const delay = TYPE_SPEED_MS + Math.random() * TYPE_JITTER_MS;
+      const id = window.setTimeout(() => {
+        if (cancelled) return;
+        t.typing = target.slice(0, t.typing.length + 1);
+        forceRender();
+        step(idx);
+      }, delay);
+      timers.push(id);
+    };
+
+    // Arranca cada typer con su desfase para que nunca coincidan letra a letra.
+    for (let i = 0; i < TYPER_COUNT; i++) {
+      const id = window.setTimeout(() => {
+        if (cancelled) return;
+        const el = pRefs.current[typersRef.current[i].slot];
+        if (el) el.style.setProperty("--glow", "1");
+        step(i);
+      }, STAGGER_MS * i);
+      timers.push(id);
+    }
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+      rafIds.forEach((id) => cancelAnimationFrame(id));
+    };
+  }, [phrases]);
+
+  // Mapa slot → typer activo para decidir qué renderizar por línea.
+  const activeSlots = new Map<number, Typer>();
+  typersRef.current.forEach((t) => {
+    activeSlots.set(t.slot, t);
+  });
 
   return (
     <section
       style={{ borderBottom: "1px solid var(--border)" }}
       aria-live="polite"
     >
-      <div className="px-8 py-10 md:py-14 flex flex-col gap-2">
-      {lines.map((committed, i) => {
-        const isActive = i === activeSlot;
-        const content = isActive ? typing : committed;
-        // Alternancia por vuelta: ciclos impares en bold, ciclos pares en normal.
-        // El slot activo adopta ya el peso del ciclo actual mientras se teclea.
-        const isBold = isActive ? cycle % 2 === 1 : bold[i];
-        // --glow se inicializa a 1 para el slot activo. La animación
-        // (useEffect arriba) lo baja a 0 cuando termina la frase.
-        const activeStyle: React.CSSProperties = isActive
-          ? { ["--glow" as string]: 1 }
-          : {};
-        return (
-          <p
-            key={i}
-            ref={(el) => {
-              pRefs.current[i] = el;
-            }}
-            className="text-sm md:text-base leading-snug tracking-tight"
-            style={{
-              minHeight: "1.3em",
-              textAlign: "left",
-              fontWeight: isBold ? 600 : 500,
-              ...activeStyle,
-            }}
-          >
-            {isActive ? renderActiveLine(content) : <span>{content}</span>}
-            {isActive && <span className="blinking-cursor" aria-hidden />}
-          </p>
-        );
-      })}
+      <div className="px-5 sm:px-8 py-8 sm:py-10 md:py-14 flex flex-col gap-2">
+        {linesRef.current.map((committed, i) => {
+          const active = activeSlots.get(i);
+          const isActive = active !== undefined;
+          // Durante la fase "holding" la frase ya está comprometida; durante
+          // "typing" mostramos el texto parcial que lleva escrito.
+          const content = isActive ? active!.typing : committed;
+          const activeStyle: React.CSSProperties = isActive
+            ? { ["--glow" as string]: 1 }
+            : {};
+          return (
+            <p
+              key={i}
+              ref={(el) => {
+                pRefs.current[i] = el;
+              }}
+              className="pain-line text-[13px] sm:text-sm md:text-base tracking-tight"
+              style={{
+                lineHeight: "1.5em",
+                textAlign: "left",
+                fontWeight: 500,
+                ...activeStyle,
+              }}
+            >
+              {isActive ? (
+                renderActiveLine(content)
+              ) : (
+                <span>{committed}</span>
+              )}
+              {isActive && <span className="blinking-cursor" aria-hidden />}
+            </p>
+          );
+        })}
       </div>
     </section>
   );

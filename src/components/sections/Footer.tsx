@@ -1,5 +1,13 @@
 import type { ReactElement } from "react";
+import Link from "next/link";
 import Logo from "@/components/ui/Logo";
+
+const LEGAL_LINKS: { label: string; href: string }[] = [
+  { label: "Aviso legal", href: "/aviso-legal" },
+  { label: "Política de privacidad", href: "/politica-de-privacidad" },
+  { label: "Política de cookies", href: "/politica-de-cookies" },
+  { label: "Términos y condiciones", href: "/terminos-y-condiciones" },
+];
 
 const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
   {
@@ -19,7 +27,7 @@ const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
   },
   {
     label: "Instagram",
-    href: "https://www.instagram.com/",
+    href: "https://www.instagram.com/kroomixcom/",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -40,7 +48,7 @@ const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
   },
   {
     label: "YouTube",
-    href: "https://www.youtube.com/",
+    href: "https://www.youtube.com/@kroomixcom",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -65,8 +73,9 @@ export default function Footer() {
     >
       {/* Fila 1: tagline + redes sociales */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm">
-        <p className="max-w-xl leading-relaxed">
-          Optimizamos el caos para crear claridad en tu negocio · Osona, Barcelona
+        <p className="leading-relaxed">
+          Optimizamos el caos para crear claridad en tu negocio. La claridad ahorra tiempo y dinero
+          <span className="text-xs"> — Osona, Barcelona</span>
         </p>
         <div className="flex items-center gap-5 shrink-0">
           {SOCIALS.map(({ label, href, icon }) => (
@@ -84,6 +93,24 @@ export default function Footer() {
           ))}
         </div>
       </div>
+
+      {/* Enlaces legales */}
+      <nav
+        aria-label="Enlaces legales"
+        className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs"
+        style={{ borderTop: "1px solid var(--border)", paddingTop: 24 }}
+      >
+        {LEGAL_LINKS.map(({ label, href }) => (
+          <Link
+            key={href}
+            href={href}
+            className="hover:opacity-70 transition-opacity"
+            style={{ color: "var(--muted)" }}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
 
       {/* Filas 2 y 3: logo + copyright centrados, juntos */}
       <div className="flex flex-col items-center gap-2">

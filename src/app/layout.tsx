@@ -33,14 +33,8 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`collapse-intro-armed ${geistSans.variable} ${geistMono.variable} ${orbitron.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable}`}
     >
-      <head>
-        {/* Sin JS, anula el plegado inicial para que el contenido sea visible */}
-        <noscript>
-          <style>{`html.collapse-intro-armed [data-collapsible]{grid-template-rows:1fr!important;opacity:1!important;}`}</style>
-        </noscript>
-      </head>
       <body className="min-h-screen">{children}</body>
     </html>
   );
