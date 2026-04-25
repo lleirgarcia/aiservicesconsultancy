@@ -312,28 +312,23 @@ export default function ChatAgent() {
         body: JSON.stringify({ messages: next, leadId }),
       });
 
-      if (!res.ok || !res.body) throw new Error("Error en la respuesta");
+      if (!res.ok) throw new Error("Error en la respuesta");
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let newLeadId: string | null = null;
+      const data = await res.json();
+      const assistantContent = data.message || "";
+      rawContentRef.current = assistantContent;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        rawContentRef.current += decoder.decode(value, { stream: true });
-        const display = rawContentRef.current.replace(CONV_END_MARKER, "").trimEnd();
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = { role: "assistant", content: display };
-          latestMessagesRef.current = updated;
-          return updated;
-        });
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { role: "assistant", content: assistantContent };
+        latestMessagesRef.current = updated;
+        return updated;
+      });
+
+      // Actualizar leadId si se creó uno nuevo
+      if (data.leadId && !leadId) {
+        setLeadId(data.leadId);
       }
-
-      // Guardar chat después de recibir respuesta
-      const finalMessages = [...next, { role: "assistant" as const, content: rawContentRef.current.replace(CONV_END_MARKER, "").trimEnd() }];
-      await saveChat(finalMessages);
     } catch {
       setMessages((prev) => {
         const updated = [...prev];

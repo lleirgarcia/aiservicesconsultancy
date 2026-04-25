@@ -81,81 +81,68 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Si no es solo para guardar, generar respuesta del agente
+    // Generar respuesta del agente
     let finalLeadId = leadId;
-
     const knowledgeBase = await loadKnowledgeBase();
 
-    const encoder = new TextEncoder();
-    let buffer = '';
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const response = await client.messages.create({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 1024,
-            stream: true,
-            system: `Eres Kromi, el asistente de Kroomix. Tu objetivo es entender el negocio del usuario y proponer soluciones que mejoren su eficiencia operativa en 2 minutos.
+    try {
+      const response = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: `Eres Kromi, el asistente de Kroomix. Tu objetivo es entender el negocio del usuario y proponer soluciones que mejoren su eficiencia operativa en 2 minutos.
 
 ${knowledgeBase}
 
 Sé empático, haz preguntas específicas sobre su operativa actual, e identifica oportunidades de mejora. Mantén el tono profesional y enfocado en valor. Si tienes suficiente información para hacer una propuesta, cierra la conversación con "<<CONV_END>>" al final.`,
-            messages: messages,
+        messages: messages,
+      });
+
+      const assistantMessage = response.content[0];
+      if (assistantMessage.type !== 'text') {
+        throw new Error('Respuesta inesperada de Claude');
+      }
+
+      // Guardar en BD
+      const finalMessages = [
+        ...messages,
+        {
+          role: 'assistant' as const,
+          content: assistantMessage.text,
+        },
+      ];
+
+      try {
+        const texts = messagesToTexts(finalMessages);
+        if (finalLeadId) {
+          await updateLeadMessages(finalLeadId, texts);
+        } else {
+          const newLead = await createLead({
+            nombre: 'Anónimo',
+            empresa: 'Por especificar',
+            tamano: 'Por especificar',
+            email: 'sin-email@example.com',
+            messages: texts,
           });
-
-          for await (const event of response) {
-            if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-              const text = event.delta.text;
-              buffer += text;
-              controller.enqueue(encoder.encode(text));
-            }
-          }
-
-          // Guardar en BD después de recibir respuesta
-          const finalMessages = [
-            ...messages,
-            {
-              role: 'assistant' as const,
-              content: buffer,
-            },
-          ];
-
-          try {
-            const texts = messagesToTexts(finalMessages);
-            if (finalLeadId) {
-              await updateLeadMessages(finalLeadId, texts);
-            } else {
-              const newLead = await createLead({
-                nombre: 'Anónimo',
-                empresa: 'Por especificar',
-                tamano: 'Por especificar',
-                email: 'sin-email@example.com',
-                messages: texts,
-              });
-              finalLeadId = newLead.id;
-            }
-          } catch (err) {
-            console.warn('Error guardando en BD:', err);
-          }
-
-          controller.close();
-        } catch (error) {
-          console.error('Error en API chat:', error);
-          const errorMsg = error instanceof Error ? error.message : 'Error interno';
-          controller.enqueue(encoder.encode(`\n\nError: ${errorMsg}`));
-          controller.close();
+          finalLeadId = newLead.id;
         }
-      },
-    });
+      } catch (err) {
+        console.warn('Error guardando en BD:', err);
+      }
 
-    return new NextResponse(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+      return NextResponse.json({
+        message: assistantMessage.text,
+        leadId: finalLeadId,
+      });
+    } catch (error) {
+      console.error('Error en API chat:', error);
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error ? error.message : 'Error interno del servidor',
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error('Error en API chat:', error);
     return NextResponse.json(
