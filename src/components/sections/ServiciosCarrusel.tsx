@@ -209,7 +209,7 @@ export default function ServiciosCarrusel() {
 
   return (
     <div style={{ borderBottom: "1px solid var(--border)" }}>
-    <div className="px-5 sm:px-8 py-10 sm:py-14">
+    <div className="px-[15px] sm:px-[27px] py-10 sm:py-14">
 
       {/* Navegación superior */}
       <div className="flex items-center justify-between mb-8">
