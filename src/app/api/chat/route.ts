@@ -28,14 +28,14 @@ async function loadKnowledgeBase() {
   ];
 
   const knowledge: Record<string, string> = {};
-  const knowledgeDir = join(process.cwd(), 'src', 'knowledge');
+  const knowledgeDir = join(process.cwd(), 'public', 'knowledge');
 
   for (const file of files) {
     try {
       const content = readFileSync(join(knowledgeDir, file), 'utf-8');
       knowledge[file] = content;
-    } catch {
-      console.warn(`No se pudo cargar ${file}`);
+    } catch (err) {
+      console.warn(`No se pudo cargar ${file}:`, err);
     }
   }
 
