@@ -21,11 +21,14 @@ Automatizamos procesos manuales que consumen tiempo, integramos sistemas dispers
 
 ## Páginas web que venden (Kroomix)
 
-Desarrollamos páginas web adaptadas a las necesidades de cada negocio:
-- Páginas diseñadas para transformar visitantes en clientes
-- Adaptadas específicamente a tu modelo de negocio y público objetivo
-- Enfocadas en ventas online y conversión
-- Si no tienes ventas online, tu página actual no está funcionando
+**No realizamos páginas webs al uso.** No realizamos páginas webs de hace 5 años. Creamos páginas webs adaptadas a las nuevas formas de consumo de la sociedad, utilizando las últimas tecnologías del mercado para convertir la máxima cantidad de usuarios en ventas.
+
+Nuestras páginas web:
+- Están diseñadas para transformar visitantes en clientes
+- Se adaptan específicamente a tu modelo de negocio y público objetivo
+- Utilizan las últimas tecnologías del mercado
+- Están enfocadas en maximizar conversiones de usuarios a ventas
+- Si no tienes ventas online, tu página web actual no funciona — la arreglamos
 
 ### Modelos de página
 
