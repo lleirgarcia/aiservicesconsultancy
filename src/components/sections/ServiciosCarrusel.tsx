@@ -7,12 +7,12 @@ const SERVICIOS = [
   {
     titulo: "Doble entrada de datos",
     problema: "El equipo registra el mismo pedido en el sistema de ventas y luego lo vuelve a meter a mano en el de almacén. Si alguien se olvida o se equivoca en uno, los datos no cuadran y nadie sabe cuál es el correcto hasta que el problema ya ha escalado.",
-    solucion: "Construimos una integración directa entre los dos sistemas usando Make o una API a medida: cuando se cierra un pedido en ventas, se crea automáticamente el movimiento de almacén con los mismos datos, sin intervención humana. El equipo deja de tocar nada. Resultado: 2 horas diarias recuperadas y errores de stock eliminados.",
+    solucion: "Construimos una integración directa entre los dos sistemas mediante workflows automatizados: cuando se cierra un pedido en ventas, se crea automáticamente el movimiento de almacén con los mismos datos, sin intervención humana. El equipo deja de tocar nada. Resultado: 2 horas diarias recuperadas y errores de stock eliminados.",
   },
   {
     titulo: "Facturación lenta",
     problema: "Cada semana, una persona dedica toda la mañana a generar facturas manualmente desde un Excel, copiar datos del pedido, ajustar el formato y enviarlas una a una por email. Si hay volumen, se queda hasta tarde. Si está de baja, no se factura.",
-    solucion: "Conectamos el sistema de pedidos con una herramienta de facturación automática (Holded, Sage o equivalente): cuando un pedido se marca como entregado, la factura se genera, se envía al cliente por email y se registra en contabilidad sola. Nadie tiene que hacer nada. Resultado: de 4 horas semanales a 10 minutos de revisión.",
+    solucion: "Conectamos el sistema de pedidos con una herramienta de facturación del mercado: cuando un pedido se marca como entregado, la factura se genera, se envía al cliente por email y se registra en contabilidad sola. Nadie tiene que hacer nada. Resultado: de 4 horas semanales a 10 minutos de revisión.",
   },
   {
     titulo: "Procesamiento manual de documentos",
@@ -27,17 +27,17 @@ const SERVICIOS = [
   {
     titulo: "Excels descontrolados",
     problema: "Hay un Excel maestro que nadie toca porque la última vez que alguien lo modificó rompió las fórmulas. Hay otro con los datos del mes pasado que circula por email. Y un tercero que solo entiende la persona que lo creó hace dos años.",
-    solucion: "Migramos los datos a una base de datos estructurada (Airtable, Notion Database o PostgreSQL según el caso) con una interfaz sencilla para que el equipo introduzca y consulte datos. Las fórmulas críticas se convierten en lógica del sistema, no en celdas frágiles. Nadie vuelve a romper nada por accidente.",
+    solucion: "Migramos los datos a una base de datos estructurada con una interfaz sencilla para que el equipo introduzca y consulte datos. Las fórmulas críticas se convierten en lógica del sistema, no en celdas frágiles. Nadie vuelve a romper nada por accidente.",
   },
   {
     titulo: "Información crítica en canales personales",
     problema: "Las condiciones acordadas con un cliente están en el WhatsApp del comercial. El estado de un pedido urgente está en el email de alguien que está de viaje. Cuando hay un problema, nadie tiene acceso a la información que necesita sin molestar a otra persona.",
-    solucion: "Configuramos un CRM sencillo (HubSpot gratuito o similar) donde cada interacción con el cliente se registra automáticamente: emails sincronizados, notas de llamada, acuerdos y estados de pedido. Cualquier persona del equipo abre la ficha del cliente y ve todo el historial sin preguntar a nadie.",
+    solucion: "Configuramos un CRM del mercado donde cada interacción con el cliente se registra automáticamente: emails sincronizados, notas de llamada, acuerdos y estados de pedido. Cualquier persona del equipo abre la ficha del cliente y ve todo el historial sin preguntar a nadie.",
   },
   {
     titulo: "Sin visibilidad financiera en tiempo real",
     problema: "Para saber cuánto se ha facturado en el mes hay que pedírselo al administrativo, que tarda un día en cruzar datos de varios sitios. Cuando el dato llega, ya tiene dos días de retraso y no incluye los pedidos de hoy.",
-    solucion: "Construimos un dashboard en Metabase o Power BI conectado directamente a las fuentes operativas: ERP, facturación y banco. El panel muestra en tiempo real facturado, cobrado, pendiente de cobro y previsión del mes. Accesible desde el móvil, sin pedírselo a nadie.",
+    solucion: "Construimos un dashboard con herramientas de visualización del mercado conectado directamente a las fuentes operativas: ERP, facturación y banco. El panel muestra en tiempo real facturado, cobrado, pendiente de cobro y previsión del mes. Accesible desde el móvil, sin pedírselo a nadie.",
   },
   {
     titulo: "Rentabilidad por cliente opaca",
@@ -52,7 +52,7 @@ const SERVICIOS = [
   {
     titulo: "Cobros que nadie persigue",
     problema: "Hay facturas vencidas desde hace meses que nadie ha reclamado porque no hay un proceso claro de seguimiento. El responsable de cobros lo lleva en su cabeza, pero cuando hay mucho volumen se le escapa. El resultado es deuda acumulada que a veces ya no se cobra.",
-    solucion: "Automatizamos el ciclo de cobros con Make o n8n: el sistema detecta facturas vencidas, envía un primer recordatorio automático a los 3 días, un segundo a los 10 y alerta al responsable a los 20. Todo configurable. El responsable solo gestiona los casos que no responden al proceso automático. DSO medio reducido en 18 días.",
+    solucion: "Automatizamos el ciclo de cobros con workflows automatizados: el sistema detecta facturas vencidas, envía un primer recordatorio automático a los 3 días, un segundo a los 10 y alerta al responsable a los 20. Todo configurable. El responsable solo gestiona los casos que no responden al proceso automático. DSO medio reducido en 18 días.",
   },
   {
     titulo: "Cash flow impredecible",
@@ -67,7 +67,7 @@ const SERVICIOS = [
   {
     titulo: "Personal cualificado en tareas de bajo valor",
     problema: "El técnico senior dedica dos horas cada mañana a copiar datos de un sistema a otro, generar informes en Excel y enviarlos por email a los jefes de área. Es la persona más cara del departamento y hace trabajo que podría hacer un becario, o una máquina.",
-    solucion: "Automatizamos el flujo completo con Make: extracción de datos del sistema origen, transformación y carga en la plantilla de informe, envío por email a los destinatarios configurados. Todo a la hora que se defina, sin que nadie toque nada. El técnico recupera 8-10 horas semanales. El coste de la automatización se amortiza en menos de 6 semanas.",
+    solucion: "Automatizamos el flujo completo con workflows automatizados: extracción de datos del sistema origen, transformación y carga en la plantilla de informe, envío por email a los destinatarios configurados. Todo a la hora que se defina, sin que nadie toque nada. El técnico recupera 8-10 horas semanales. El coste se amortiza en menos de 6 semanas.",
   },
   {
     titulo: "Rotación en puestos de entrada de datos",
@@ -77,7 +77,7 @@ const SERVICIOS = [
   {
     titulo: "Dependencia total del dueño",
     problema: "Cuando el propietario se va de vacaciones, el negocio ralentiza. Las decisiones se acumulan, los procesos que solo él conoce se pausan y el equipo trabaja en modo espera. No es un problema de confianza, es que los procesos están en su cabeza, no documentados en ningún sitio.",
-    solucion: "Hacemos sesiones de mapeo de proceso con el propietario: grabamos, transcribimos y estructuramos cada flujo crítico en Notion con árbol de decisiones, responsables y excepciones. Los pasos repetitivos se automatizan. Cada proceso tiene un dueño asignado y reglas claras. El negocio funciona igual sin él presente.",
+    solucion: "Hacemos sesiones de mapeo de proceso con el propietario: grabamos, transcribimos y estructuramos cada flujo crítico con árbol de decisiones, responsables y excepciones. Los pasos repetitivos se automatizan con workflows o programas a medida si el proceso es complejo. Cada proceso tiene un dueño asignado y reglas claras. El negocio funciona igual sin él presente.",
   },
   {
     titulo: "Urgencias que bloquean la mejora",
@@ -122,12 +122,12 @@ const SERVICIOS = [
   {
     titulo: "Sin historial unificado de clientes",
     problema: "Cuando un cliente llama con una queja, el comercial no sabe qué le vendió ni cuándo. El de soporte no sabe si es un cliente antiguo o nuevo. El de administración no sabe si tiene facturas pendientes. Cada departamento tiene su parte del puzzle y nadie tiene el cuadro completo.",
-    solucion: "Implementamos un CRM centralizado (HubSpot, Pipedrive o a medida según el caso) con sincronización automática de emails, pedidos del ERP e incidencias. Cada vez que alguien abre la ficha de un cliente ve el historial completo: últimas compras, conversaciones, facturas pendientes y notas del equipo. Sin preguntar a nadie.",
+    solucion: "Implementamos un CRM del mercado o desarrollamos uno a medida si los existentes no encajan con el negocio, con sincronización automática de emails, pedidos del ERP e incidencias. Cada vez que alguien abre la ficha de un cliente ve el historial completo: últimas compras, conversaciones, facturas pendientes y notas del equipo. Sin preguntar a nadie.",
   },
   {
     titulo: "Gestión del mes a toro pasado",
     problema: "Para saber si el mes va bien o mal hay que esperar al cierre contable, que llega a mitad del mes siguiente. Para entonces, lo que salió mal ya no tiene remedio. Las decisiones se toman siempre con datos de hace 6 semanas.",
-    solucion: "Construimos un dashboard operativo en Metabase o Power BI conectado a las fuentes del negocio en tiempo real: ventas del día, margen acumulado del mes, cobros pendientes y comparativa con el mismo período del año anterior. Accesible desde móvil. El equipo directivo sabe cómo va el mes hoy y puede actuar antes del cierre.",
+    solucion: "Construimos un dashboard operativo con herramientas de visualización del mercado conectado a las fuentes del negocio en tiempo real: ventas del día, margen acumulado del mes, cobros pendientes y comparativa con el mismo período del año anterior. Accesible desde móvil. El equipo directivo sabe cómo va el mes hoy y puede actuar antes del cierre.",
   },
   {
     titulo: "Rendimiento del equipo sin datos",
@@ -137,12 +137,12 @@ const SERVICIOS = [
   {
     titulo: "Procesos que viven en la cabeza de alguien",
     problema: "Hay procesos críticos que solo sabe hacer una persona. Si esa persona falta, el proceso se para. Si se va de la empresa, se lleva el conocimiento. Se ha intentado documentarlo varias veces pero nunca se termina porque no hay tiempo.",
-    solucion: "Hacemos sesiones de grabación con la persona que sabe el proceso: la vemos hacerlo, lo desglosamos paso a paso, documentamos las decisiones y excepciones en Notion con formato de árbol de decisión. Los pasos repetitivos se automatizan donde es posible. El resultado es un manual operativo vivo que cualquier persona puede seguir desde el primer día.",
+    solucion: "Hacemos sesiones de grabación con la persona que sabe el proceso: la vemos hacerlo, lo desglosamos paso a paso, documentamos las decisiones y excepciones con formato de árbol de decisión. Los pasos repetitivos se automatizan con workflows o con un programa a medida si la lógica es compleja. El resultado es un manual operativo vivo que cualquier persona puede seguir desde el primer día.",
   },
   {
     titulo: "Sistemas que no comparten datos",
     problema: "El ERP de almacén y el CRM de ventas son de fabricantes distintos y nunca han hablado entre sí. Para saber si hay stock de un producto, el comercial tiene que llamar al almacén o acceder a un sistema distinto. Los datos siempre van por detrás de la realidad.",
-    solucion: "Construimos una integración bidireccional entre los dos sistemas usando sus APIs o mediante Make/n8n si no tienen API directa: stock actualizado en el CRM en tiempo real, pedidos del CRM reflejados en el ERP sin entrada manual. El comercial ve el stock desde su herramienta y el almacén recibe el pedido solo.",
+    solucion: "Construimos una integración bidireccional entre los dos sistemas usando sus APIs o mediante workflows automatizados si no tienen conexión directa. Si la integración es compleja, desarrollamos un conector a medida: stock actualizado en el CRM en tiempo real, pedidos del CRM reflejados en el ERP sin entrada manual.",
   },
   {
     titulo: "Procesos que no escalan",
@@ -172,7 +172,7 @@ const SERVICIOS = [
   {
     titulo: "Tecnología percibida como cosa de grandes",
     problema: "El propietario ha visto casos de digitalización en grandes empresas con millones de inversión. La conclusión es que eso no es para ellos, que son demasiado pequeños, que no tienen departamento de IT ni presupuesto para esas cosas.",
-    solucion: "Trabajamos exclusivamente con empresas de 10 a 200 personas. Usamos herramientas accesibles (Make, Airtable, Metabase, n8n) que no requieren infraestructura propia ni equipo técnico interno. El primer proyecto tiene habitualmente un coste menor al gasto mensual que genera el problema que resuelve.",
+    solucion: "Trabajamos exclusivamente con empresas de 10 a 200 personas. Usamos herramientas del mercado y desarrollamos soluciones a medida cuando hace falta, sin infraestructura propia ni equipo técnico interno requerido. El primer proyecto tiene habitualmente un coste menor al gasto mensual que genera el problema que resuelve.",
   },
   {
     titulo: "Parálisis por falta de claridad",
