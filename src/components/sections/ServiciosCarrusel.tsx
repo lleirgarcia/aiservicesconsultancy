@@ -223,62 +223,37 @@ export default function ServiciosCarrusel() {
           {current + 1} / {SERVICIOS.length}
         </span>
         <div className="flex gap-2">
-          <button
-            onClick={prev}
-            style={{
-              background: "transparent",
-              border: "1px solid var(--border)",
-              borderRadius: 4,
-              width: 36,
-              height: 36,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "var(--muted)",
-              fontSize: 16,
-              transition: "border-color 0.15s, color 0.15s",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = "var(--fg)";
-              e.currentTarget.style.color = "var(--fg)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.color = "var(--muted)";
-            }}
-            aria-label="Anterior"
-          >
-            ←
-          </button>
-          <button
-            onClick={next}
-            style={{
-              background: "transparent",
-              border: "1px solid var(--border)",
-              borderRadius: 4,
-              width: 36,
-              height: 36,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "var(--muted)",
-              fontSize: 16,
-              transition: "border-color 0.15s, color 0.15s",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = "var(--fg)";
-              e.currentTarget.style.color = "var(--fg)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.color = "var(--muted)";
-            }}
-            aria-label="Siguiente"
-          >
-            →
-          </button>
+          {[{ label: "Anterior", symbol: "←", action: prev }, { label: "Siguiente", symbol: "→", action: next }].map(({ label, symbol, action }) => (
+            <button
+              key={label}
+              onClick={action}
+              className="w-11 h-11 sm:w-9 sm:h-9"
+              style={{
+                background: "transparent",
+                border: "1px solid var(--border)",
+                borderRadius: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "var(--muted)",
+                fontSize: 18,
+                flexShrink: 0,
+                transition: "border-color 0.15s, color 0.15s",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = "var(--fg)";
+                e.currentTarget.style.color = "var(--fg)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.color = "var(--muted)";
+              }}
+              aria-label={label}
+            >
+              {symbol}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -309,7 +284,14 @@ export default function ServiciosCarrusel() {
             animate="center"
             exit="exit"
             transition={SPRING}
-            style={{ position: "absolute", width: "100%" }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -50) next();
+              else if (info.offset.x > 50) prev();
+            }}
+            style={{ position: "absolute", width: "100%", touchAction: "pan-y" }}
           >
             <div
               style={{
