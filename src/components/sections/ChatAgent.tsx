@@ -17,7 +17,7 @@ const INITIAL_MESSAGE: Message = {
     "Hola, soy Kromi, el asistente de Kroomix. En dos minutos te ayudo a detectar dónde puede haber una oportunidad de mejora en tu operativa.\n\n¿Cómo te llamas, de qué empresa eres y a qué se dedica?",
 };
 
-const MAX_MESSAGES = 25;
+const MAX_MESSAGES = 40;
 const MAX_RESETS = 2;
 const CONV_END_MARKER = "<<CONV_END>>";
 
@@ -385,7 +385,7 @@ export default function ChatAgent() {
             className="ml-2 text-xs"
             style={{ color: "var(--muted)", fontFamily: "var(--font-geist-mono), monospace" }}
           >
-            kroomix — diagnóstico
+            Kroomi — diagnóstico
           </span>
           <button
             type="button"
