@@ -197,6 +197,7 @@ export default function ChatAgent() {
   const didInitialScrollRef = useRef(false);
   const latestMessagesRef = useRef<Message[]>([INITIAL_MESSAGE]);
   const savedRef = useRef(false);
+  const wasLoadingRef = useRef(false);
 
   const {
     supported: micSupported,
@@ -241,6 +242,13 @@ export default function ChatAgent() {
     const next = Math.min(el.scrollHeight, 140);
     el.style.height = `${next}px`;
   }, [input]);
+
+  useEffect(() => {
+    if (wasLoadingRef.current && !loading) {
+      inputRef.current?.focus();
+    }
+    wasLoadingRef.current = loading;
+  }, [loading]);
 
   async function saveChat(msgs: Message[]) {
     if (msgs.length <= 1) return;
@@ -345,7 +353,6 @@ export default function ChatAgent() {
       } else if (messages.length + 1 >= MAX_MESSAGES) {
         setShowModal(true);
       }
-      inputRef.current?.focus();
     }
   }
 
