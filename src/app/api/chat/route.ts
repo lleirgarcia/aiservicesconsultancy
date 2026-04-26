@@ -18,7 +18,7 @@ interface ChatRequest {
   isManualSave?: boolean;
 }
 
-const KNOWLEDGE_BASE = `# Servicios de FixTheOps
+const KNOWLEDGE_BASE = `# Servicios de Kroomix
 
 Automatizamos procesos manuales que consumen tiempo, integramos sistemas dispersos y proporcionamos visibilidad en tiempo real de operaciones.
 
