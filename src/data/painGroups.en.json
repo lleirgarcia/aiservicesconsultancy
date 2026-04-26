@@ -1,0 +1,68 @@
+[
+  {
+    "label": "Data & admin",
+    "pains": [
+      "Copying data manually between systems",
+      "Entering invoices by hand",
+      "Processing PDFs manually",
+      "Having duplicate or inconsistent data",
+      "Not knowing which numbers are correct",
+      "Information scattered across many places"
+    ]
+  },
+  {
+    "label": "Finance",
+    "pains": [
+      "No visibility into real revenue",
+      "Not knowing which customers are profitable",
+      "Not spotting where money is leaking",
+      "Collecting late from customers",
+      "Cash flow problems",
+      "Not knowing where to invest to grow"
+    ]
+  },
+  {
+    "label": "People & team",
+    "pains": [
+      "Paying skilled staff for repetitive tasks",
+      "Struggling to hire qualified people",
+      "Owner overload (doing everything)",
+      "No time to improve processes",
+      "Internal resistance to change",
+      "Frequent human errors"
+    ]
+  },
+  {
+    "label": "Sales & customers",
+    "pains": [
+      "Managing orders on WhatsApp with no control",
+      "Having a website but no online orders",
+      "Losing leads because replies are too slow",
+      "Poor email management",
+      "Slow customer service",
+      "Missing sales opportunities",
+      "No CRM or lead system"
+    ]
+  },
+  {
+    "label": "Operations",
+    "pains": [
+      "No clear reporting",
+      "Not measuring team productivity",
+      "Undocumented processes",
+      "Tools that do not talk to each other",
+      "Hard to scale operations",
+      "Little control over day-to-day operations"
+    ]
+  },
+  {
+    "label": "Technology",
+    "pains": [
+      "Not automating processes",
+      "No basic digital systems in place",
+      "Locked into legacy processes",
+      "Fear of implementing AI",
+      "Thinking AI is too expensive or complex"
+    ]
+  }
+]

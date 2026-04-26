@@ -6,17 +6,12 @@ import remarkGfm from "remark-gfm";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { getSessionCount, incrementSessionCount } from "@/lib/chatSession";
 import { OPEN_CHAT_PROMPT_EVENT, type OpenChatPromptDetail } from "@/lib/openChatWithPrompt";
+import { useI18n } from "@/i18n/LocaleContext";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
-
-const INITIAL_MESSAGE: Message = {
-  role: "assistant",
-  content:
-    "Hola, soy Kromi, el asistente de Kroomix. En dos minutos te ayudo a detectar dónde puede haber una oportunidad de mejora en tu operativa.\n\n¿Cómo te llamas, de qué empresa eres y a qué se dedica?",
-};
 
 const MAX_MESSAGES = 40;
 const MAX_RESETS = 2;
@@ -28,6 +23,7 @@ const WHATSAPP_URL = "https://wa.me/34626572151";
 const EMAIL = "lleirgarcia@gmail.com";
 
 function LimitModal({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -85,16 +81,16 @@ function LimitModal({ onClose }: { onClose: () => void }) {
               className="text-xs font-medium uppercase tracking-widest"
               style={{ color: "var(--accent)", marginBottom: 6 }}
             >
-              Hemos llegado al límite
+              {t("chat.limitTitle")}
             </p>
             <p className="text-sm" style={{ color: "var(--muted)", lineHeight: 1.5 }}>
-              Con lo que me has contado ya tenemos suficiente contexto. El siguiente paso es hablar directamente.
+              {t("chat.limitBody")}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t("chat.close")}
             style={{
               background: "transparent",
               border: "none",
@@ -126,7 +122,7 @@ function LimitModal({ onClose }: { onClose: () => void }) {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: "var(--accent)" }}
           >
-            Llamar ahora
+            {t("contact.callNow")}
           </span>
           <span className="text-sm" style={{ color: "var(--muted)" }}>
             {PHONE_DISPLAY}
@@ -151,10 +147,10 @@ function LimitModal({ onClose }: { onClose: () => void }) {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: "var(--accent)" }}
           >
-            Enviar WhatsApp
+            {t("contact.wa")}
           </span>
           <span className="text-sm" style={{ color: "var(--muted)" }}>
-            Te respondemos en menos de 24h
+            {t("contact.waHint")}
           </span>
         </a>
 
@@ -173,7 +169,7 @@ function LimitModal({ onClose }: { onClose: () => void }) {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: "var(--accent)" }}
           >
-            Enviar email
+            {t("contact.email")}
           </span>
           <span className="text-sm" style={{ color: "var(--muted)" }}>
             {EMAIL}
@@ -185,7 +181,11 @@ function LimitModal({ onClose }: { onClose: () => void }) {
 }
 
 export default function ChatAgent() {
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const { t, locale, speechRecognitionLang } = useI18n();
+
+  const [messages, setMessages] = useState<Message[]>(() => [
+    { role: "assistant", content: t("chat.initial") },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetsUsed, setResetsUsed] = useState(0);
@@ -196,7 +196,9 @@ export default function ChatAgent() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const rawContentRef = useRef("");
   const didInitialScrollRef = useRef(false);
-  const latestMessagesRef = useRef<Message[]>([INITIAL_MESSAGE]);
+  const latestMessagesRef = useRef<Message[]>([
+    { role: "assistant", content: t("chat.initial") },
+  ]);
   const savedRef = useRef(false);
   const wasLoadingRef = useRef(false);
   const submitFromUserTextRef = useRef<(text: string) => Promise<void>>(async () => {});
@@ -206,9 +208,18 @@ export default function ChatAgent() {
     state: micState,
     error: micError,
     toggle: micToggle,
-  } = useSpeechRecognition((transcript) => {
-    setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
-  });
+  } = useSpeechRecognition(
+    (transcript) => {
+      setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+    },
+    {
+      lang: speechRecognitionLang,
+      errDenied: t("chat.micErr.denied"),
+      errNoDevice: t("chat.micErr.noDevice"),
+      errNetwork: t("chat.micErr.network"),
+      errStart: t("chat.micErr.startFailed"),
+    }
+  );
 
   const resetsExhausted = resetsUsed >= MAX_RESETS;
   const limitReached = messages.length >= MAX_MESSAGES || resetsExhausted;
@@ -223,6 +234,15 @@ export default function ChatAgent() {
   useEffect(() => {
     setResetsUsed(getSessionCount());
   }, []);
+
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length !== 1 || prev[0].role !== "assistant") return prev;
+      const next = t("chat.initial");
+      if (prev[0].content === next) return prev;
+      return [{ role: "assistant", content: next }];
+    });
+  }, [locale, t]);
 
   useEffect(() => {
     latestMessagesRef.current = messages;
@@ -284,7 +304,8 @@ export default function ChatAgent() {
         body: JSON.stringify({
           messages: msgs,
           leadId: leadId,
-          isManualSave: true
+          isManualSave: true,
+          locale,
         }),
       });
 
@@ -295,7 +316,7 @@ export default function ChatAgent() {
         }
       }
     } catch (err) {
-      console.error("Error guardando chat:", err);
+      console.error("Error saving chat:", err);
     }
   }
 
@@ -305,7 +326,7 @@ export default function ChatAgent() {
     savedRef.current = false;
     const nextUsed = incrementSessionCount();
     setResetsUsed(nextUsed);
-    setMessages([INITIAL_MESSAGE]);
+    setMessages([{ role: "assistant", content: t("chat.initial") }]);
     setInput("");
     setShowModal(false);
     setLeadId(null);
@@ -316,7 +337,7 @@ export default function ChatAgent() {
     await saveChat(latestMessagesRef.current);
     savedRef.current = false;
     setConvClosed(false);
-    setMessages([INITIAL_MESSAGE]);
+    setMessages([{ role: "assistant", content: t("chat.initial") }]);
     setInput("");
     setLeadId(null);
     inputRef.current?.focus();
@@ -342,10 +363,10 @@ export default function ChatAgent() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, leadId }),
+        body: JSON.stringify({ messages: next, leadId, locale }),
       });
 
-      if (!res.ok) throw new Error("Error en la respuesta");
+      if (!res.ok) throw new Error("bad response");
 
       const data = await res.json();
       const assistantContent = data.message || "";
@@ -366,7 +387,7 @@ export default function ChatAgent() {
         const updated = [...prevMsgs];
         updated[updated.length - 1] = {
           role: "assistant",
-          content: "Ha habido un error. Por favor, inténtalo de nuevo.",
+          content: t("chat.errorGeneric"),
         };
         return updated;
       });
@@ -400,7 +421,6 @@ export default function ChatAgent() {
       id="contacto"
       className="px-4 sm:px-6 py-10 sm:py-16 max-w-4xl mx-auto"
     >
-      {/* Ventana de chat */}
       <div
         className="h-[min(72vh,560px)] sm:h-[560px]"
         style={{
@@ -415,7 +435,6 @@ export default function ChatAgent() {
       >
         {showModal && <LimitModal onClose={() => setShowModal(false)} />}
 
-        {/* Barra superior estilo terminal */}
         <div className="terminal-bar" style={{ flexShrink: 0 }}>
           <span className="terminal-dot" style={{ background: "var(--border)" }} />
           <span className="terminal-dot" style={{ background: "var(--muted)" }} />
@@ -424,7 +443,7 @@ export default function ChatAgent() {
             className="ml-2 text-xs"
             style={{ color: "var(--muted)", fontFamily: "var(--font-geist-mono), monospace" }}
           >
-            Kroomi — diagnóstico
+            {t("chat.kroomiBar")}
           </span>
           <button
             type="button"
@@ -432,8 +451,8 @@ export default function ChatAgent() {
             disabled={!canReset}
             title={
               resetsExhausted
-                ? `Ya has usado las ${MAX_RESETS} conversaciones nuevas disponibles`
-                : "Nueva conversación"
+                ? t("chat.newThreadTitle", { max: MAX_RESETS })
+                : t("chat.newThread")
             }
             style={{
               marginLeft: "auto",
@@ -462,14 +481,13 @@ export default function ChatAgent() {
               e.currentTarget.style.borderColor = "var(--border)";
             }}
           >
-            <span>↻ nueva conversación</span>
+            <span>{t("chat.newConv2")}</span>
             <span style={{ opacity: 0.6 }}>
               {resetsUsed}/{MAX_RESETS}
             </span>
           </button>
         </div>
 
-        {/* Historial de mensajes */}
         <div
           ref={messagesRef}
           style={{
@@ -523,10 +541,8 @@ export default function ChatAgent() {
               </div>
             </div>
           ))}
-
         </div>
 
-        {/* Input */}
         <div
           style={{
             borderTop: "1px solid var(--border)",
@@ -555,7 +571,7 @@ export default function ChatAgent() {
                 textAlign: "center",
               }}
             >
-              ↻ Nueva conversación
+              {t("chat.newConv")}
             </button>
           ) : limitReached ? (
             <button
@@ -574,7 +590,7 @@ export default function ChatAgent() {
                 textAlign: "center",
               }}
             >
-              Contactar directamente →
+              {t("chat.limitContact")}
             </button>
           ) : (
             <>
@@ -585,7 +601,7 @@ export default function ChatAgent() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}
                 disabled={loading}
-                placeholder="Escribe aquí… (Enter para enviar)"
+                placeholder={t("chat.placeholder")}
                 style={{
                   flex: 1,
                   resize: "none",
@@ -615,26 +631,24 @@ export default function ChatAgent() {
                     micError
                       ? micError
                       : micState === "recording"
-                      ? "Detener grabación"
-                      : micState === "requesting"
-                      ? "Pidiendo permiso de micrófono…"
-                      : micState === "error"
-                      ? "Error de micrófono"
-                      : "Hablar"
+                        ? t("chat.mic.rec")
+                        : micState === "requesting"
+                          ? t("chat.mic.req")
+                          : micState === "error"
+                            ? t("chat.mic.err")
+                            : t("chat.mic.talk")
                   }
                   style={{
                     background:
-                      micState === "recording"
-                        ? "var(--accent)"
-                        : "transparent",
+                      micState === "recording" ? "var(--accent)" : "transparent",
                     color:
                       micState === "recording"
                         ? "var(--bg)"
                         : micState === "error"
-                        ? "#FF5F57"
-                        : micState === "requesting"
-                        ? "var(--fg)"
-                        : "var(--muted)",
+                          ? "#FF5F57"
+                          : micState === "requesting"
+                            ? "var(--fg)"
+                            : "var(--muted)",
                     border: "1px solid var(--border)",
                     borderRadius: 4,
                     width: 38,
@@ -644,9 +658,7 @@ export default function ChatAgent() {
                     justifyContent: "center",
                     flexShrink: 0,
                     cursor:
-                      loading || micState === "requesting"
-                        ? "not-allowed"
-                        : "pointer",
+                      loading || micState === "requesting" ? "not-allowed" : "pointer",
                     opacity: loading ? 0.4 : 1,
                     transition: "background 0.15s, color 0.15s",
                     alignSelf: "flex-end",
@@ -661,13 +673,14 @@ export default function ChatAgent() {
                     />
                   ) : (
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 18.93V22h2v-2.07A8.001 8.001 0 0 0 20 12h-2a6 6 0 0 1-12 0H4a8.001 8.001 0 0 0 7 7.93z"/>
+                      <path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 18.93V22h2v-2.07A8.001 8.001 0 0 0 20 12h-2a6 6 0 0 1-12 0H4a8.001 8.001 0 0 0 7 7.93z" />
                     </svg>
                   )}
                 </button>
               )}
 
               <button
+                type="button"
                 onClick={send}
                 disabled={loading || !input.trim()}
                 style={{
@@ -685,6 +698,7 @@ export default function ChatAgent() {
                   height: 38,
                   alignSelf: "flex-end",
                 }}
+                aria-label={t("chat.sending")}
               >
                 →
               </button>
@@ -694,7 +708,7 @@ export default function ChatAgent() {
       </div>
 
       <p className="mt-4 text-xs" style={{ color: "var(--muted)" }}>
-        Shift + Enter para nueva línea. Los datos que compartas se usan solo para este diagnóstico.
+        {t("chat.hint")}
       </p>
       {micError && (
         <p
@@ -702,7 +716,7 @@ export default function ChatAgent() {
           style={{ color: "#FF5F57" }}
           role="alert"
         >
-          Micrófono: {micError}
+          {t("chat.micLog")}: {micError}
         </p>
       )}
     </section>

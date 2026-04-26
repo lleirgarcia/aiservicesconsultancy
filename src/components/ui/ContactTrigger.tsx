@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "@/i18n/LocaleContext";
 
 const PHONE_DISPLAY = "+34 626 572 151";
 const PHONE_TEL = "+34626572151";
@@ -8,6 +9,7 @@ const WHATSAPP_URL = "https://wa.me/34626572151";
 const EMAIL = "lleirgarcia@gmail.com";
 
 export default function ContactTrigger() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function ContactTrigger() {
           className="text-xs font-medium uppercase tracking-widest"
           style={{ color: "var(--muted)" }}
         >
-          Contáctanos
+          {t("contact.trigger")}
         </span>
       </button>
 
@@ -46,7 +48,7 @@ export default function ContactTrigger() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Elige cómo contactar"
+          aria-label={t("contact.dialog")}
           onClick={() => setOpen(false)}
           style={{
             position: "fixed",
@@ -77,12 +79,12 @@ export default function ContactTrigger() {
               style={{ borderBottom: "1px solid var(--border)" }}
             >
               <span className="text-xs font-medium uppercase tracking-widest">
-                ¿Cómo prefieres contactar?
+                {t("contact.dialog")}
               </span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Cerrar"
+                aria-label={t("chat.close")}
                 className="transition-opacity hover:opacity-60 cursor-pointer"
                 style={{
                   background: "transparent",
@@ -104,7 +106,7 @@ export default function ContactTrigger() {
               style={{ borderBottom: "1px solid var(--border)" }}
             >
               <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
-                Llamar
+                {t("contact.call")}
               </span>
               <span className="text-sm" style={{ color: "var(--muted)" }}>
                 {PHONE_DISPLAY}
@@ -118,7 +120,7 @@ export default function ContactTrigger() {
               style={{ borderBottom: "1px solid var(--border)" }}
             >
               <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
-                Enviar email
+                {t("contact.email")}
               </span>
               <span className="text-sm" style={{ color: "var(--muted)" }}>
                 {EMAIL}
@@ -133,7 +135,7 @@ export default function ContactTrigger() {
               className="flex flex-col gap-1 px-6 py-5 transition-colors"
             >
               <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
-                Enviar WhatsApp
+                {t("contact.wa")}
               </span>
             </a>
           </div>

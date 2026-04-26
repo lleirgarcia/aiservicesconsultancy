@@ -1,8 +1,13 @@
-/** Rotulador: franja verde detrás de la parte baja del texto (cada línea con box-decoration-break). */
+"use client";
+
+import { useI18n } from "@/i18n/LocaleContext";
+
 const em =
   "font-semibold text-inherit px-0.5 rounded-sm [box-decoration-break:clone] [-webkit-box-decoration-break:clone] [background-image:linear-gradient(180deg,transparent_58%,rgba(52,211,153,0.42)_58%)] dark:[background-image:linear-gradient(180deg,transparent_58%,rgba(52,211,153,0.28)_58%)]";
 
 export default function QuienesSomos() {
+  const { t } = useI18n();
+
   return (
     <>
       <div
@@ -10,13 +15,13 @@ export default function QuienesSomos() {
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
       >
         <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
-          Quiénes somos
+          {t("quienes.title")}
         </h2>
         <p
           className="text-xs font-medium uppercase tracking-widest mt-3"
           style={{ color: "var(--muted)" }}
         >
-          Tu socio para modernizar la operativa sin perderte en el camino
+          {t("quienes.subtitle")}
         </p>
       </div>
 
@@ -27,22 +32,18 @@ export default function QuienesSomos() {
             style={{ color: "var(--fg)" }}
           >
             <p className="mb-6">
-              Queremos ser tu socio al{" "}
-              <span className={em}>actualizar tus procesos digitales</span>: que respondas a lo que ya
-              exigen tus usuarios y clientes, y que aproveches con criterio las tecnologías que hay hoy
-              en el mercado — sin humo, sin promesas vacías.
+              {t("quienes.p1a")}
+              <span className={em}>{t("quienes.p1em")}</span>
+              {t("quienes.p1b")}
             </p>
             <p className="mb-6" style={{ color: "var(--muted)" }}>
-              Todo va en la misma dirección: dar más fuerza a tu marca, a tu empresa y a tu día a día
-              operativo. Recuperar horas que ahora se van en tareas repetitivas, recortar costes donde
-              haya margen y, al cerrar el mes, <span className={em}>dejar más dinero sobre la mesa</span>.
+              {t("quienes.p2")}
+              <span className={em}>{t("quienes.p2em")}</span>.
             </p>
             <p style={{ color: "var(--muted)" }}>
-              Si eso te suena bien, también es nuestro objetivo que tengas{" "}
-              <span className={em}>
-                menos quebraderos de cabeza y más claridad para decidir con tranquilidad
-              </span>
-              .
+              {t("quienes.p3a")}
+              <span className={em}>{t("quienes.p3b")}</span>
+              {t("quienes.p3dot")}
             </p>
           </div>
         </div>

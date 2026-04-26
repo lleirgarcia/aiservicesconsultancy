@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "title": "Process savings calculator — Industrial companies and distribution",
+    "description": "Calculate in 2 minutes how much money and time you are wasting on manual processes.For industrial, distribution and logistics companies."
+  },
+  "header": {
+    "homeAria": "Kroomix — home",
+    "contact": "Contact us",
+    "langGroup": "Select language"
+  },
+  "hero": {
+    "h1": "Who has a business,",
+    "sub1": "have problems to solve,",
+    "sub2": "improvements to adapt,",
+    "sub3": "and money to earn"
+  },
+  "sectionSolution": {
+    "title": "There is a solution",
+    "subtitle": "These are the problems we solve"
+  },
+  "sectionCta": {
+    "title": "Which of these is your case?",
+    "subtitle": "Tell us.In two minutes we will tell you if we can help you."
+  },
+  "sectionPainList": {
+    "heading": "Do any of these problems sound familiar?"
+  },
+  "quienes": {
+    "title": "Who we are",
+    "subtitle": "Your partner to modernize operations without getting lost along the way",
+    "p1a": "We want to be your partner in ",
+    "p1b": ": so you respond to what your users and clients already demand, and you make smart use of today's market technology — no fluff, no empty promises.",
+    "p1em": "updating your digital processes",
+    "p2": "Everything is going in the same direction: giving your brand, your company, and your day-to-day operations more strength. Win back hours lost to repetitive tasks, cut costs where you can, and, when you close the month, ",
+    "p2em": "leave more money on the table",
+    "p3a": "If that resonates with you, we also want you to have ",
+    "p3b": "fewer headaches and more clarity to make decisions with confidence",
+    "p3dot": "."
+  },
+  "footer": {
+    "tagline": "We optimize chaos to create clarity in your business.Clarity saves time and money",
+    "location": "Osona, Barcelona",
+    "legalNav": "Legal links",
+    "rights": "All rights reserved"
+  },
+  "legal": {
+    "aviso": "Legal notice",
+    "privacidad": "Privacy Policy",
+    "cookies": "Cookies policy",
+    "terminos": "Terms and conditions"
+  },
+  "contact": {
+    "trigger": "Contact us",
+    "dialog": "How do you prefer to contact?",
+    "call": "Call",
+    "callNow": "Call now",
+    "email": "Send email",
+    "wa": "Send WhatsApp",
+    "waHint": "We usually reply within 24h"
+  },
+  "servicios": {
+    "problem": "Problem",
+    "solution": "Solution",
+    "prev": "Previous",
+    "next": "Next",
+    "moreButton": "Tell me more about this solution"
+  },
+  "chat": {
+    "initial": "Hi, I'm Kromi, the Kroomix assistant.In two minutes I will help you detect where there may be an opportunity for improvement in your operations.\\n\\nWhat is your name, what company are you from and what do you do?",
+    "limitTitle": "We have reached the limit",
+    "limitBody": "With what you have told me we already have enough context.The next step is to speak directly.",
+    "close": "Close",
+    "kroomiBar": "Kroomi — diagnosis",
+    "newThread": "new conversation",
+    "newThreadTitle": "You have already used the {max} new conversations available",
+    "placeholder": "Write here… (Enter to send)",
+    "sending": "Send",
+    "errorGeneric": "There has been an error.Please try again.",
+    "newConv": "New conversation",
+    "newConv2": "↻ New conversation",
+    "limitContact": "Contact directly →",
+    "micLog": "Microphone",
+    "hint": "Shift + Enter for new line.The data you share is used only for this diagnosis.",
+    "mic": {
+      "rec": "Stop recording",
+      "req": "Asking for microphone permission…",
+      "err": "microphone error",
+      "talk": "Talk"
+    },
+    "micErr": {
+      "denied": "Microphone permission denied",
+      "noDevice": "No microphone detected",
+      "network": "Network error in speech recognition",
+      "startFailed": "Could not start the microphone"
+    }
+  },
+  "chatCaso": {
+    "l1": "I have seen the case «{titulo}» on your website and I want you to explain this solution applied to my company well.",
+    "l2": "Problem (card text):",
+    "l3": "Summary solution (card text):",
+    "l4": "If you don't already have context about me (name, company, what we do, and approximate team size), ask me first in a few questions.When you have it, develop the solution in detail and contextualized to our business."
+  }
+}

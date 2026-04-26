@@ -1,88 +1,37 @@
-const PAIN_GROUPS = [
-  {
-    label: "Datos y admin",
-    pains: [
-      "Copiar datos manualmente entre sistemas",
-      "Introducir facturas a mano",
-      "Procesar PDFs manualmente",
-      "Tener datos duplicados o inconsistentes",
-      "No saber qué datos son correctos",
-      "Información dispersa en múltiples sitios",
-    ],
-  },
-  {
-    label: "Finanzas",
-    pains: [
-      "No tener visibilidad de ingresos reales",
-      "No saber qué clientes son rentables",
-      "No detectar pérdidas de dinero",
-      "Cobrar tarde a clientes",
-      "Tener problemas de flujo de caja",
-      "No saber dónde invertir para crecer",
-    ],
-  },
-  {
-    label: "Personas y equipo",
-    pains: [
-      "Pagar empleados por tareas repetitivas",
-      "No encontrar trabajadores cualificados",
-      "Sobrecarga del dueño (hace de todo)",
-      "Falta de tiempo para mejorar procesos",
-      "Resistencia al cambio interno",
-      "Errores humanos frecuentes",
-    ],
-  },
-  {
-    label: "Comercial y clientes",
-    pains: [
-      "Gestionar pedidos por WhatsApp sin control",
-      "Tener página web pero no recibir pedidos online",
-      "Perder leads por no responder rápido",
-      "Mala gestión de emails",
-      "Atención al cliente lenta",
-      "Perder oportunidades de venta",
-      "No tener CRM o sistema de leads",
-    ],
-  },
-  {
-    label: "Operaciones",
-    pains: [
-      "Falta de reporting claro",
-      "No medir productividad del equipo",
-      "Procesos no documentados",
-      "Falta de integración entre herramientas",
-      "Dificultad para escalar operaciones",
-      "Falta de control sobre operaciones",
-    ],
-  },
-  {
-    label: "Tecnología",
-    pains: [
-      "No usar automatización en procesos",
-      "No tener sistemas digitales básicos",
-      "Dependencia de procesos antiguos",
-      "Miedo a implementar IA",
-      "Pensar que la IA es cara o compleja",
-    ],
-  },
-];
+"use client";
 
-const MAX_ROWS = Math.max(...PAIN_GROUPS.map((g) => g.pains.length));
+import { useMemo } from "react";
+import { useI18n } from "@/i18n/LocaleContext";
+import type { Locale } from "@/i18n/dict";
+import painGroupsEs from "@/data/painGroups.es.json";
+import painGroupsEn from "@/data/painGroups.en.json";
+import painGroupsCa from "@/data/painGroups.ca.json";
+
+type PainGroup = { label: string; pains: string[] };
+
+const GROUPS_BY_LOCALE: Record<Locale, PainGroup[]> = {
+  es: painGroupsEs,
+  en: painGroupsEn,
+  ca: painGroupsCa,
+};
 
 export default function PainSidebar() {
+  const { locale } = useI18n();
+  const painGroups = useMemo(() => GROUPS_BY_LOCALE[locale], [locale]);
+  const maxRows = Math.max(...painGroups.map((g) => g.pains.length));
+
   return (
     <div
       className="grid"
       style={{
         gridTemplateColumns: "repeat(6, 1fr)",
-        gridTemplateRows: `auto repeat(${MAX_ROWS}, 1fr)`,
+        gridTemplateRows: `auto repeat(${maxRows}, 1fr)`,
         borderBottom: "1px solid var(--border)",
       }}
     >
-      {/* Fila de encabezados */}
-      {PAIN_GROUPS.map((group) => (
+      {painGroups.map((group, gi) => (
         <div
-          key={group.label}
+          key={`${locale}-h-${gi}`}
           className="px-2 py-1"
           style={{
             borderRight: "1px solid var(--border)",
@@ -98,11 +47,10 @@ export default function PainSidebar() {
         </div>
       ))}
 
-      {/* Filas de pains */}
-      {Array.from({ length: MAX_ROWS }, (_, rowIndex) =>
-        PAIN_GROUPS.map((group) => (
+      {Array.from({ length: maxRows }, (_, rowIndex) =>
+        painGroups.map((group, gi) => (
           <div
-            key={`${group.label}-${rowIndex}`}
+            key={`${locale}-${gi}-${rowIndex}`}
             className="px-2 py-1"
             style={{
               borderRight: "1px solid var(--border)",

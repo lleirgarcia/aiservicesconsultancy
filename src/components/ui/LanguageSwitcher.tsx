@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/i18n/LocaleContext";
+import type { Locale } from "@/i18n/dict";
 
-type LangCode = "ca" | "es" | "en";
-
-const LANGS: { code: LangCode; label: string }[] = [
+const LANGS: { code: Locale; label: string }[] = [
   { code: "ca", label: "CA" },
   { code: "es", label: "ES" },
   { code: "en", label: "EN" },
 ];
 
 export default function LanguageSwitcher() {
-  const [lang, setLang] = useState<LangCode>("es");
+  const { locale, setLocale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,15 +32,11 @@ export default function LanguageSwitcher() {
     };
   }, [open]);
 
-  const activeLabel = LANGS.find((l) => l.code === lang)?.label ?? "ES";
+  const activeLabel = LANGS.find((l) => l.code === locale)?.label ?? "ES";
 
   return (
     <>
-      {/* Mobile: compact dropdown */}
-      <div
-        ref={wrapRef}
-        className="relative sm:hidden"
-      >
+      <div className="relative sm:hidden" ref={wrapRef}>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -53,7 +49,7 @@ export default function LanguageSwitcher() {
           }}
           aria-haspopup="listbox"
           aria-expanded={open}
-          aria-label="Seleccionar idioma"
+          aria-label={t("header.langGroup")}
         >
           <span>{activeLabel}</span>
           <svg
@@ -80,7 +76,7 @@ export default function LanguageSwitcher() {
         {open && (
           <ul
             role="listbox"
-            aria-label="Idiomas"
+            aria-label={t("header.langGroup")}
             className="absolute right-0 mt-2 min-w-[80px]"
             style={{
               background: "var(--bg)",
@@ -92,13 +88,13 @@ export default function LanguageSwitcher() {
             }}
           >
             {LANGS.map((l) => {
-              const active = lang === l.code;
+              const active = locale === l.code;
               return (
                 <li key={l.code} role="option" aria-selected={active}>
                   <button
                     type="button"
                     onClick={() => {
-                      setLang(l.code);
+                      setLocale(l.code);
                       setOpen(false);
                     }}
                     className="w-full text-left text-xs font-medium uppercase tracking-widest cursor-pointer transition-opacity hover:opacity-80"
@@ -118,14 +114,13 @@ export default function LanguageSwitcher() {
         )}
       </div>
 
-      {/* Desktop: inline pills */}
       <div
         className="hidden sm:flex items-center gap-2 text-xs font-medium uppercase tracking-widest"
         role="group"
-        aria-label="Seleccionar idioma"
+        aria-label={t("header.langGroup")}
       >
         {LANGS.map((l, i) => {
-          const active = lang === l.code;
+          const active = locale === l.code;
           return (
             <div key={l.code} className="flex items-center gap-2">
               {i > 0 && (
@@ -135,7 +130,7 @@ export default function LanguageSwitcher() {
               )}
               <button
                 type="button"
-                onClick={() => setLang(l.code)}
+                onClick={() => setLocale(l.code)}
                 className="transition-opacity hover:opacity-100"
                 style={{
                   color: active ? "var(--foreground)" : "var(--muted)",
@@ -146,7 +141,7 @@ export default function LanguageSwitcher() {
                   padding: 0,
                 }}
                 aria-pressed={active}
-                aria-label={`Idioma: ${l.label}`}
+                aria-label={`${t("header.langGroup")}: ${l.label}`}
               >
                 {l.label}
               </button>

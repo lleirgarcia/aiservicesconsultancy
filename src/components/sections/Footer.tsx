@@ -1,12 +1,15 @@
+"use client";
+
 import type { ReactElement } from "react";
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
+import { useI18n } from "@/i18n/LocaleContext";
 
-const LEGAL_LINKS: { label: string; href: string }[] = [
-  { label: "Aviso legal", href: "/aviso-legal" },
-  { label: "Política de privacidad", href: "/politica-de-privacidad" },
-  { label: "Política de cookies", href: "/politica-de-cookies" },
-  { label: "Términos y condiciones", href: "/terminos-y-condiciones" },
+const LEGAL_HREFS: { k: "aviso" | "privacidad" | "cookies" | "terminos"; href: string }[] = [
+  { k: "aviso", href: "/aviso-legal" },
+  { k: "privacidad", href: "/politica-de-privacidad" },
+  { k: "cookies", href: "/politica-de-cookies" },
+  { k: "terminos", href: "/terminos-y-condiciones" },
 ];
 
 const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
@@ -64,6 +67,7 @@ const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
 ];
 
 export default function Footer() {
+  const { t } = useI18n();
   const year = new Date().getFullYear();
 
   return (
@@ -74,8 +78,8 @@ export default function Footer() {
       {/* Fila 1: tagline + redes sociales */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm">
         <p className="leading-relaxed">
-          Optimizamos el caos para crear claridad en tu negocio. La claridad ahorra tiempo y dinero
-          <span className="text-xs"> — Osona, Barcelona</span>
+          {t("footer.tagline")}
+          <span className="text-xs"> — {t("footer.location")}</span>
         </p>
         <div className="flex items-center gap-5 shrink-0">
           {SOCIALS.map(({ label, href, icon }) => (
@@ -96,18 +100,18 @@ export default function Footer() {
 
       {/* Enlaces legales */}
       <nav
-        aria-label="Enlaces legales"
+        aria-label={t("footer.legalNav")}
         className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs"
         style={{ borderTop: "1px solid var(--border)", paddingTop: 24 }}
       >
-        {LEGAL_LINKS.map(({ label, href }) => (
+        {LEGAL_HREFS.map(({ k, href }) => (
           <Link
             key={href}
             href={href}
             className="hover:opacity-70 transition-opacity"
             style={{ color: "var(--muted)" }}
           >
-            {label}
+            {t(`legal.${k}`)}
           </Link>
         ))}
       </nav>
@@ -116,7 +120,7 @@ export default function Footer() {
       <div className="flex flex-col items-center gap-2">
         <Logo size={26} />
         <p className="text-xs">
-          © {year} · Todos los derechos reservados
+          © {year} · {t("footer.rights")}
         </p>
       </div>
     </footer>

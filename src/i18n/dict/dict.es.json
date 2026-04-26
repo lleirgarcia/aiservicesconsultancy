@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "title": "Calculadora de ahorro en procesos — Empresas industriales y distribución",
+    "description": "Calcula en 2 minutos cuánto dinero y tiempo estás perdiendo en procesos manuales. Para empresas industriales, de distribución y logística."
+  },
+  "header": {
+    "homeAria": "Kroomix — inicio",
+    "contact": "Contáctanos",
+    "langGroup": "Seleccionar idioma"
+  },
+  "hero": {
+    "h1": "Quien tiene un negocio,",
+    "sub1": "tiene problemas que solucionar,",
+    "sub2": "mejoras que adaptar,",
+    "sub3": "y dinero que ganar"
+  },
+  "sectionSolution": {
+    "title": "Tiene solución",
+    "subtitle": "Estos son los problemas que resolvemos"
+  },
+  "sectionCta": {
+    "title": "¿Cuál de estos es tu caso?",
+    "subtitle": "Cuéntanoslo. En dos minutos te decimos si podemos ayudarte."
+  },
+  "sectionPainList": {
+    "heading": "¿Reconoces alguno de estos problemas?"
+  },
+  "quienes": {
+    "title": "Quiénes somos",
+    "subtitle": "Tu socio para modernizar la operativa sin perderte en el camino",
+    "p1a": "Queremos ser tu socio al ",
+    "p1b": "actualizar tus procesos digitales: que respondas a lo que ya exigen tus usuarios y clientes, y que aproveches con criterio las tecnologías que hay hoy en el mercado — sin humo, sin promesas vacías.",
+    "p1em": "actualizar tus procesos digitales",
+    "p2": "Todo va en la misma dirección: dar más fuerza a tu marca, a tu empresa y a tu día a día operativo. Recuperar horas que ahora se van en tareas repetitivas, recortar costes donde haya margen y, al cerrar el mes, ",
+    "p2em": "dejar más dinero sobre la mesa",
+    "p3a": "Si eso te suena bien, también es nuestro objetivo que tengas ",
+    "p3b": "menos quebraderos de cabeza y más claridad para decidir con tranquilidad",
+    "p3dot": "."
+  },
+  "footer": {
+    "tagline": "Optimizamos el caos para crear claridad en tu negocio. La claridad ahorra tiempo y dinero",
+    "location": "Osona, Barcelona",
+    "legalNav": "Enlaces legales",
+    "rights": "Todos los derechos reservados"
+  },
+  "legal": {
+    "aviso": "Aviso legal",
+    "privacidad": "Política de privacidad",
+    "cookies": "Política de cookies",
+    "terminos": "Términos y condiciones"
+  },
+  "contact": {
+    "trigger": "Contáctanos",
+    "dialog": "¿Cómo prefieres contactar?",
+    "call": "Llamar",
+    "callNow": "Llamar ahora",
+    "email": "Enviar email",
+    "wa": "Enviar WhatsApp",
+    "waHint": "Te respondemos en menos de 24h"
+  },
+  "servicios": {
+    "problem": "Problema",
+    "solution": "Solución",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "moreButton": "Cuéntame más sobre esta solución"
+  },
+  "chat": {
+    "initial": "Hola, soy Kromi, el asistente de Kroomix. En dos minutos te ayudo a detectar dónde puede haber una oportunidad de mejora en tu operativa.\\n\\n¿Cómo te llamas, de qué empresa eres y a qué se dedica?",
+    "limitTitle": "Hemos llegado al límite",
+    "limitBody": "Con lo que me has contado ya tenemos suficiente contexto. El siguiente paso es hablar directamente.",
+    "close": "Cerrar",
+    "kroomiBar": "Kroomi — diagnóstico",
+    "newThread": "nueva conversación",
+    "newThreadTitle": "Ya has usado las {max} conversaciones nuevas disponibles",
+    "placeholder": "Escribe aquí… (Enter para enviar)",
+    "sending": "Enviar",
+    "errorGeneric": "Ha habido un error. Por favor, inténtalo de nuevo.",
+    "newConv": "Nueva conversación",
+    "newConv2": "↻ Nueva conversación",
+    "limitContact": "Contactar directamente →",
+    "micLog": "Micrófono",
+    "hint": "Shift + Enter para nueva línea. Los datos que compartas se usan solo para este diagnóstico.",
+    "mic": {
+      "rec": "Detener grabación",
+      "req": "Pidiendo permiso de micrófono…",
+      "err": "Error de micrófono",
+      "talk": "Hablar"
+    },
+    "micErr": {
+      "denied": "Permiso de micrófono denegado",
+      "noDevice": "No se detecta ningún micrófono",
+      "network": "Error de red en el reconocimiento de voz",
+      "startFailed": "No se pudo iniciar el micrófono"
+    }
+  },
+  "chatCaso": {
+    "l1": "He visto en vuestra web el caso «{titulo}» y quiero que me expliques bien esa solución aplicada a mi empresa.",
+    "l2": "Problema (texto de la tarjeta):",
+    "l3": "Solución resumida (texto de la tarjeta):",
+    "l4": "Si aún no tienes contexto sobre mí (nombre, empresa, a qué nos dedicamos y tamaño aproximado del equipo), pídemelo primero en pocas preguntas. Cuando lo tengas, desarrolla la solución con detalle y contextualizada a nuestro negocio."
+  }
+}

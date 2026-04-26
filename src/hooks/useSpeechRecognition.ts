@@ -55,8 +55,25 @@ interface UseSpeechRecognitionReturn {
   toggle: () => void;
 }
 
+type SpeechI18n = {
+  lang: string;
+  errDenied: string;
+  errNoDevice: string;
+  errNetwork: string;
+  errStart: string;
+};
+
+const DEFAULT_I18N: SpeechI18n = {
+  lang: "es-ES",
+  errDenied: "Permiso de micrófono denegado",
+  errNoDevice: "No se detecta ningún micrófono",
+  errNetwork: "Error de red en el reconocimiento de voz",
+  errStart: "No se pudo iniciar el micrófono",
+};
+
 export function useSpeechRecognition(
-  onTranscript: (text: string) => void
+  onTranscript: (text: string) => void,
+  i18n?: Partial<SpeechI18n>
 ): UseSpeechRecognitionReturn {
   const [supported, setSupported] = useState(false);
   const [state, setState] = useState<SpeechState>("idle");
@@ -66,6 +83,10 @@ export function useSpeechRecognition(
   const onTranscriptRef = useRef(onTranscript);
   const isRecordingRef = useRef(false);
   const permissionGrantedRef = useRef(false);
+  const i18nRef = useRef<SpeechI18n>({ ...DEFAULT_I18N, ...i18n });
+  useEffect(() => {
+    i18nRef.current = { ...DEFAULT_I18N, ...i18n };
+  });
 
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
@@ -83,7 +104,7 @@ export function useSpeechRecognition(
     setSupported(true);
 
     const rec = new SR();
-    rec.lang = "es-ES";
+    rec.lang = i18nRef.current.lang;
     rec.continuous = false;
     rec.interimResults = false;
     rec.maxAlternatives = 1;
@@ -122,11 +143,11 @@ export function useSpeechRecognition(
 
       if (code === "not-allowed" || code === "service-not-allowed") {
         permissionGrantedRef.current = false;
-        setError("Permiso de micrófono denegado");
+        setError(i18nRef.current.errDenied);
       } else if (code === "audio-capture") {
-        setError("No se detecta ningún micrófono");
+        setError(i18nRef.current.errNoDevice);
       } else if (code === "network") {
-        setError("Error de red en el reconocimiento de voz");
+        setError(i18nRef.current.errNetwork);
       } else {
         setError(`Error: ${code}`);
       }
@@ -176,14 +197,14 @@ export function useSpeechRecognition(
           } catch (err2) {
             console.warn("[speech-recognition] retry start failed:", err2);
             setState("error");
-            setError("No se pudo iniciar el micrófono");
+            setError(i18nRef.current.errStart);
             setTimeout(() => { setState("idle"); setError(null); }, 2500);
           }
         }, 200);
       } catch {
         console.warn("[speech-recognition] start failed:", err);
         setState("error");
-        setError("No se pudo iniciar el micrófono");
+        setError(i18nRef.current.errStart);
         setTimeout(() => { setState("idle"); setError(null); }, 2500);
       }
     }
@@ -192,6 +213,8 @@ export function useSpeechRecognition(
   const toggle = useCallback(async () => {
     const rec = recognitionRef.current;
     if (!rec) return;
+
+    rec.lang = i18nRef.current.lang;
 
     if (isRecordingRef.current) {
       try { rec.stop(); } catch { try { rec.abort(); } catch { /* ignore */ } }
@@ -216,7 +239,7 @@ export function useSpeechRecognition(
         }
         permissionGrantedRef.current = true;
       } catch (err) {
-        setError("Permiso de micrófono denegado");
+        setError(i18nRef.current.errDenied);
         setState("error");
         console.warn("[speech-recognition] getUserMedia failed:", err);
         setTimeout(() => { setState("idle"); setError(null); }, 2500);

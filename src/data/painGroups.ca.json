@@ -1,0 +1,68 @@
+[
+  {
+    "label": "Dades i admin",
+    "pains": [
+      "Copiar dades manualment entre sistemes",
+      "Introduir factures a mà",
+      "Processar PDFs manualment",
+      "Tenir dades duplicades o inconsistents",
+      "No saber quines dades són correctes",
+      "Informació dispersa en diversos llocs"
+    ]
+  },
+  {
+    "label": "Finances",
+    "pains": [
+      "No tenir visibilitat dels ingressos reals",
+      "No saber quins clients són rendibles",
+      "No detectar fuites de diners",
+      "Cobrar tard als clients",
+      "Tenir problemes de tresoreria",
+      "No saber on invertir per créixer"
+    ]
+  },
+  {
+    "label": "Persones i equip",
+    "pains": [
+      "Pagar empleats per tasques repetitives",
+      "No trobar treballadors qualificats",
+      "Sobrecàrrega del propietari (ho fa tot)",
+      "Manca de temps per millorar processos",
+      "Resistència al canvi intern",
+      "Errors humans freqüents"
+    ]
+  },
+  {
+    "label": "Comercial i clients",
+    "pains": [
+      "Gestionar comandes per WhatsApp sense control",
+      "Tenir pàgina web però no rebre comandes online",
+      "Perdre leads per no respondre ràpid",
+      "Mala gestió dels correus",
+      "Atenció al client lenta",
+      "Perdre oportunitats de venda",
+      "No tenir CRM o sistema de leads"
+    ]
+  },
+  {
+    "label": "Operacions",
+    "pains": [
+      "Manca d’informes clars",
+      "No mesurar la productivitat de l’equip",
+      "Processos no documentats",
+      "Manca d’integració entre eines",
+      "Dificultat per escalar operacions",
+      "Manca de control sobre les operacions"
+    ]
+  },
+  {
+    "label": "Tecnologia",
+    "pains": [
+      "No usar automatització en processos",
+      "No tenir sistemes digitals bàsics",
+      "Dependència de processos antics",
+      "Por a implementar IA",
+      "Pensar que la IA és cara o complexa"
+    ]
+  }
+]
