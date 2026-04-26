@@ -4,6 +4,7 @@ import ChatAgent from "@/components/sections/ChatAgent";
 import Footer from "@/components/sections/Footer";
 import Logo from "@/components/ui/Logo";
 import ContactTrigger from "@/components/ui/ContactTrigger";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 
 export default function Home() {
   return (
@@ -23,7 +24,10 @@ export default function Home() {
         <a href="/" aria-label="kroomix.com" className="inline-flex shrink-0">
           <Logo />
         </a>
-        <ContactTrigger />
+        <div className="flex items-center gap-4">
+          <ContactTrigger />
+          <LanguageSwitcher />
+        </div>
       </header>
 
       {/* Hero */}
