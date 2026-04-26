@@ -46,10 +46,15 @@ Nuestras páginas web:
 
 ### Extras (precio adicional)
 
-#### Chatbot con IA: +800€ - 1.500€
-- Chatbot conversacional para responder preguntas 24/7
-- Entrenado con información del negocio
-- Redirección a humanos cuando es necesario
+#### Chatbot automático: +800€ - 1.500€
+Un chatbot automático que trabaja 24/7 por ti. Beneficios:
+- Responde consultas inmediatamente, sin esperar a que llegues a la oficina
+- Cierra leads automáticamente mientras tú duermes o atiiendes otros clientes
+- Vende productos/servicios fuera de tu horario laboral
+- Aumenta tus ventas capturando oportunidades que antes se perdían
+- Transmite profesionalidad y confianza a potenciales clientes
+- Tus clientes actuales se sienten valorados con respuestas al instante
+- Se entrena con información de tu negocio para responder como lo harías tú
 
 #### Sistema de suscripciones: +1.200€ - 2.000€
 - Membresías/planes recurrentes para usuarios
