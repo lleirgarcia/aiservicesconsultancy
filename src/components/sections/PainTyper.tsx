@@ -42,6 +42,7 @@ const PHRASES: string[] = [
   "Siempre lo hemos hecho así y funciona, más o menos...",
   "Eso de la IA está bien para las grandes, nosotros somos pequeños...",
   "He visto demos, pero no tengo ni idea de por dónde empezar...",
+  "Tenemos página web, pero nadie pide nada por ahí...",
 ];
 
 const MAX_LINES = 10;

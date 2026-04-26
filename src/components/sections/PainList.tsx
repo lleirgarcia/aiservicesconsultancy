@@ -18,6 +18,7 @@ const PAINS = [
   "Mala gestión de emails",
   "Atención al cliente lenta",
   "Perder oportunidades de venta",
+  "Tener página web pero no recibir pedidos online",
   "No tener CRM o sistema de leads",
   "No usar automatización en procesos",
   "Miedo a implementar IA",

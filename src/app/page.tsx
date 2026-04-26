@@ -1,4 +1,5 @@
 import PainTyper from "@/components/sections/PainTyper";
+import QuienesSomos from "@/components/sections/QuienesSomos";
 import ServiciosCarrusel from "@/components/sections/ServiciosCarrusel";
 import ChatAgent from "@/components/sections/ChatAgent";
 import Footer from "@/components/sections/Footer";
@@ -9,7 +10,7 @@ import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 export default function Home() {
   return (
     <div
-      className="max-w-5xl mx-auto"
+      className="max-w-5xl mx-auto min-w-0 w-full box-border"
       style={{
         borderLeft: "1px solid var(--border)",
         borderRight: "1px solid var(--border)",
@@ -74,6 +75,9 @@ export default function Home() {
 
       {/* Carrusel de servicios */}
       <ServiciosCarrusel />
+
+      {/* Quiénes somos */}
+      <QuienesSomos />
 
       {/* CTA al chat */}
       <div

@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { getSessionCount, incrementSessionCount } from "@/lib/chatSession";
+import { OPEN_CHAT_PROMPT_EVENT, type OpenChatPromptDetail } from "@/lib/openChatWithPrompt";
 
 interface Message {
   role: "user" | "assistant";
@@ -198,6 +199,7 @@ export default function ChatAgent() {
   const latestMessagesRef = useRef<Message[]>([INITIAL_MESSAGE]);
   const savedRef = useRef(false);
   const wasLoadingRef = useRef(false);
+  const submitFromUserTextRef = useRef<(text: string) => Promise<void>>(async () => {});
 
   const {
     supported: micSupported,
@@ -212,6 +214,11 @@ export default function ChatAgent() {
   const limitReached = messages.length >= MAX_MESSAGES || resetsExhausted;
   const inputBlocked = convClosed || limitReached;
   const canReset = !loading && !resetsExhausted && messages.length > 1;
+
+  const loadingRef = useRef(false);
+  const inputBlockedRef = useRef(false);
+  loadingRef.current = loading;
+  inputBlockedRef.current = inputBlocked;
 
   useEffect(() => {
     setResetsUsed(getSessionCount());
@@ -249,6 +256,23 @@ export default function ChatAgent() {
     }
     wasLoadingRef.current = loading;
   }, [loading]);
+
+  useEffect(() => {
+    function onOpenChatPrompt(e: Event) {
+      const ce = e as CustomEvent<OpenChatPromptDetail>;
+      const prompt = ce.detail?.prompt?.trim();
+      if (!prompt) return;
+      const autoSend = ce.detail.autoSend !== false;
+      const canAutoSend = autoSend && !inputBlockedRef.current && !loadingRef.current;
+      if (canAutoSend) void submitFromUserTextRef.current(prompt);
+      else {
+        setInput(prompt);
+        queueMicrotask(() => inputRef.current?.focus());
+      }
+    }
+    window.addEventListener(OPEN_CHAT_PROMPT_EVENT, onOpenChatPrompt);
+    return () => window.removeEventListener(OPEN_CHAT_PROMPT_EVENT, onOpenChatPrompt);
+  }, []);
 
   async function saveChat(msgs: Message[]) {
     if (msgs.length <= 1) return;
@@ -298,12 +322,13 @@ export default function ChatAgent() {
     inputRef.current?.focus();
   }
 
-  async function send() {
-    const text = input.trim();
-    if (!text || loading || inputBlocked) return;
+  async function submitFromUserText(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed || loading || inputBlocked) return;
 
-    const userMessage: Message = { role: "user", content: text };
-    const next = [...messages, userMessage];
+    const prev = latestMessagesRef.current;
+    const userMessage: Message = { role: "user", content: trimmed };
+    const next = [...prev, userMessage];
     setMessages(next);
     setInput("");
     setLoading(true);
@@ -326,20 +351,19 @@ export default function ChatAgent() {
       const assistantContent = data.message || "";
       rawContentRef.current = assistantContent;
 
-      setMessages((prev) => {
-        const updated = [...prev];
+      setMessages((prevMsgs) => {
+        const updated = [...prevMsgs];
         updated[updated.length - 1] = { role: "assistant", content: assistantContent };
         latestMessagesRef.current = updated;
         return updated;
       });
 
-      // Actualizar leadId si se creó uno nuevo
       if (data.leadId && !leadId) {
         setLeadId(data.leadId);
       }
     } catch {
-      setMessages((prev) => {
-        const updated = [...prev];
+      setMessages((prevMsgs) => {
+        const updated = [...prevMsgs];
         updated[updated.length - 1] = {
           role: "assistant",
           content: "Ha habido un error. Por favor, inténtalo de nuevo.",
@@ -350,10 +374,18 @@ export default function ChatAgent() {
       setLoading(false);
       if (rawContentRef.current.includes(CONV_END_MARKER)) {
         setConvClosed(true);
-      } else if (messages.length + 1 >= MAX_MESSAGES) {
+      } else if (next.length >= MAX_MESSAGES) {
         setShowModal(true);
       }
     }
+  }
+
+  submitFromUserTextRef.current = submitFromUserText;
+
+  async function send() {
+    const text = input.trim();
+    if (!text || loading || inputBlocked) return;
+    await submitFromUserText(text);
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {

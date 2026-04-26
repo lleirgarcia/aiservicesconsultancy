@@ -145,6 +145,13 @@ export async function POST(request: NextRequest) {
 
 ${KNOWLEDGE_BASE}
 
+## Consultas desde un caso concreto de la web
+Si el usuario quiere profundizar en una solución descrita en la web (suele citar el título del caso y bloques de «Problema» / «Solución resumida» o similar):
+- Revisa el historial: si **aún no** tienes claro al menos **nombre o cómo llamarte**, **empresa**, **a qué se dedica** y **tamaño aproximado** (plantilla o tramo), **no des todavía** la explicación técnica larga de esa solución.
+- Responde breve: reconoce el caso que le interesa, explica que para contextualizarla a su negocio necesitas un poco de contexto, y formula **unas pocas preguntas concretas** en pocas líneas para obtenerlo.
+- Cuando en mensajes posteriores ya tengas ese contexto, **entonces** desarrolla la solución con detalle (pasos, herramientas típicas, qué tener en cuenta) **adaptada** a su sector, tamaño y forma de operar.
+- Si el contexto ya estaba claro en mensajes anteriores de la misma conversación, puedes ir directo a la explicación contextualizada.
+
 Sé empático, haz preguntas específicas sobre su operativa actual, e identifica oportunidades de mejora. Mantén el tono profesional y enfocado en valor. Si tienes suficiente información para hacer una propuesta, cierra la conversación con "<<CONV_END>>" al final.`,
         messages: messages,
       });

@@ -36,6 +36,7 @@ const PAIN_GROUPS = [
     label: "Comercial y clientes",
     pains: [
       "Gestionar pedidos por WhatsApp sin control",
+      "Tener página web pero no recibir pedidos online",
       "Perder leads por no responder rápido",
       "Mala gestión de emails",
       "Atención al cliente lenta",

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, type Transition } from "framer-motion";
+import { openChatWithPrompt } from "@/lib/openChatWithPrompt";
 
 const SERVICIOS = [
   {
@@ -100,6 +101,11 @@ const SERVICIOS = [
     solucion: "Construimos un flujo automatizado: cuando llega una solicitud, el sistema envía en minutos una respuesta personalizada con la información más relevante y, si el producto o servicio es estándar, un presupuesto orientativo generado automáticamente. El comercial solo interviene para cerrar. Tasa de conversión de leads en reuniones aumentó un 40% en 60 días.",
   },
   {
+    titulo: "Página web sin pedidos online",
+    problema: "La empresa tiene web: marca, contacto, quizá un catálogo estático. Pero el canal no genera ventas: los clientes siguen llamando o escribiendo por WhatsApp, y el tráfico no se convierte en pedidos. Suele deberse a que la web es solo escaparate (sin precios, sin stock, sin reserva ni cesta), no hay un siguiente paso claro tras la visita, o los formularios y consultas no llegan a un proceso de seguimiento. El coste del mantenimiento no se amortiza en ingresos directos y da la sensación de que \"internet no sirve para este negocio\".",
+    solucion: "Diseñamos un recorrido de compra o solicitud acorde al modelo: catálogo con precios o solicitud de presupuesto guiada, reservas o pedido mínimo online, pasarela de pago o integración con TPV/ERP según volumen. Conectamos formularios y eventos de la web al CRM o a un flujo automático de respuesta y alertas al equipo. Medimos con analítica qué páginas y campañas traen intención de compra. Resultado: la web deja de ser folleto digital y pasa a ser un canal medible que captura y cierra pedidos sin depender solo del teléfono.",
+  },
+  {
     titulo: "Comunicaciones que se pierden",
     problema: "Hay emails de clientes que se quedan sin respuesta porque llegan cuando la bandeja está llena, porque la persona responsable estaba ocupada o porque alguien asumió que otro los había respondido. Cuando el cliente vuelve a escribir, ya está molesto.",
     solucion: "Configuramos un sistema de gestión de bandeja con asignación automática por palabras clave o remitente, temporizador de SLA visible para el equipo y alerta automática si un email no recibe respuesta en el plazo definido. Cada mensaje tiene un responsable y un plazo. Las quejas por silencio desaparecen.",
@@ -176,6 +182,20 @@ const SERVICIOS = [
   },
 ];
 
+function buildChatPromptForCaso(caso: (typeof SERVICIOS)[number]): string {
+  return [
+    `He visto en vuestra web el caso «${caso.titulo}» y quiero que me expliques bien esa solución aplicada a mi empresa.`,
+    "",
+    "Problema (texto de la tarjeta):",
+    caso.problema,
+    "",
+    "Solución resumida (texto de la tarjeta):",
+    caso.solucion,
+    "",
+    "Si aún no tienes contexto sobre mí (nombre, empresa, a qué nos dedicamos y tamaño aproximado del equipo), pídemelo primero en pocas preguntas. Cuando lo tengas, desarrolla la solución con detalle y contextualizada a nuestro negocio.",
+  ].join("\n");
+}
+
 const SPRING: Transition = {
   type: "spring",
   stiffness: 320,
@@ -203,8 +223,11 @@ export default function ServiciosCarrusel() {
   const servicio = SERVICIOS[current];
 
   return (
-    <div style={{ borderBottom: "1px solid var(--border)" }}>
-    <div className="px-5 sm:px-8 py-10 sm:py-14">
+    <div
+      className="min-w-0 max-w-full"
+      style={{ borderBottom: "1px solid var(--border)" }}
+    >
+    <div className="min-w-0 max-w-full px-5 sm:px-8 py-10 sm:py-14">
 
       {/* Navegación superior */}
       <div className="flex items-center justify-between mb-8">
@@ -252,8 +275,11 @@ export default function ServiciosCarrusel() {
         </div>
       </div>
 
-      {/* Tarjeta con animación spring */}
-      <div style={{ overflow: "hidden", position: "relative", minHeight: 290 }}>
+      {/* overflow-x clips slide motion; in-flow height so tall cards are not clipped (was absolute + minHeight). */}
+      <div
+        className="min-w-0 max-w-full relative"
+        style={{ overflowX: "hidden", overflowY: "visible" }}
+      >
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div
             key={current}
@@ -286,9 +312,11 @@ export default function ServiciosCarrusel() {
               if (info.offset.x < -50) next();
               else if (info.offset.x > 50) prev();
             }}
-            style={{ position: "absolute", width: "100%", touchAction: "pan-y" }}
+            className="min-w-0 w-full max-w-full"
+            style={{ position: "relative", touchAction: "pan-y" }}
           >
             <div
+              className="min-w-0 max-w-full"
               style={{
                 border: "1px solid var(--border)",
                 borderRadius: 6,
@@ -303,14 +331,15 @@ export default function ServiciosCarrusel() {
                   background: "var(--bg-section)",
                 }}
               >
-                <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
+                <h3 className="min-w-0 text-xl sm:text-2xl font-bold tracking-tight break-words">
                   {servicio.titulo}
                 </h3>
               </div>
 
-              {/* Problema + Solución */}
-              <div className="grid sm:grid-cols-2">
+              {/* Problema + Solución — min-w-0 lets grid cells shrink on narrow viewports */}
+              <div className="grid min-w-0 sm:grid-cols-2">
                 <div
+                  className="min-w-0"
                   style={{
                     padding: "24px",
                     borderBottom: "1px solid var(--border)",
@@ -324,13 +353,14 @@ export default function ServiciosCarrusel() {
                     Problema
                   </p>
                   <p
-                    className="text-sm leading-relaxed"
+                    className="text-sm leading-relaxed break-words"
                     style={{ fontStyle: "italic", opacity: 0.85 }}
                   >
                     {servicio.problema}
                   </p>
                 </div>
                 <div
+                  className="min-w-0"
                   style={{
                     padding: "24px",
                     borderBottom: "1px solid var(--border)",
@@ -343,12 +373,49 @@ export default function ServiciosCarrusel() {
                     Solución
                   </p>
                   <p
-                    className="text-sm leading-relaxed"
+                    className="text-sm leading-relaxed break-words"
                     style={{ color: "var(--muted)" }}
                   >
                     {servicio.solucion}
                   </p>
                 </div>
+              </div>
+
+              <div
+                style={{
+                  padding: "16px 24px 20px",
+                  borderTop: "1px solid var(--border)",
+                  background: "var(--bg-soft)",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    openChatWithPrompt({
+                      prompt: buildChatPromptForCaso(servicio),
+                      autoSend: true,
+                    })
+                  }
+                  className="w-full text-left text-sm font-semibold uppercase tracking-wide transition-colors"
+                  style={{
+                    background: "transparent",
+                    border: "1px solid var(--border)",
+                    borderRadius: 4,
+                    padding: "12px 16px",
+                    color: "var(--fg)",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--accent)";
+                    e.currentTarget.style.color = "var(--accent)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.color = "var(--fg)";
+                  }}
+                >
+                  Cuéntame más sobre esta solución
+                </button>
               </div>
             </div>
           </motion.div>

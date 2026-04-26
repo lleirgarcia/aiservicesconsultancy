@@ -158,50 +158,13 @@ export function useSpeechRecognition(
     };
   }, []);
 
-  const toggle = useCallback(async () => {
-    const rec = recognitionRef.current;
-    if (!rec) return;
+  const isSafari = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    const ua = window.navigator.userAgent;
+    return /Safari/.test(ua) && !/Chrome/.test(ua);
+  }, []);
 
-    if (isRecordingRef.current) {
-      try {
-        rec.stop();
-      } catch {
-        try {
-          rec.abort();
-        } catch {
-          // ignore
-        }
-      }
-      return;
-    }
-
-    if (!permissionGrantedRef.current) {
-      try {
-        setState("requesting");
-        if (
-          typeof navigator !== "undefined" &&
-          navigator.mediaDevices?.getUserMedia
-        ) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          stream.getTracks().forEach((t) => t.stop());
-        }
-        permissionGrantedRef.current = true;
-      } catch (err) {
-        setError("Permiso de micrófono denegado");
-        setState("error");
-        if (typeof console !== "undefined") {
-          console.warn("[speech-recognition] getUserMedia failed:", err);
-        }
-        setTimeout(() => {
-          setState("idle");
-          setError(null);
-        }, 2500);
-        return;
-      }
-    }
-
+  const startRecognition = useCallback((rec: SpeechRecognitionInstance) => {
     try {
       rec.start();
     } catch (err) {
@@ -211,30 +174,58 @@ export function useSpeechRecognition(
           try {
             rec.start();
           } catch (err2) {
-            if (typeof console !== "undefined") {
-              console.warn("[speech-recognition] retry start failed:", err2);
-            }
+            console.warn("[speech-recognition] retry start failed:", err2);
             setState("error");
             setError("No se pudo iniciar el micrófono");
-            setTimeout(() => {
-              setState("idle");
-              setError(null);
-            }, 2500);
+            setTimeout(() => { setState("idle"); setError(null); }, 2500);
           }
         }, 200);
       } catch {
-        if (typeof console !== "undefined") {
-          console.warn("[speech-recognition] start failed:", err);
-        }
+        console.warn("[speech-recognition] start failed:", err);
         setState("error");
         setError("No se pudo iniciar el micrófono");
-        setTimeout(() => {
-          setState("idle");
-          setError(null);
-        }, 2500);
+        setTimeout(() => { setState("idle"); setError(null); }, 2500);
       }
     }
   }, []);
+
+  const toggle = useCallback(async () => {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+
+    if (isRecordingRef.current) {
+      try { rec.stop(); } catch { try { rec.abort(); } catch { /* ignore */ } }
+      return;
+    }
+
+    // Safari: arrancar directamente — pide permiso solo al llamar start()
+    // Si usamos await getUserMedia antes, Safari pierde el contexto de gesto
+    if (isSafari()) {
+      setState("requesting");
+      startRecognition(rec);
+      return;
+    }
+
+    // Chrome y resto: pedir permiso explícitamente primero
+    if (!permissionGrantedRef.current) {
+      try {
+        setState("requesting");
+        if (navigator.mediaDevices?.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach((t) => t.stop());
+        }
+        permissionGrantedRef.current = true;
+      } catch (err) {
+        setError("Permiso de micrófono denegado");
+        setState("error");
+        console.warn("[speech-recognition] getUserMedia failed:", err);
+        setTimeout(() => { setState("idle"); setError(null); }, 2500);
+        return;
+      }
+    }
+
+    startRecognition(rec);
+  }, [isSafari, startRecognition]);
 
   return { supported, state, error, toggle };
 }
