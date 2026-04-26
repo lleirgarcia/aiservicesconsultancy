@@ -93,6 +93,8 @@ export async function POST(request: NextRequest) {
     const body: ChatRequest = await request.json();
     const { messages, leadId, isManualSave } = body;
 
+    console.log('[CHAT API] Inicio - isManualSave:', isManualSave, 'leadId:', leadId);
+
     if (!messages || messages.length === 0) {
       return NextResponse.json(
         { error: 'Se requiere un historial de mensajes' },
@@ -102,11 +104,15 @@ export async function POST(request: NextRequest) {
 
     // Si es solo para guardar (isManualSave), guarda y retorna
     if (isManualSave) {
+      console.log('[CHAT API] Guardando manualmente');
       try {
         const texts = messagesToTexts(messages);
         if (leadId) {
+          console.log('[CHAT API] Actualizando lead existente:', leadId);
           await updateLeadMessages(leadId, texts);
+          console.log('[CHAT API] Lead actualizado exitosamente');
         } else {
+          console.log('[CHAT API] Creando nuevo lead anónimo');
           const newLead = await createLead({
             nombre: 'Anónimo',
             empresa: 'Por especificar',
@@ -114,17 +120,19 @@ export async function POST(request: NextRequest) {
             email: 'sin-email@example.com',
             messages: texts,
           });
+          console.log('[CHAT API] Nuevo lead creado:', newLead.id);
           return NextResponse.json({ leadId: newLead.id });
         }
         return NextResponse.json({ leadId });
       } catch (err) {
-        console.warn('Error guardando chat:', err);
+        console.error('[CHAT API] Error guardando chat:', err);
         return NextResponse.json({ leadId });
       }
     }
 
     // Generar respuesta del agente
     let finalLeadId = leadId;
+    console.log('[CHAT API] Generando respuesta del agente');
 
     try {
       const response = await client.messages.create({
@@ -143,6 +151,8 @@ Sé empático, haz preguntas específicas sobre su operativa actual, e identific
         throw new Error('Respuesta inesperada de Claude');
       }
 
+      console.log('[CHAT API] Respuesta recibida, intentando guardar en BD');
+
       // Guardar en BD
       const finalMessages = [
         ...messages,
@@ -154,9 +164,14 @@ Sé empático, haz preguntas específicas sobre su operativa actual, e identific
 
       try {
         const texts = messagesToTexts(finalMessages);
+        console.log('[CHAT API] Textos a guardar:', texts.length, 'mensajes');
+        
         if (finalLeadId) {
+          console.log('[CHAT API] Actualizando lead:', finalLeadId);
           await updateLeadMessages(finalLeadId, texts);
+          console.log('[CHAT API] Lead actualizado exitosamente');
         } else {
+          console.log('[CHAT API] Creando nuevo lead anónimo');
           const newLead = await createLead({
             nombre: 'Anónimo',
             empresa: 'Por especificar',
@@ -165,17 +180,19 @@ Sé empático, haz preguntas específicas sobre su operativa actual, e identific
             messages: texts,
           });
           finalLeadId = newLead.id;
+          console.log('[CHAT API] Nuevo lead creado:', finalLeadId);
         }
       } catch (err) {
-        console.warn('Error guardando en BD:', err);
+        console.error('[CHAT API] Error al guardar en BD:', err);
       }
 
+      console.log('[CHAT API] Retornando respuesta con leadId:', finalLeadId);
       return NextResponse.json({
         message: assistantMessage.text,
         leadId: finalLeadId,
       });
     } catch (error) {
-      console.error('Error en API chat:', error);
+      console.error('[CHAT API] Error generando respuesta:', error);
       return NextResponse.json(
         {
           error:
@@ -185,7 +202,7 @@ Sé empático, haz preguntas específicas sobre su operativa actual, e identific
       );
     }
   } catch (error) {
-    console.error('Error en API chat:', error);
+    console.error('[CHAT API] Error general:', error);
     return NextResponse.json(
       {
         error:
