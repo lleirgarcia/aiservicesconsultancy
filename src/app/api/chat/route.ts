@@ -4,6 +4,9 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic();
 
+// Log de diagnóstico al cargar el módulo
+console.log('[CHAT API] ENV CHECK - SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, '| SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY, '| ANTHROPIC_KEY:', !!process.env.ANTHROPIC_API_KEY);
+
 interface MessagePayload {
   role: 'user' | 'assistant';
   content: string;
