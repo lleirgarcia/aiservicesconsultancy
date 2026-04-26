@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createLead, updateLeadMessages } from '@/lib/supabase';
 import Anthropic from '@anthropic-ai/sdk';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 const client = new Anthropic();
 
@@ -17,30 +15,66 @@ interface ChatRequest {
   isManualSave?: boolean;
 }
 
-async function loadKnowledgeBase() {
-  const files = [
-    'services.md',
-    'ideal-clients.md',
-    'pain-points.md',
-    'case-studies.md',
-    'faq.md',
-    'limitations.md',
-  ];
+const KNOWLEDGE_BASE = `# Servicios de FixTheOps
 
-  const knowledge: Record<string, string> = {};
-  const knowledgeDir = join(process.cwd(), 'public', 'knowledge');
+Automatizamos procesos manuales que consumen tiempo, integramos sistemas dispersos y proporcionamos visibilidad en tiempo real de operaciones.
 
-  for (const file of files) {
-    try {
-      const content = readFileSync(join(knowledgeDir, file), 'utf-8');
-      knowledge[file] = content;
-    } catch (err) {
-      console.warn(`No se pudo cargar ${file}:`, err);
-    }
-  }
+## Páginas web que venden (Kroomix)
 
-  return Object.values(knowledge).join('\n\n---\n\n');
-}
+Desarrollamos páginas web adaptadas a las necesidades de cada negocio:
+- Páginas diseñadas para transformar visitantes en clientes
+- Adaptadas específicamente a tu modelo de negocio y público objetivo
+- Enfocadas en ventas online y conversión
+- Si no tienes ventas online, tu página actual no está funcionando
+
+### Modelos de página
+
+#### Página Profesional: 2.500€ - 4.000€
+- Múltiples secciones, galería, formularios avanzados
+- Integración email/WhatsApp
+- SEO básico
+- Diseño responsive
+
+#### Página E-commerce: 4.500€ - 8.000€
+- Carrito de compra, pasarela de pagos (Stripe/PayPal)
+- Gestión de productos y categorías
+- Historial de pedidos para clientes
+- Integración con inventario
+
+### Extras (precio adicional)
+
+#### Chatbot con IA: +800€ - 1.500€
+- Chatbot conversacional para responder preguntas 24/7
+- Entrenado con información del negocio
+- Redirección a humanos cuando es necesario
+
+#### Sistema de suscripciones: +1.200€ - 2.000€
+- Membresías/planes recurrentes para usuarios
+- Acceso a contenido exclusivo o servicios
+- Gestión de renovaciones automáticas
+- Portal de usuario para gestionar suscripción
+
+### Mantenimiento anual
+- Página Profesional: 600€ - 900€
+- Página E-commerce: 1.000€ - 1.500€
+- + Chatbot: +300€ - 500€
+- + Suscripciones: +400€ - 600€
+(Incluye: hosting, SSL, backups, seguridad, actualizaciones, soporte técnico, monitoreo)
+
+## Clientes ideales
+Empresas pequeñas y medianas (10-500 empleados) en: servicios profesionales, distribución, construcción, transporte, RRHH, manufactura.
+
+## Problemas que resolvemos
+- Pérdida de tiempo en tareas repetitivas
+- Herramientas que no se comunican entre sí
+- Errores por entrada manual de datos
+- Falta de visibilidad sobre operaciones
+- Costes elevados por ineficiencias
+
+## Limitaciones importantes
+- Si no generas ventas online, tu página web actual no funciona
+- Requiere documentación clara de procesos actuales
+- Algunos procesos pueden necesitar redefinición para automatizar bien`;
 
 function messagesToTexts(messages: MessagePayload[]): string[] {
   return messages.map(msg => msg.content);
@@ -83,7 +117,6 @@ export async function POST(request: NextRequest) {
 
     // Generar respuesta del agente
     let finalLeadId = leadId;
-    const knowledgeBase = await loadKnowledgeBase();
 
     try {
       const response = await client.messages.create({
@@ -91,7 +124,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 1024,
         system: `Eres Kromi, el asistente de Kroomix. Tu objetivo es entender el negocio del usuario y proponer soluciones que mejoren su eficiencia operativa en 2 minutos.
 
-${knowledgeBase}
+${KNOWLEDGE_BASE}
 
 Sé empático, haz preguntas específicas sobre su operativa actual, e identifica oportunidades de mejora. Mantén el tono profesional y enfocado en valor. Si tienes suficiente información para hacer una propuesta, cierra la conversación con "<<CONV_END>>" al final.`,
         messages: messages,
