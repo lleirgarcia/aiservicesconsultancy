@@ -568,7 +568,7 @@ export default function ChatAgent() {
                   lineHeight: 1.5,
                   minHeight: 38,
                   maxHeight: 140,
-                  overflowY: "auto",
+                  overflowY: "hidden",
                   opacity: loading ? 0.5 : 1,
                 }}
               />
