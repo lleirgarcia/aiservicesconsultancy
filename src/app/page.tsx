@@ -31,12 +31,6 @@ export default function Home() {
         className="px-5 sm:px-8 py-14 sm:py-20 section-accent-left"
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
       >
-        <p
-          className="text-xs font-medium uppercase tracking-widest mb-4"
-          style={{ color: "var(--accent)" }}
-        >
-          Kroomix — Osona
-        </p>
         <h1 className="text-3xl md:text-5xl font-bold leading-tight tracking-tight uppercase">
           Quien tiene un negocio,
           <span
