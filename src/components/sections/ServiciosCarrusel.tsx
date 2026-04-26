@@ -85,11 +85,6 @@ const SERVICIOS = [
     solucion: "Trabajamos en sprints de 2 semanas con un entregable concreto y funcional al final de cada uno. No hacemos proyectos de 6 meses: el primer sprint ya resuelve algo real y medible. Esto desbloquea la parálisis porque hay resultados visibles desde la primera semana.",
   },
   {
-    titulo: "Propuestas que no avanzan internamente",
-    problema: "El responsable de operaciones sabe que hay que digitalizar el proceso de producción. Lo ha propuesto tres veces. Siempre hay objeciones: que si es muy caro, que si el equipo no va a aprender, que si no es el momento. El proyecto nunca arranca.",
-    solucion: "Construimos un análisis de coste-beneficio con los datos reales de la empresa: cuántas horas se dedican al proceso actual, coste por hora, frecuencia de errores y coste de cada error. Lo comparamos con el coste de la solución y el tiempo de retorno. Con los números encima de la mesa, las objeciones pierden peso.",
-  },
-  {
     titulo: "Errores que se repiten sin solución",
     problema: "Cada mes hay errores en los albaranes de entrega: artículo equivocado, cantidad mal, dirección incorrecta. Se corrigen, se pide disculpas al cliente, y al mes siguiente vuelve a pasar. No es desidia, es que el proceso tiene un punto de fallo estructural que nadie ha atacado.",
     solucion: "Mapeamos el proceso de preparación de pedidos e identificamos el punto exacto donde se introduce el error. Añadimos una capa de validación automática: el sistema compara el artículo escaneado con el pedido y bloquea el envío si no cuadra. En empresas de distribución esto ha reducido las incidencias de entrega más de un 80% en el primer mes.",
