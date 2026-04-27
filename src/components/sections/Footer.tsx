@@ -2,7 +2,6 @@
 
 import type { ReactElement } from "react";
 import Link from "next/link";
-import Logo from "@/components/ui/Logo";
 import { useI18n } from "@/i18n/LocaleContext";
 
 const LEGAL_HREFS: { k: "aviso" | "privacidad" | "cookies" | "terminos"; href: string }[] = [
@@ -73,7 +72,7 @@ export default function Footer() {
   return (
     <footer
       className="px-6 py-4 max-w-4xl mx-auto flex flex-col gap-3"
-      style={{ borderTop: "1px solid var(--border)", color: "var(--muted)" }}
+      style={{ color: "var(--muted)" }}
     >
       {/* Fila 1: tagline + redes sociales */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm">
@@ -103,7 +102,7 @@ export default function Footer() {
       <nav
         aria-label={t("footer.legalNav")}
         className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs"
-        style={{ borderTop: "1px solid var(--border)", paddingTop: 24 }}
+        style={{}}
       >
         {LEGAL_HREFS.map(({ k, href }) => (
           <Link
@@ -119,7 +118,12 @@ export default function Footer() {
 
       {/* Filas 2 y 3: logo + copyright centrados, juntos */}
       <div className="flex flex-col items-center gap-2">
-        <Logo size={26} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/kroomix-logo.png"
+          alt="Kroomix.com"
+          style={{ height: 100, width: "auto", mixBlendMode: "screen", display: "block" }}
+        />
         <p className="text-xs">
           © {year} · {t("footer.rights")}
         </p>

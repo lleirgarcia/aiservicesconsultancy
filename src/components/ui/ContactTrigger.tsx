@@ -8,7 +8,6 @@ const PHONE_DISPLAY = "+34 626 572 151";
 const PHONE_TEL = "+34626572151";
 const WHATSAPP_URL = "https://wa.me/34626572151";
 const EMAIL_PRIMARY = "kromix@kroomix.com";
-const EMAIL_SECONDARY = "lleirgarcia@gmail.com";
 
 export default function ContactTrigger() {
   const { t } = useI18n();
@@ -114,9 +113,6 @@ export default function ContactTrigger() {
           <span className="text-sm" style={{ color: "var(--muted)" }}>
             {EMAIL_PRIMARY}
           </span>
-          <span className="text-sm" style={{ color: "var(--muted)", opacity: 0.6 }}>
-            {EMAIL_SECONDARY}
-          </span>
         </a>
 
         <a
@@ -125,11 +121,30 @@ export default function ContactTrigger() {
           rel="noopener noreferrer"
           onClick={() => setOpen(false)}
           className="flex flex-col gap-1 px-6 py-5 transition-colors"
+          style={{ borderBottom: "1px solid var(--border)" }}
         >
           <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
             {t("contact.wa")}
           </span>
         </a>
+
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            const el = document.getElementById("contacto");
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          className="flex flex-col gap-1 px-6 py-5 transition-colors w-full text-left cursor-pointer"
+          style={{ background: "transparent", border: "none" }}
+        >
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
+            Hablar con asistente
+          </span>
+          <span className="text-sm" style={{ color: "var(--muted)" }}>
+            Kromi, el asistente virtual
+          </span>
+        </button>
       </div>
     </div>,
     document.body

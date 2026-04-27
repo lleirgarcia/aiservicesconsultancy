@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/LocaleContext";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 const HEADLINE_FONT = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif";
 
@@ -11,18 +12,21 @@ const PROCESOS = [
     title: "Construimos sistemas digitales y automatizados que evitan tareas humanas repetitivas",
     body: "Construimos sistemas digitales que a ti y a tu equipo os hacen perder el tiempo y no aportan un valor real a tu negocio. Ahorrar tiempo en tareas que podrían estar automatizadas es una necesidad real de cualquier negocio. Deja que una máquina realice esas tareas mientras tú inviertes tiempo en lo importante.",
     align: "left" as const,
+    image: "/como-01.png",
   },
   {
     id: "02",
     title: "Añadimos inteligencia a tus procesos digitales para ayudarte a tomar mejores decisiones",
     body: "Creamos procesos que toman decisiones de forma 100% autónoma (o casi autónoma), eliminando las horas que debe invertir una persona, recopilando información, procesándola, interpretándola y tomando una decisión. Definimos criterios claros según tu negocio y los automatizamos.",
     align: "right" as const,
+    image: "/como-02.png",
   },
   {
     id: "03",
     title: "Clarificamos la operativa digital de tu empresa",
     body: "Eliminamos la complejidad de entender todos los procesos digitales de tu empresa, para qué sirven y en qué te benefician, con tal de que tú y tu empresa entendáis en cada momento las herramientas que se utilizan, para qué se utilizan y sus beneficios. Todo en números.",
     align: "left" as const,
+    image: "/como-03.png",
   },
 ];
 
@@ -91,31 +95,10 @@ export default function ComoLoHacemos() {
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-section)" }}
       >
         <div className="max-w-[1280px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
-          <h2
-            style={{
-              fontFamily: HEADLINE_FONT,
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-              color: "var(--fg)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            {t("sectionComoLoHacemos.heading")}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.95rem",
-              color: "var(--accent)",
-              margin: 0,
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-            }}
-          >
-            LO QUE HACEMOS
-          </p>
+          <SectionHeader
+            title={t("sectionComoLoHacemos.heading")}
+            subtitle="LO QUE HACEMOS"
+          />
         </div>
       </div>
 
@@ -144,50 +127,72 @@ export default function ComoLoHacemos() {
                       : ""
                   }`}
                   style={{
-                    padding: "clamp(1.5rem, 3vw, 2rem)",
+                    overflow: "hidden",
                     borderRadius: 12,
                     border: "1px solid var(--border)",
                     background: "var(--bg-elevated)",
                     boxShadow: "0 16px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
                     opacity: visibleCards.has(proceso.id) ? 1 : 0,
+                    display: "flex",
+                    flexDirection: proceso.align === "right" ? "row-reverse" : "row",
+                    alignItems: "center",
+                    height: 280,
                   }}
                 >
+                  <div style={{ flex: 1, minWidth: 0, padding: "clamp(1.5rem, 3vw, 2rem)" }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-geist-mono), monospace",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase" as const,
+                        color: "var(--accent)",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      {proceso.id}
+                    </div>
+                    <h3
+                      style={{
+                        fontFamily: HEADLINE_FONT,
+                        fontSize: "clamp(1.1rem, 1.8vw, 1.35rem)",
+                        fontWeight: 700,
+                        letterSpacing: "-0.02em",
+                        lineHeight: 1.25,
+                        color: "var(--fg)",
+                        margin: "0 0 1rem 0",
+                      }}
+                    >
+                      {proceso.title}
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "0.875rem",
+                        lineHeight: 1.7,
+                        color: "var(--muted)",
+                        margin: 0,
+                      }}
+                    >
+                      {proceso.body}
+                    </p>
+                  </div>
                   <div
                     style={{
-                      fontFamily: "var(--font-geist-mono), monospace",
-                      fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase" as const,
-                      color: "var(--accent)",
-                      marginBottom: "1rem",
+                      width: "50%",
+                      flexShrink: 0,
+                      alignSelf: "stretch",
+                      background: "#0a1628",
+                      display: "flex",
+                      alignItems: "center",
                     }}
                   >
-                    {proceso.id}
+                    <img
+                      src={proceso.image}
+                      alt={proceso.title}
+                      style={{ width: "100%", display: "block" }}
+                    />
                   </div>
-                  <h3
-                    style={{
-                      fontFamily: HEADLINE_FONT,
-                      fontSize: "clamp(1.1rem, 1.8vw, 1.35rem)",
-                      fontWeight: 700,
-                      letterSpacing: "-0.02em",
-                      lineHeight: 1.25,
-                      color: "var(--fg)",
-                      margin: "0 0 1rem 0",
-                    }}
-                  >
-                    {proceso.title}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: "0.875rem",
-                      lineHeight: 1.7,
-                      color: "var(--muted)",
-                      margin: 0,
-                    }}
-                  >
-                    {proceso.body}
-                  </p>
                 </div>
               </div>
             ))}
