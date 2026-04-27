@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Calculadora d'estalvi en processos — Empreses industrials i distribució",
-    "description": "Calcula en 2 minuts quants diners i temps estàs perdent en processos manuals.Per a empreses industrials, de distribució i logística."
+    "description": "Calcula en 2 minuts quants diners i temps estàs perdent en processos manuals. Per a empreses industrials, de distribució i logística."
   },
   "header": {
     "homeAria": "Kroomix — inici",
@@ -12,33 +12,72 @@
     "h1": "Qui té un negoci,",
     "sub1": "té problemes per solucionar,",
     "sub2": "millores per adaptar,",
-    "sub3": "i diners a guanyar"
+    "sub3": "i diners a guanyar",
+    "discoverCta": "DESCOBREIX MÉS"
   },
   "sectionSolution": {
-    "title": "Té solució",
-    "subtitle": "Aquests són els problemes que resolem"
+    "heading": "Si et ressona alguna d'aquestes frases…",
+    "rightPlace": "Ets al lloc correcte",
+    "verticalsLead": "Tot són problemes DIGITALS en aquestes 3 verticals"
+  },
+  "sectionOfrecemos": {
+    "heading": "D'acord, però què oferim?",
+    "subtitle": "Els nostres serveis",
+    "s1title": "Construïm sistemes digitals i automatitzats que eviten tasques humanes repetitives",
+    "s1body": "Construïm sistemes digitals on tu i el vostre equip perdeu temps i no aporten prou valor al negoci. Estalviar temps en tasques que es poden automatitzar és una necessitat a qualsevol negoci. Deixeu que una màquina faci el repetitiu mentre tu inverteixes en el que importa.",
+    "s2title": "Afegim intel·ligència als vostres processos digitals per a millors decisions",
+    "s2body": "Creem processos que prenen decisions de forma 100% autònoma o gairebé autònoma, evitant les hores que una persona dedica a reunir dades, processar-les, interpretar-les i decidir. Definim criteris clars segons el vostre negoci i els automatitzem.",
+    "s3title": "Clarifiquem l'operativa digital de la vostra empresa",
+    "s3body": "Tallem el soroll d'entendre tots els processos digitals de l'empresa, per a què serveixen, en què t'afavoreixen, perquè tu i el negoci sapigueu a cada moment quines eines s'usen, per a què i en quin benefici. Quan toca, ho posem a xifres."
+  },
+  "sectionComoLoHacemos": {
+    "heading": "Com ho fem?",
+    "subtitle": "EL NOSTRE PROCÉS"
+  },
+  "sectionCarrusel": {
+    "heading": "Exemples de problemàtiques reals"
   },
   "sectionCta": {
     "title": "Quin és el teu cas?",
-    "subtitle": "Explica'ns-ho.En dos minuts et diem si et podem ajudar."
+    "subtitle": "Explica'ns-ho. En dos minuts et diem si et podem ajudar."
   },
   "sectionPainList": {
-    "heading": "Reconeixes algun d’aquests problemes?"
+    "heading": "Reconeixes algun d'aquests problemes?"
   },
   "quienes": {
     "title": "Qui som",
     "subtitle": "El teu soci per modernitzar l'operativa sense perdre't pel camí",
-    "p1a": "Volem ser el teu soci al",
-    "p1b": "actualitzar els teus processos digitals: que responguis al que ja exigeixen els teus usuaris i clients, i que aprofitis amb criteri les tecnologies que hi ha avui al mercat — sense fum, sense promeses buides.",
-    "p1em": "actualitzar els teus processos digitals",
-    "p2": "Tot va en la mateixa adreça: donar més força a la teva marca, a la teva empresa i al teu dia a dia operatiu.Recuperar hores que ara se'n van en tasques repetitives, retallar costos on hi hagi marge i, en tancar el mes,",
-    "p2em": "deixar més diners sobre la taula",
-    "p3a": "Si això et sona bé, també és el nostre objectiu que tinguis",
-    "p3b": "menys maldecaps i més claredat per decidir amb tranquil·litat",
-    "p3dot": "."
+    "lead": "Som un equip d'enginyers de programari i arquitectes de sistemes automatitzats.",
+    "body1": "Fem servir les últimes tecnologies del mercat — incloent-hi la intel·ligència artificial — per potenciar petites i mitjanes empreses en els seus fluxos de treball interns i externs.",
+    "body2": "Sense fum, sense promeses buides. Solucions concretes, mesurables i adaptades al teu negoci.",
+    "i1": "Enginyeria de programari a mida",
+    "i2": "Arquitectura de sistemes automatitzats",
+    "i3": "Intel·ligència artificial aplicada",
+    "i4": "Integració en fluxos de treball reals"
+  },
+  "comoTrabajamos": {
+    "heading": "Com treballem",
+    "subtitle": "Perquè el sistema potencia el resultat",
+    "s1title": "Analitzem les teves necessitats",
+    "s1body": "Identifiquem els problemes que frenen la teva operativa i les millores que pots implementar.",
+    "s2title": "Proposem solucions",
+    "s2body": "Et presentem opcions concretes amb els seus beneficis estimats: temps recuperat o diners estalviats.",
+    "s3title": "Definim la solució junts",
+    "s3body": "Treballem amb tu de forma col·laborativa fins que tinguis una idea clara del que construirem i com.",
+    "s4title": "Sistema Mínim Viable",
+    "s4body": "Et lliurem un primer sistema funcional — el que altres anomenen MVP, nosaltres ho anomenem SMV — perquè vegis resultats aviat.",
+    "s5title": "Desenvolupem la resta",
+    "s5body": "Completem la solució mentre veus en quin estat està en tot moment, amb lliuraments parcials i sense sorpreses.",
+    "s6title": "Integrem a la teva operativa",
+    "s6body": "Acompanyem la implantació perquè la solució encaixi amb els teus processos reals des del primer dia.",
+    "s7title": "Formem i deixem funcionar",
+    "s7body": "Si cal, formem el teu equip. Deixem el sistema totalment operatiu i a la teva disposició.",
+    "s8title": "Mides l'impacte real",
+    "s8body": "Setmanes o mesos després, els resultats parlen sols: menys temps, menys errors, més diners sobre la taula."
   },
   "footer": {
-    "tagline": "Optimitzem el caos per crear claredat al teu negoci.La claredat estalvia temps i diners",
+    "taglineLead": "Optimitzem el caos per crear claredat al teu negoci. La claredat estalvia ",
+    "taglineHighlight": "temps i diners",
     "location": "Osona, Barcelona",
     "legalNav": "Enllaços legals",
     "rights": "Tots els drets reservats"
@@ -56,7 +95,7 @@
     "callNow": "Trucar ara",
     "email": "Enviar email",
     "wa": "Enviar WhatsApp",
-    "waHint": "Normalment respondem en menys de 24 h"
+    "waHint": "Normalment responem en menys de 24 h"
   },
   "servicios": {
     "problem": "Problema",
@@ -66,21 +105,21 @@
     "moreButton": "Explica'm més sobre aquesta solució"
   },
   "chat": {
-    "initial": "Hola, sóc Kromi, l'assistent de Kroomix.En dos minuts t'ajudo a detectar on pot haver-hi una oportunitat de millora a la teva operativa.\\n\\nCom et dius, de quina empresa ets ia què es dedica?",
+    "initial": "Hola, sóc Kromi, l'assistent de Kroomix. En dos minuts t'ajudo a detectar on pot haver-hi una oportunitat de millora a la teva operativa.\\n\\nCom et dius, de quina empresa ets i a què es dedica?",
     "limitTitle": "Hem arribat al límit",
-    "limitBody": "Amb el que m'has explicat ja tenim prou context.El pas següent és parlar directament.",
+    "limitBody": "Amb el que m'has explicat ja tenim prou context. El pas següent és parlar directament.",
     "close": "Tancar",
     "kroomiBar": "Kroomi — diagnòstic",
     "newThread": "nova conversa",
     "newThreadTitle": "Ja has fet servir les {max} converses noves disponibles",
     "placeholder": "Escriu aquí… (Enter per enviar)",
     "sending": "Enviar",
-    "errorGeneric": "Hi ha hagut un error.Si us plau, torna-ho a intentar.",
+    "errorGeneric": "Hi ha hagut un error. Si us plau, torna-ho a intentar.",
     "newConv": "Nova conversa",
     "newConv2": "↻ Nova conversa",
     "limitContact": "Contactar directament →",
     "micLog": "Micròfon",
-    "hint": "Shift + Enter per a nova línia.Les dades que compartiu només s'utilitzen per a aquest diagnòstic.",
+    "hint": "Shift + Enter per a nova línia. Les dades que compartiu només s'utilitzen per a aquest diagnòstic.",
     "mic": {
       "rec": "Aturar enregistrament",
       "req": "Demanant permís de micròfon…",
@@ -94,10 +133,39 @@
       "startFailed": "No s'ha pogut iniciar el micròfon"
     }
   },
+  "pilares": {
+    "problemas": {
+      "label": "Problemes",
+      "heading": "El que frena el teu negoci cada dia",
+      "body": "Processos manuals, sistemes que no es parlen, informació repartida entre correus, WhatsApp i fulls de càlcul. Sabem exactament com es veu això des de dins.",
+      "i1": "Doble entrada de dades",
+      "i2": "Sistemes desconnectats",
+      "i3": "Excels impossibles de mantenir",
+      "i4": "Coneixement que viu en persones"
+    },
+    "mejoras": {
+      "label": "Millores",
+      "heading": "Saps què millorar, però et falten temps o coneixement",
+      "body": "Hi ha processos que funcionen, però que podrien o haurien de funcionar millor, deixant més temps per a tasques més importants.",
+      "i1": "Automatització de fluxos repetitius",
+      "i2": "Integracions entre sistemes",
+      "i3": "Taulers de dades en temps real",
+      "i4": "Processos documentats i traspassables"
+    },
+    "dinero": {
+      "label": "Diners",
+      "heading": "Perds diners en tasques que no funcionen i que es poden optimitzar",
+      "body": "Cada problema sense resoldre té un cost, visible o ocult, i avui dia tot es pot mesurar i millorar.",
+      "i1": "Hores recuperades per setmana",
+      "i2": "Errors i refeines eliminats",
+      "i3": "Cobraments accelerats",
+      "i4": "Decisions amb dades reals"
+    }
+  },
   "chatCaso": {
     "l1": "He vist a la vostra web el cas «{titulo}» i vull que m'expliquis bé aquesta solució aplicada a la meva empresa.",
     "l2": "Problema (text de la targeta):",
     "l3": "Solució resumida (text de la targeta):",
-    "l4": "Si encara no tens context sobre mi (nom, empresa, a què ens dediquem i mida aproximada de l'equip), demana-m'ho primer en poques preguntes.Quan ho tinguis, desenvolupa la solució amb detall i contextualitzada al nostre negoci."
+    "l4": "Si encara no tens context sobre mi (nom, empresa, a què ens dediquem i mida aproximada de l'equip), demana-m'ho primer en poques preguntes. Quan ho tinguis, desenvolupa la solució amb detall i contextualitzada al nostre negoci."
   }
 }

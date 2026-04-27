@@ -12,11 +12,30 @@
     "h1": "Quien tiene un negocio,",
     "sub1": "tiene problemas que solucionar,",
     "sub2": "mejoras que adaptar,",
-    "sub3": "y dinero que ganar"
+    "sub3": "y dinero que ganar",
+    "discoverCta": "DESCUBRE MÁS"
   },
   "sectionSolution": {
-    "title": "Tiene solución",
-    "subtitle": "Estos son los problemas que resolvemos"
+    "heading": "Si alguna frase resuena contigo…",
+    "rightPlace": "Estás en el lugar correcto",
+    "verticalsLead": "Problemas DIGITALES en estas TRES verticales"
+  },
+  "sectionOfrecemos": {
+    "heading": "Vale, pero, ¿qué ofrecemos?",
+    "subtitle": "Nuestros servicios",
+    "s1title": "Construimos sistemas digitales y automatizados que evitan tareas humanas repetitivas",
+    "s1body": "Construimos sistemas digitales que a ti y a tu equipo os hacen perder el tiempo y no aportan un valor real a tu negocio. Ahorrar tiempo en tareas que podrían estar automatizadas es una necesidad real de cualquier negocio. Deja que una máquina realice esas tareas mientras tú inviertes tiempo en lo importante.",
+    "s2title": "Añadimos inteligencia a tus procesos digitales para ayudarte a tomar mejores decisiones",
+    "s2body": "Creamos procesos que toman decisiones de forma 100% autónoma (o casi autónoma), eliminando las horas que debe invertir una persona, recopilando información, procesándola, interpretándola y tomando una decisión. Definimos criterios claros según tu negocio y los automatizamos.",
+    "s3title": "Clarificamos la operativa digital de tu empresa",
+    "s3body": "Eliminamos la complejidad de entender todos los procesos digitales de tu empresa, para qué sirven y en qué te benefician, con tal de que tú y tu empresa entendáis en cada momento las herramientas que se utilizan, para qué se utilizan y sus beneficios. Todo en números."
+  },
+  "sectionComoLoHacemos": {
+    "heading": "¿Cómo lo hacemos?",
+    "subtitle": "NUESTRO PROCESO"
+  },
+  "sectionCarrusel": {
+    "heading": "Ejemplos de problemáticas reales"
   },
   "sectionCta": {
     "title": "¿Cuál de estos es tu caso?",
@@ -28,17 +47,37 @@
   "quienes": {
     "title": "Quiénes somos",
     "subtitle": "Tu socio para modernizar la operativa sin perderte en el camino",
-    "p1a": "Queremos ser tu socio al ",
-    "p1b": "actualizar tus procesos digitales: que respondas a lo que ya exigen tus usuarios y clientes, y que aproveches con criterio las tecnologías que hay hoy en el mercado — sin humo, sin promesas vacías.",
-    "p1em": "actualizar tus procesos digitales",
-    "p2": "Todo va en la misma dirección: dar más fuerza a tu marca, a tu empresa y a tu día a día operativo. Recuperar horas que ahora se van en tareas repetitivas, recortar costes donde haya margen y, al cerrar el mes, ",
-    "p2em": "dejar más dinero sobre la mesa",
-    "p3a": "Si eso te suena bien, también es nuestro objetivo que tengas ",
-    "p3b": "menos quebraderos de cabeza y más claridad para decidir con tranquilidad",
-    "p3dot": "."
+    "lead": "Somos un equipo de ingenieros de software y arquitectos de sistemas automatizados.",
+    "body1": "Utilizamos las últimas tecnologías del mercado — incluyendo inteligencia artificial — para potenciar pequeñas y medianas empresas en sus flujos de trabajo internos y externos.",
+    "body2": "Sin humo, sin promesas vacías: te enseñamos ejemplos reales a problemas concretos antes de que contrates.",
+    "i1": "Ingeniería de software a medida",
+    "i2": "Arquitectura de sistemas automatizados",
+    "i3": "Inteligencia artificial aplicada",
+    "i4": "Integración en flujos reales de trabajo"
+  },
+  "comoTrabajamos": {
+    "heading": "Cómo trabajamos",
+    "subtitle": "Porque el sistema potencia el resultado",
+    "s1title": "Analizamos tus necesidades",
+    "s1body": "Identificamos los problemas que frenan tu operativa y las mejoras digitales que quieres implementar pero no sabes cómo.",
+    "s2title": "Proponemos soluciones",
+    "s2body": "Te presentamos opciones concretas con sus beneficios estimados: tiempo recuperado o dinero ahorrado.",
+    "s3title": "Definimos la solución juntos",
+    "s3body": "Trabajamos contigo de forma colaborativa siguiendo una metodología que nos ayuda a ambas partes a definir claramente las necesidades y todo lo que implementaremos, antes de empezar a trabajar en ello.",
+    "s4title": "Sistema Mínimo Viable",
+    "s4body": "Te entregamos un primer sistema funcional — lo que otros llaman MVP, nosotros lo llamamos SMV — para que veas resultados rápido.",
+    "s5title": "Desarrollamos el resto",
+    "s5body": "Completamos la solución mientras tú visualizas en qué estado está en todo momento, con entregas parciales y sin sorpresas.",
+    "s6title": "Integramos en tu operativa",
+    "s6body": "Acompañamos la implantación para que la solución encaje con tus procesos reales desde el primer día.",
+    "s7title": "Formamos y dejamos funcionar",
+    "s7body": "Si hace falta, formamos a tu equipo. Dejamos el sistema totalmente operativo y a tu disposición.",
+    "s8title": "Mides el impacto real",
+    "s8body": "Semanas o meses después, los resultados hablan solos: menos tiempo, menos errores, más dinero sobre la mesa."
   },
   "footer": {
-    "tagline": "Optimizamos el caos para crear claridad en tu negocio. La claridad ahorra tiempo y dinero",
+    "taglineLead": "Optimizamos el caos para crear claridad en tu negocio. La claridad ahorra ",
+    "taglineHighlight": "tiempo y dinero",
     "location": "Osona, Barcelona",
     "legalNav": "Enlaces legales",
     "rights": "Todos los derechos reservados"
@@ -92,6 +131,35 @@
       "noDevice": "No se detecta ningún micrófono",
       "network": "Error de red en el reconocimiento de voz",
       "startFailed": "No se pudo iniciar el micrófono"
+    }
+  },
+  "pilares": {
+    "problemas": {
+      "label": "Problemas",
+      "heading": "Lo que frena tu negocio cada día",
+      "body": "Procesos manuales, sistemas que no se hablan, información repartida entre emails, WhatsApp y hojas de cálculo. Sabemos exactamente cómo se ve esto desde dentro.",
+      "i1": "Doble entrada de datos",
+      "i2": "Sistemas desconectados",
+      "i3": "Excels imposibles de mantener",
+      "i4": "Conocimiento que vive en personas"
+    },
+    "mejoras": {
+      "label": "Mejoras",
+      "heading": "Sabes qué mejorar, pero te faltan tiempo o conocimiento",
+      "body": "Existen procesos que funcionan, pero que podrían o deberían funcionar mejor, dejando más tiempo para tareas más importantes.",
+      "i1": "Automatización de flujos repetitivos",
+      "i2": "Integraciones entre sistemas",
+      "i3": "Paneles de datos en tiempo real",
+      "i4": "Procesos documentados y traspasables"
+    },
+    "dinero": {
+      "label": "Dinero",
+      "heading": "Pierdes dinero en tareas que no funcionan y son optimizables",
+      "body": "Cada problema sin resolver tiene un coste, visible o oculto, y hoy día todo se puede medir y mejorar.",
+      "i1": "Horas recuperadas por semana",
+      "i2": "Errores y retrabajos eliminados",
+      "i3": "Cobros acelerados",
+      "i4": "Decisiones con datos reales"
     }
   },
   "chatCaso": {

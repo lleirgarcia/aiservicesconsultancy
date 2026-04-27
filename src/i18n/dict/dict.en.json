@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Process savings calculator — Industrial companies and distribution",
-    "description": "Calculate in 2 minutes how much money and time you are wasting on manual processes.For industrial, distribution and logistics companies."
+    "description": "Calculate in 2 minutes how much money and time you are wasting on manual processes. For industrial, distribution and logistics companies."
   },
   "header": {
     "homeAria": "Kroomix — home",
@@ -10,17 +10,36 @@
   },
   "hero": {
     "h1": "Who has a business,",
-    "sub1": "have problems to solve,",
+    "sub1": "has problems to solve,",
     "sub2": "improvements to adapt,",
-    "sub3": "and money to earn"
+    "sub3": "and money to earn",
+    "discoverCta": "LEARN MORE"
   },
   "sectionSolution": {
-    "title": "There is a solution",
-    "subtitle": "These are the problems we solve"
+    "heading": "If any of this resonates with you…",
+    "rightPlace": "You're in the right place",
+    "verticalsLead": "These are all DIGITAL problems across these three verticals"
+  },
+  "sectionOfrecemos": {
+    "heading": "Fair enough — what do we offer?",
+    "subtitle": "Our services",
+    "s1title": "We build digital, automated systems that take repetitive human work out of the loop",
+    "s1body": "We build digital systems in place of the work you and your team do today that burns time and does not add real value to the business. Saving time on work that should be automated is a basic need. Let a machine run the repeatables while you invest in what actually matters.",
+    "s2title": "We add intelligence to your digital processes so you can make better calls",
+    "s2body": "We build flows that can decide in a 100% autonomous (or near-autonomous) way, so no one has to spend hours gathering information, processing it, interpreting it and only then choosing. We define clear, business-specific criteria and then automate their application, end to end, with the guardrails you want.",
+    "s3title": "We make your company's digital operations easier to read",
+    "s3body": "We cut through the fog of your digital process landscape, what it is for, and where it pays off, so you and the business always know which tool is in play, why, and at what value. We ground that in numbers whenever it helps you steer better."
+  },
+  "sectionComoLoHacemos": {
+    "heading": "How do we do it?",
+    "subtitle": "OUR PROCESS"
+  },
+  "sectionCarrusel": {
+    "heading": "Real-world problem examples"
   },
   "sectionCta": {
     "title": "Which of these is your case?",
-    "subtitle": "Tell us.In two minutes we will tell you if we can help you."
+    "subtitle": "Tell us. In two minutes we will tell you if we can help you."
   },
   "sectionPainList": {
     "heading": "Do any of these problems sound familiar?"
@@ -28,17 +47,37 @@
   "quienes": {
     "title": "Who we are",
     "subtitle": "Your partner to modernize operations without getting lost along the way",
-    "p1a": "We want to be your partner in ",
-    "p1b": ": so you respond to what your users and clients already demand, and you make smart use of today's market technology — no fluff, no empty promises.",
-    "p1em": "updating your digital processes",
-    "p2": "Everything is going in the same direction: giving your brand, your company, and your day-to-day operations more strength. Win back hours lost to repetitive tasks, cut costs where you can, and, when you close the month, ",
-    "p2em": "leave more money on the table",
-    "p3a": "If that resonates with you, we also want you to have ",
-    "p3b": "fewer headaches and more clarity to make decisions with confidence",
-    "p3dot": "."
+    "lead": "We are a team of software engineers and automated systems architects.",
+    "body1": "We use the latest market technologies — including artificial intelligence — to empower small and medium-sized businesses in their internal and external workflows.",
+    "body2": "No fluff, no empty promises. Concrete, measurable solutions tailored to your business.",
+    "i1": "Custom software engineering",
+    "i2": "Automated systems architecture",
+    "i3": "Applied artificial intelligence",
+    "i4": "Integration into real workflows"
+  },
+  "comoTrabajamos": {
+    "heading": "How we work",
+    "subtitle": "Because the system amplifies the result",
+    "s1title": "We analyse your needs",
+    "s1body": "We identify the problems slowing down your operations and the improvements you can implement.",
+    "s2title": "We propose solutions",
+    "s2body": "We present concrete options with estimated benefits: time saved or money recovered.",
+    "s3title": "We define the solution together",
+    "s3body": "We work with you collaboratively until you have a clear picture of what we are going to build and how.",
+    "s4title": "Minimum Viable System",
+    "s4body": "We deliver a first working system — what others call an MVP, we call it an MVS — so you see results fast.",
+    "s5title": "We develop the rest",
+    "s5body": "We complete the solution while you can see at every step what state it is in, with partial deliveries and no surprises.",
+    "s6title": "We integrate into your operations",
+    "s6body": "We guide the rollout so the solution fits your real processes from day one.",
+    "s7title": "We train and hand over",
+    "s7body": "If needed, we train your team. We leave the system fully operational and ready for you.",
+    "s8title": "You measure the real impact",
+    "s8body": "Weeks or months later, the results speak for themselves: less time, fewer errors, more money on the table."
   },
   "footer": {
-    "tagline": "We optimize chaos to create clarity in your business.Clarity saves time and money",
+    "taglineLead": "We optimize chaos to create clarity in your business. Clarity saves ",
+    "taglineHighlight": "time and money",
     "location": "Osona, Barcelona",
     "legalNav": "Legal links",
     "rights": "All rights reserved"
@@ -66,25 +105,25 @@
     "moreButton": "Tell me more about this solution"
   },
   "chat": {
-    "initial": "Hi, I'm Kromi, the Kroomix assistant.In two minutes I will help you detect where there may be an opportunity for improvement in your operations.\\n\\nWhat is your name, what company are you from and what do you do?",
+    "initial": "Hi, I'm Kromi, the Kroomix assistant. In two minutes I will help you detect where there may be an opportunity for improvement in your operations.\\n\\nWhat is your name, what company are you from and what do you do?",
     "limitTitle": "We have reached the limit",
-    "limitBody": "With what you have told me we already have enough context.The next step is to speak directly.",
+    "limitBody": "With what you have told me we already have enough context. The next step is to speak directly.",
     "close": "Close",
     "kroomiBar": "Kroomi — diagnosis",
     "newThread": "new conversation",
     "newThreadTitle": "You have already used the {max} new conversations available",
     "placeholder": "Write here… (Enter to send)",
     "sending": "Send",
-    "errorGeneric": "There has been an error.Please try again.",
+    "errorGeneric": "There has been an error. Please try again.",
     "newConv": "New conversation",
     "newConv2": "↻ New conversation",
     "limitContact": "Contact directly →",
     "micLog": "Microphone",
-    "hint": "Shift + Enter for new line.The data you share is used only for this diagnosis.",
+    "hint": "Shift + Enter for new line. The data you share is used only for this diagnosis.",
     "mic": {
       "rec": "Stop recording",
       "req": "Asking for microphone permission…",
-      "err": "microphone error",
+      "err": "Microphone error",
       "talk": "Talk"
     },
     "micErr": {
@@ -94,10 +133,39 @@
       "startFailed": "Could not start the microphone"
     }
   },
+  "pilares": {
+    "problemas": {
+      "label": "Problems",
+      "heading": "What holds your business back every day",
+      "body": "Manual processes, systems that don't talk to each other, information scattered across emails, WhatsApp and spreadsheets. We know exactly what this looks like from the inside.",
+      "i1": "Double data entry",
+      "i2": "Disconnected systems",
+      "i3": "Unmaintainable spreadsheets",
+      "i4": "Knowledge locked in people"
+    },
+    "mejoras": {
+      "label": "Improvements",
+      "heading": "You know what to improve, but you lack the time or know-how",
+      "body": "There are processes that work, but could or should work better—freeing more time for more important tasks.",
+      "i1": "Automation of repetitive flows",
+      "i2": "System integrations",
+      "i3": "Real-time data dashboards",
+      "i4": "Documented and transferable processes"
+    },
+    "dinero": {
+      "label": "Money",
+      "heading": "You lose money on tasks that do not work and can be optimized",
+      "body": "Every unsolved problem has a cost, whether you see it or not — and today everything can be measured and improved.",
+      "i1": "Hours recovered per week",
+      "i2": "Errors and rework eliminated",
+      "i3": "Accelerated collections",
+      "i4": "Decisions backed by real data"
+    }
+  },
   "chatCaso": {
     "l1": "I have seen the case «{titulo}» on your website and I want you to explain this solution applied to my company well.",
     "l2": "Problem (card text):",
     "l3": "Summary solution (card text):",
-    "l4": "If you don't already have context about me (name, company, what we do, and approximate team size), ask me first in a few questions.When you have it, develop the solution in detail and contextualized to our business."
+    "l4": "If you don't already have context about me (name, company, what we do, and approximate team size), ask me first in a few questions. When you have it, develop the solution in detail and contextualized to our business."
   }
 }
