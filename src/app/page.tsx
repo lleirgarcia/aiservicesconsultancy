@@ -75,7 +75,7 @@ export default function Home() {
         }}
       >
         <div className="max-w-[1280px] mx-auto px-6 sm:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-4 overflow-visible">
-          <a href="/" aria-label={t("header.homeAria")} className="inline-flex shrink-0">
+          <a href="/" aria-label={t("header.homeAria")} className="inline-flex shrink-0" style={{ marginTop: "7px", marginBottom: "9px" }}>
             <Logo />
           </a>
           <div className="flex items-center gap-3 sm:gap-4">
