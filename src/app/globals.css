@@ -2,13 +2,21 @@
 @import "@xyflow/react/dist/style.css";
 
 :root {
-  --fg:         #F5F5F5;
-  --muted:      #A1A1AA;
-  --border:     #25252A;
-  --bg:         #0B0B0C;
-  --bg-soft:    #1A1A1D;
-  --bg-section: #111115;
-  --accent:     #00FF88;
+  /* Stitch design system — Architectural Futurism */
+  --fg:           #e0e3e5;
+  --muted:        #909097;
+  --muted-hi:     #c6c6cd;
+  --border:       #45464d;
+  --border-hi:    #323537;
+  --bg:           #101415;
+  --bg-soft:      #191c1e;
+  --bg-section:   #1d2022;
+  --bg-elevated:  #272a2c;
+  --accent:       #89ceff;
+  --accent-dim:   rgba(137, 206, 255, 0.12);
+  --accent-on:    #00344d;
+  --glass-bg:     rgba(29, 32, 34, 0.65);
+  --glass-border: rgba(137, 206, 255, 0.07);
 }
 
 * { box-sizing: border-box; }
@@ -17,10 +25,33 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), var(--font-geist-sans), system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Glassmorphism ─────────────────────────────── */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+.electric-glow {
+  box-shadow: 0 0 24px rgba(137, 206, 255, 0.12), 0 0 1px rgba(137, 206, 255, 0.3);
+}
+
+.electric-border {
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 12px rgba(137, 206, 255, 0.08);
+}
+
+/* ── Headline font utility ─────────────────────── */
+.font-headline {
+  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 /* ── Keyword marker (highlighter-pen look) ───── */

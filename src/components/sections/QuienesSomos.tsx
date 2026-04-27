@@ -3,7 +3,7 @@
 import { useI18n } from "@/i18n/LocaleContext";
 
 const em =
-  "font-semibold text-inherit px-0.5 rounded-sm [box-decoration-break:clone] [-webkit-box-decoration-break:clone] [background-image:linear-gradient(180deg,transparent_58%,rgba(52,211,153,0.42)_58%)] dark:[background-image:linear-gradient(180deg,transparent_58%,rgba(52,211,153,0.28)_58%)]";
+  "font-semibold text-inherit px-0.5 rounded-sm [box-decoration-break:clone] [-webkit-box-decoration-break:clone] [background-image:linear-gradient(180deg,transparent_58%,rgba(137,206,255,0.28)_58%)]";
 
 export default function QuienesSomos() {
   const { t } = useI18n();

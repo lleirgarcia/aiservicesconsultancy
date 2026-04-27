@@ -9,13 +9,13 @@ type LogoProps = {
   className?: string;
 };
 
-const GREEN_LIGHT = "#9EFFCC";
-const GREEN_MID = "#00FF88";
-const GREEN_DARK = "#007A44";
+const CYAN_BRIGHT = "#c9e6ff";
+const CYAN_MID   = "#89ceff";
+const CYAN_DIM   = "#3a7fa8";
 
 export default function Logo({ size, className }: LogoProps) {
   const base: CSSProperties = {
-    fontFamily: "var(--font-orbitron), ui-sans-serif, system-ui, sans-serif",
+    fontFamily: "var(--font-space-grotesk), 'Space Grotesk', ui-sans-serif, system-ui, sans-serif",
     fontWeight: 700,
     fontSize: size != null ? `${size}px` : undefined,
     letterSpacing: "0.02em",
@@ -33,9 +33,9 @@ export default function Logo({ size, className }: LogoProps) {
       style={{ display: "inline-flex", alignItems: "baseline", gap: "0.18em" }}
       aria-label="kroomix.com"
     >
-      <span style={{ ...base, color: GREEN_LIGHT }}>kroo</span>
-      <span style={{ ...base, color: GREEN_MID }}>mix</span>
-      <span style={{ ...base, color: GREEN_DARK }}>.com</span>
+      <span style={{ ...base, color: CYAN_BRIGHT }}>kroo</span>
+      <span style={{ ...base, color: CYAN_MID }}>mix</span>
+      <span style={{ ...base, color: CYAN_DIM }}>.com</span>
     </span>
   );
 }
