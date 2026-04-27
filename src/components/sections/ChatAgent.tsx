@@ -528,7 +528,7 @@ export default function ChatAgent() {
               >
                 {msg.role === "assistant" ? (
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.content}
+                    {msg.content.replace(CONV_END_MARKER, "").trimEnd()}
                   </ReactMarkdown>
                 ) : (
                   msg.content
