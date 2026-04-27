@@ -14,8 +14,8 @@ export default function Logo({ size, className }: LogoProps) {
       alt="Kroomix.com"
       width={height * 4}
       height={height}
-      className={className}
-      style={{ height, width: "auto", display: "block", mixBlendMode: "screen", marginTop: "5px", marginBottom: "7px" }}
+      className={`${className ?? ""} h-[90px] sm:h-[200px]`.trim()}
+      style={{ width: "auto", display: "block", mixBlendMode: "screen", marginTop: "5px", marginBottom: "7px" }}
       priority
     />
   );
