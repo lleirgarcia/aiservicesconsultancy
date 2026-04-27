@@ -71,9 +71,10 @@ export default function Home() {
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           borderBottom: "1px solid var(--border)",
+          overflow: "visible",
         }}
       >
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-4">
+        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-4 overflow-visible">
           <a href="/" aria-label={t("header.homeAria")} className="inline-flex shrink-0">
             <Logo />
           </a>
