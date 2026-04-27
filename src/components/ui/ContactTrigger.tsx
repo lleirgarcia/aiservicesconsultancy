@@ -7,7 +7,8 @@ import { useI18n } from "@/i18n/LocaleContext";
 const PHONE_DISPLAY = "+34 626 572 151";
 const PHONE_TEL = "+34626572151";
 const WHATSAPP_URL = "https://wa.me/34626572151";
-const EMAIL = "lleirgarcia@gmail.com";
+const EMAIL_PRIMARY = "kromix@kroomix.com";
+const EMAIL_SECONDARY = "lleirgarcia@gmail.com";
 
 export default function ContactTrigger() {
   const { t } = useI18n();
@@ -102,7 +103,7 @@ export default function ContactTrigger() {
         </a>
 
         <a
-          href={`mailto:${EMAIL}`}
+          href={`mailto:${EMAIL_PRIMARY}`}
           onClick={() => setOpen(false)}
           className="flex flex-col gap-1 px-6 py-5 transition-colors"
           style={{ borderBottom: "1px solid var(--border)" }}
@@ -111,7 +112,10 @@ export default function ContactTrigger() {
             {t("contact.email")}
           </span>
           <span className="text-sm" style={{ color: "var(--muted)" }}>
-            {EMAIL}
+            {EMAIL_PRIMARY}
+          </span>
+          <span className="text-sm" style={{ color: "var(--muted)", opacity: 0.6 }}>
+            {EMAIL_SECONDARY}
           </span>
         </a>
 

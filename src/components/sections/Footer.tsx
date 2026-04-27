@@ -72,13 +72,14 @@ export default function Footer() {
 
   return (
     <footer
-      className="px-6 py-10 max-w-4xl mx-auto flex flex-col gap-8"
+      className="px-6 py-4 max-w-4xl mx-auto flex flex-col gap-3"
       style={{ borderTop: "1px solid var(--border)", color: "var(--muted)" }}
     >
       {/* Fila 1: tagline + redes sociales */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm">
         <p className="leading-relaxed">
-          {t("footer.tagline")}
+          {t("footer.taglineLead")}
+          <span style={{ color: "var(--accent)" }}>{t("footer.taglineHighlight")}</span>
           <span className="text-xs"> — {t("footer.location")}</span>
         </p>
         <div className="flex items-center gap-5 shrink-0">
