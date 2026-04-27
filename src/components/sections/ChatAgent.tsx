@@ -419,7 +419,7 @@ export default function ChatAgent() {
   return (
     <section
       id="contacto"
-      className="px-4 sm:px-6 py-10 sm:py-16 max-w-4xl mx-auto"
+      className="px-4 sm:px-6 pt-12 sm:pt-16 pb-7 sm:pb-10 w-full"
     >
       <div
         className="h-[min(72vh,560px)] sm:h-[560px]"

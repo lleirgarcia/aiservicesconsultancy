@@ -1,19 +1,64 @@
 "use client";
 
+import { useCallback } from "react";
 import PainTyper from "@/components/sections/PainTyper";
 import QuienesSomos from "@/components/sections/QuienesSomos";
+import ComoTrabajamos from "@/components/sections/ComoTrabajamos";
+import ComoLoHacemos from "@/components/sections/ComoLoHacemos";
 import ServiciosCarrusel from "@/components/sections/ServiciosCarrusel";
+import TresPilares from "@/components/sections/TresPilares";
+import QueOfrecemos from "@/components/sections/QueOfrecemos";
 import ChatAgent from "@/components/sections/ChatAgent";
 import Footer from "@/components/sections/Footer";
 import Logo from "@/components/ui/Logo";
 import ContactTrigger from "@/components/ui/ContactTrigger";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { useI18n } from "@/i18n/LocaleContext";
 
 const HEADLINE_FONT = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif";
 
+const HEADER_OFFSET_PX = 64; /* h-16 */
+const HEADER_OFFSET_SM_PX = 72; /* sm:h-[72px] */
+const SCROLL_TO_SOLUCIONES_MS = 350;
+
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+/** Slow eased scroll; respects reduced motion. */
+function scrollToIdSlow(id: string) {
+  if (typeof window === "undefined") return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  const headerOff =
+    window.matchMedia("(min-width: 640px)").matches
+      ? HEADER_OFFSET_SM_PX
+      : HEADER_OFFSET_PX;
+  const yTarget =
+    el.getBoundingClientRect().top + window.scrollY - headerOff;
+  const y0 = window.scrollY;
+  const delta = yTarget - y0;
+  if (Math.abs(delta) < 1) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.scrollTo(0, yTarget);
+    return;
+  }
+  const t0 = performance.now();
+  const tick = (now: number) => {
+    const u = Math.min(1, (now - t0) / SCROLL_TO_SOLUCIONES_MS);
+    const eased = easeInOutCubic(u);
+    window.scrollTo(0, y0 + delta * eased);
+    if (u < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 export default function Home() {
   const { t } = useI18n();
+  const onDiscoverSoluciones = useCallback(() => {
+    scrollToIdSlow("soluciones");
+  }, []);
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
@@ -41,9 +86,8 @@ export default function Home() {
 
       {/* ── Hero ────────────────────────────────────────── */}
       <section
-        className="relative flex items-center overflow-hidden"
+        className="relative flex min-h-0 flex-col overflow-x-clip hero-viewport"
         style={{
-          minHeight: "88vh",
           background: "linear-gradient(160deg, #0b0f10 0%, #101415 55%, #131a1d 100%)",
         }}
       >
@@ -86,153 +130,168 @@ export default function Home() {
           }}
         />
 
-        <div className="relative z-10 max-w-[1280px] mx-auto px-6 sm:px-8 w-full py-20 sm:py-28">
-          {/* Eyebrow label */}
-          <div
-            className="inline-flex items-center gap-3 mb-8"
-            style={{
-              borderLeft: "2px solid var(--accent)",
-              paddingLeft: "0.85rem",
-            }}
-          >
-            <span
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col justify-center">
+          <div className="max-w-[1280px] mx-auto w-full px-5 sm:px-8 py-[clamp(1rem,3dvh,1.75rem)] sm:py-[clamp(1.25rem,4dvh,2.5rem)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-6 lg:gap-x-8 xl:gap-x-10 lg:items-start w-full">
+            {/* Primary column — narrower on lg+ so the pain list has more width */}
+            <div className="lg:col-span-5 min-w-0">
+              <h1
+                style={{
+                  fontFamily: HEADLINE_FONT,
+                  fontSize: "clamp(1.85rem, 5.2vw + 0.5rem, 5.5rem)",
+                  fontWeight: 700,
+                  letterSpacing: "-0.025em",
+                  lineHeight: 1.04,
+                  color: "var(--fg)",
+                  marginBottom: "clamp(0.75rem, 2.5dvh, 2rem)",
+                  maxWidth: "min(100%, 14ch)",
+                }}
+              >
+                {t("hero.h1")}
+              </h1>
+
+              <div className="flex flex-col gap-1.5 sm:gap-2 mb-6 sm:mb-10 lg:mb-14">
+                {[t("hero.sub1"), t("hero.sub2"), t("hero.sub3")].map((line, i) => {
+                  const chevronOpac = [0.5, 0.78, 1][i] ?? 1;
+                  const isPayoff = i === 2;
+                  return (
+                  <div key={i} className="flex items-baseline gap-2 sm:gap-3">
+                    <span
+                      style={{
+                        fontFamily: "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+                        fontSize: "clamp(11px, 2.2vw, 13px)",
+                        fontWeight: 700,
+                        color: "var(--accent)",
+                        opacity: chevronOpac,
+                        minWidth: "1em",
+                        letterSpacing: "-0.04em",
+                      }}
+                    >
+                      »
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: HEADLINE_FONT,
+                        fontSize: isPayoff
+                          ? "clamp(1.02rem, 1.95vw + 0.4rem, 1.68rem)"
+                          : "clamp(0.95rem, 1.8vw + 0.35rem, 1.5rem)",
+                        fontWeight: isPayoff ? 600 : 500,
+                        letterSpacing: "-0.01em",
+                        color: isPayoff
+                          ? "var(--fg)"
+                          : i === 0
+                            ? "var(--muted)"
+                            : "var(--muted-hi)",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {line}
+                    </span>
+                  </div>
+                );
+                })}
+              </div>
+
+              <div
+                style={{
+                  width: "clamp(60px, 8vw, 100px)",
+                  height: 1,
+                  background: "linear-gradient(90deg, var(--accent) 0%, transparent 100%)",
+                  opacity: 0.5,
+                }}
+              />
+            </div>
+
+            {/* Pain list — wider column (7/12) + taller box for readable lines */}
+            <div
+              className="lg:col-span-7 min-w-0 overflow-hidden lg:pt-[clamp(0.5rem,4dvh,2rem)]"
               style={{
-                fontFamily: HEADLINE_FONT,
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "var(--accent)",
+                height: "clamp(360px, 58vh, 600px)",
+                maskImage:
+                  "linear-gradient(to bottom, transparent 0%, #fff 8%, #fff 90%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent 0%, #fff 8%, #fff 90%, transparent 100%)",
               }}
             >
-              Kroomix · Osona
-            </span>
-          </div>
-
-          {/* Main headline */}
-          <h1
-            style={{
-              fontFamily: HEADLINE_FONT,
-              fontSize: "clamp(2.6rem, 6.5vw, 5.5rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.025em",
-              lineHeight: 1.04,
-              color: "var(--fg)",
-              marginBottom: "clamp(1rem, 3vw, 2rem)",
-              maxWidth: "14ch",
-            }}
-          >
-            {t("hero.h1")}
-          </h1>
-
-          {/* Sub-items */}
-          <div className="flex flex-col gap-2 mb-10 sm:mb-14">
-            {[t("hero.sub1"), t("hero.sub2"), t("hero.sub3")].map((line, i) => (
-              <div key={i} className="flex items-baseline gap-3">
-                <span
-                  style={{
-                    fontFamily: "var(--font-geist-mono), monospace",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: "var(--accent)",
-                    opacity: 1 - i * 0.2,
-                    minWidth: 18,
-                  }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span
-                  style={{
-                    fontFamily: HEADLINE_FONT,
-                    fontSize: "clamp(1.1rem, 2.5vw, 1.6rem)",
-                    fontWeight: 500,
-                    letterSpacing: "-0.01em",
-                    color: i === 0 ? "var(--muted-hi)" : "var(--muted)",
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {line}
-                </span>
+              <div className="lg:pl-8 xl:pl-14 lg:pr-0 h-full min-w-0">
+                <PainTyper bare />
               </div>
-            ))}
+            </div>
+            </div>
           </div>
+        </div>
 
-          {/* Divider line */}
-          <div
-            style={{
-              width: "clamp(60px, 8vw, 100px)",
-              height: 1,
-              background: "linear-gradient(90deg, var(--accent) 0%, transparent 100%)",
-              opacity: 0.5,
-            }}
-          />
+        <div
+          className="relative z-20 hidden w-full flex-shrink-0 justify-center px-4 pb-7 pt-2 sm:flex sm:pb-9"
+        >
+          <button
+            type="button"
+            className="cta-discover"
+            onClick={onDiscoverSoluciones}
+          >
+            {t("hero.discoverCta")}
+            <svg
+              className="cta-discover-chevron"
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.25}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
         </div>
 
         {/* Bottom edge fade */}
         <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          className="pointer-events-none absolute bottom-0 left-0 right-0"
           style={{
             height: 120,
             background: "linear-gradient(to bottom, transparent, var(--bg))",
+            zIndex: 10,
           }}
         />
       </section>
 
-      {/* ── PainTyper ───────────────────────────────────── */}
-      <div style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
-        <PainTyper />
-      </div>
-
-      {/* ── Soluciones — header ─────────────────────────── */}
+      {/* ── Soluciones — header (target #soluciones) ────────────────── */}
       <div
+        id="soluciones"
+        className="scroll-mt-16 sm:scroll-mt-[4.5rem]"
         style={{
           borderBottom: "1px solid var(--border)",
           background: "var(--bg-section)",
         }}
       >
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 py-12 sm:py-16">
-          <span
-            style={{
-              display: "block",
-              fontFamily: "var(--font-inter), system-ui, sans-serif",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--accent)",
-              marginBottom: "1rem",
-              paddingLeft: "0.85rem",
-              borderLeft: "2px solid var(--accent)",
-            }}
-          >
-            {t("sectionSolution.subtitle")}
-          </span>
-          <h2
-            style={{
-              fontFamily: HEADLINE_FONT,
-              fontSize: "clamp(1.8rem, 4vw, 3rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
-              color: "var(--fg)",
-            }}
-          >
-            {t("sectionSolution.title")}
-          </h2>
+        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
+          <SectionHeader
+            title={t("sectionSolution.heading")}
+            subtitle={t("sectionSolution.rightPlace")}
+          />
         </div>
       </div>
 
-      {/* ── Carrusel de servicios ───────────────────────── */}
-      <div className="max-w-[1280px] mx-auto">
-        <ServiciosCarrusel />
-      </div>
+      {/* ── Tres pilares flotantes ──────────────────────── */}
+      <TresPilares />
+
+      {/* ── Qué ofrecemos (servicios) ───────────────────── */}
+      <QueOfrecemos />
+
+      {/* ── Cómo lo hacemos ─────────────────────────────── */}
+      <ComoLoHacemos />
+
+      {/* ── Carrusel de servicios (full-width header rule; body max-w inside component) ── */}
+      <ServiciosCarrusel />
+
+      {/* ── Cómo trabajamos ─────────────────────────────── */}
+      <ComoTrabajamos />
 
       {/* ── Quiénes somos ───────────────────────────────── */}
-      <div style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="max-w-[1280px] mx-auto">
-          <QuienesSomos />
-        </div>
-      </div>
+      <QuienesSomos />
 
       {/* ── CTA — header ────────────────────────────────── */}
       <div
@@ -242,35 +301,11 @@ export default function Home() {
           background: "var(--bg-section)",
         }}
       >
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 py-12 sm:py-16">
-          <span
-            style={{
-              display: "block",
-              fontFamily: "var(--font-inter), system-ui, sans-serif",
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--accent)",
-              marginBottom: "1rem",
-              paddingLeft: "0.85rem",
-              borderLeft: "2px solid var(--accent)",
-            }}
-          >
-            {t("sectionCta.subtitle")}
-          </span>
-          <h2
-            style={{
-              fontFamily: HEADLINE_FONT,
-              fontSize: "clamp(1.8rem, 4vw, 3rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
-              color: "var(--fg)",
-            }}
-          >
-            {t("sectionCta.title")}
-          </h2>
+        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 py-8 sm:py-10">
+          <SectionHeader
+            title={t("sectionCta.title")}
+            subtitle={t("sectionCta.subtitle")}
+          />
         </div>
       </div>
 

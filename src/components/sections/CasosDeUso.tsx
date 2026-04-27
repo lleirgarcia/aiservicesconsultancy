@@ -109,7 +109,6 @@ export default function CasosDeUso() {
       {/* Indicador de puntos */}
       <div
         className="px-5 sm:px-8 py-4 flex gap-1.5"
-        style={{ borderTop: "1px solid var(--border)" }}
       >
         {CASOS.map((_, i) => (
           <button
