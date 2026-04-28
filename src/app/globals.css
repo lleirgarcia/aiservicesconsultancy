@@ -31,6 +31,118 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Hero: full viewport under sticky header (h-16 / sm:72px) */
+.hero-viewport {
+  min-height: calc(100vh - 4rem);
+  min-height: calc(100svh - 4rem);
+  min-height: calc(100dvh - 4rem);
+}
+@media (min-width: 640px) {
+  .hero-viewport {
+    min-height: calc(100vh - 4.5rem);
+    min-height: calc(100svh - 4.5rem);
+    min-height: calc(100dvh - 4.5rem);
+  }
+}
+
+/* CTA: scroll to soluciones — rounded rectangle, soft glow + chevron nudge */
+.cta-discover {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.8rem 1.35rem 0.75rem;
+  appearance: none;
+  font-family: var(--font-space-grotesk), "Space Grotesk", system-ui, sans-serif;
+  font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  color: var(--fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 10px;
+  border: 1px solid rgba(137, 206, 255, 0.35);
+  background: linear-gradient(
+    180deg,
+    var(--bg-elevated) 0%,
+    var(--bg-soft) 100%
+  );
+  box-shadow:
+    0 0 0 0 rgba(137, 206, 255, 0.12),
+    0 2px 16px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  animation: cta-discover-glow 2.5s ease-in-out infinite;
+}
+.cta-discover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(137, 206, 255, 0.6);
+  box-shadow:
+    0 0 20px rgba(137, 206, 255, 0.15),
+    0 6px 24px rgba(0, 0, 0, 0.45);
+  animation: none;
+}
+.cta-discover:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.cta-discover-chevron {
+  flex-shrink: 0;
+  color: var(--accent);
+  animation: cta-discover-bob 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-discover,
+  .cta-discover-chevron {
+    animation: none;
+  }
+  .cta-discover:hover {
+    transform: none;
+  }
+}
+@keyframes cta-discover-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(137, 206, 255, 0.12),
+      0 2px 20px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 20px 3px rgba(137, 206, 255, 0.14),
+      0 2px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+@keyframes cta-discover-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+/* ── Pilares flotantes ─────────────────────────── */
+@keyframes pilar-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+.pilar-float {
+  animation: pilar-float var(--float-duration, 5.5s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pilar-float { animation: none; }
+}
+
 /* ── Glassmorphism ─────────────────────────────── */
 .glass-panel {
   background: var(--glass-bg);
@@ -259,13 +371,13 @@ input[type="number"] { -moz-appearance: textfield; }
     -webkit-mask-image: linear-gradient(
       to right,
       #000 0,
-      #000 calc(100% - 28px),
+      #000 calc(100% - 40px),
       transparent 100%
     );
     mask-image: linear-gradient(
       to right,
       #000 0,
-      #000 calc(100% - 28px),
+      #000 calc(100% - 40px),
       transparent 100%
     );
   }

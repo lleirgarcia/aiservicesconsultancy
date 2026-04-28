@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence, type Transition } from "framer-motion";
 import { openChatWithPrompt } from "@/lib/openChatWithPrompt";
 import { useI18n } from "@/i18n/LocaleContext";
+import SectionHeader from "@/components/ui/SectionHeader";
 import type { Locale } from "@/i18n/dict";
 import serviciosEs from "@/data/servicios/servicios.es.json";
 import serviciosEn from "@/data/servicios/servicios.en.json";
@@ -70,12 +71,21 @@ export default function ServiciosCarrusel() {
   ] as const;
 
   return (
-    <div
-      className="min-w-0 max-w-full"
-      style={{ borderBottom: "1px solid var(--border)" }}
-    >
-      <div className="min-w-0 max-w-full px-5 sm:px-8 py-10 sm:py-14">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-w-0 max-w-full">
+      {/* Cabecera: texto compacto + línea a ancho viewport */}
+      <div className="w-full">
+        <div className="mx-auto max-w-[1280px] px-6 sm:px-8 py-6 sm:py-7">
+          <SectionHeader title={t("sectionCarrusel.heading")} />
+        </div>
+        <div
+          className="h-px w-full"
+          style={{ background: "var(--border-hi)" }}
+          aria-hidden
+        />
+      </div>
+
+      <div className="mx-auto min-w-0 max-w-[1280px] px-5 sm:px-8 pt-12 sm:pt-16 pb-7 sm:pb-9">
+        <div className="flex items-center justify-between mb-6">
           <span
             style={{
               fontFamily: "var(--font-geist-mono), monospace",

@@ -3,7 +3,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ## Key dependencies
 
 - **Next.js 16** + **React 19** + **TypeScript**
-- **i18n (ES / CA / EN)** — UI copy lives in `src/i18n/dict/dict.{es,ca,en}.json`; long-form lists (services carousel, pain phrases, pain grid) in `src/data/`. The chat API uses `locale` from the client to pick a matching system prompt (`src/i18n/chatSystem.{es,en,ca}.txt` via `getChatSystemInstruction`). Language is stored under `kroomix-locale` in `localStorage`.
+- **i18n (ES / CA / EN)** — UI copy lives in `src/i18n/dict/dict.{es,ca,en}.json`; the home page includes a “Qué ofrecemos / Nuestros servicios” block (`QueOfrecemos.tsx`) between the three-pillar section and the service examples carousel; long-form lists (services carousel, pain phrases, pain grid) in `src/data/`. The chat API uses `locale` from the client to pick a matching system prompt (`src/i18n/chatSystem.{es,en,ca}.txt` via `getChatSystemInstruction`). Language is stored under `kroomix-locale` in `localStorage`.
 - **Tailwind CSS 4** for styling
 - **[@xyflow/react](https://reactflow.dev)** (React Flow v12) — renders the "Así funciona hoy" / "Así podría funcionar mañana" workflow diagrams in `src/components/sections/WorkflowDiagram.tsx` with custom node types (`chaos`, `input`, `center`, `output`, `result`) and a custom wavy edge. The diagrams are display-only (pan/zoom/drag disabled) and auto-fit to the viewport.
 

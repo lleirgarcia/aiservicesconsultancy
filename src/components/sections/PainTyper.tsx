@@ -17,20 +17,29 @@ const MAX_LINES = 10;
 const TYPE_SPEED_MS = 14;
 const TYPE_JITTER_MS = 18;
 const HOLD_MS = 1000;
-// Duración del desvanecimiento verde → blanco tras terminar de escribir.
-// Debe ser < HOLD_MS para que la cola llegue a apagarse por completo
-// antes de saltar al siguiente slot.
 const FADE_MS = 1200;
-// Número de caracteres del final que arrastran el tinte verde.
-// El último escrito va con la intensidad máxima y se desvanece a blanco
-// a medida que se tecleen más letras detrás.
 const TAIL_GLOW = 12;
-
-// Cuántas frases se tecleen simultáneamente y cuánto se retrasan entre sí.
-// Cada typer arranca desfasado STAGGER_MS respecto al anterior, para evitar
-// que letras y pausas caigan sincronizadas.
 const TYPER_COUNT = 2;
 const STAGGER_MS = 400;
+
+/** All 10 values must be unique so no two lines share the same start edge (bare/hero) */
+const SLOT_INDENT = [
+  "0%",
+  "7.5%",
+  "3.2%",
+  "11.5%",
+  "1.1%",
+  "9.2%",
+  "4.5%",
+  "6.1%",
+  "2.3%",
+  "8.1%",
+] as const;
+
+const SLOT_MARGIN_TOP = [
+  "0",      "1.6rem", "0.3rem", "2.4rem", "0.5rem",
+  "1.9rem", "0.2rem", "1.1rem", "2.8rem", "0.7rem",
+];
 
 type Phase = "typing" | "holding";
 
@@ -50,18 +59,6 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/**
- * Renderiza la línea que se está tecleando: la cabecera en color normal
- * y los últimos TAIL_GLOW caracteres con un degradado hacia el verde de
- * acento. El último escrito es el más verde y se va desvaneciendo hacia
- * blanco a medida que se escriben más letras detrás de él.
- *
- * Cada letra multiplica su intensidad por var(--glow), una custom
- * property que el componente anima manualmente vía requestAnimationFrame.
- * Mientras se teclea vale 1; al terminar la frase (fase "holding") se
- * interpola hasta 0, de forma que el tinte verde se desvanece de manera
- * suave hacia blanco a lo largo de FADE_MS.
- */
 function renderActiveLine(text: string) {
   const len = text.length;
   if (len === 0) return null;
@@ -72,9 +69,7 @@ function renderActiveLine(text: string) {
     <>
       {head && <span>{head}</span>}
       {Array.from(tail).map((ch, i) => {
-        // Distancia al final del texto: 0 = recién escrito (más verde).
         const distFromEnd = tail.length - 1 - i;
-        // Intensidad base en %: 100 para el último, decreciendo hasta 0.
         const pct = Math.max(0, 100 - (distFromEnd * 100) / TAIL_GLOW);
         return (
           <span
@@ -91,20 +86,15 @@ function renderActiveLine(text: string) {
   );
 }
 
-export default function PainTyper() {
+export default function PainTyper({ bare = false }: { bare?: boolean }) {
   const { locale } = useI18n();
-  // Random order on load; reshuffle when locale changes.
   const phrases = useMemo(
     () => shuffle(PAIN_BY_LOCALE[locale]),
     [locale]
   );
 
-  // Historial de texto ya tecleado por slot. Mutado vía ref para evitar
-  // renders pesados y sincronizado al DOM con `forceRender` cuando procede.
   const linesRef = useRef<string[]>(Array(MAX_LINES).fill(""));
 
-  // Estado de cada typer (N concurrentes). Se arranca en slots distintos y
-  // en frases distintas para evitar colisiones desde el primer frame.
   const typersRef = useRef<Typer[]>(
     Array.from({ length: TYPER_COUNT }, (_, i) => ({
       slot: i,
@@ -114,20 +104,15 @@ export default function PainTyper() {
     }))
   );
 
-  // Historial circular de los últimos índices usados. Se usa para evitar
-  // repetir frases que aún estén visibles en pantalla.
   const recentIdxRef = useRef<number[]>(
     Array.from({ length: TYPER_COUNT }, (_, i) => i)
   );
 
-  // Un <p> por slot. Animamos --glow directamente sobre el elemento
-  // activo para no depender de transiciones CSS sobre custom properties.
   const pRefs = useRef<(HTMLParagraphElement | null)[]>([]);
 
   const [, forceRender] = useReducer((x: number) => x + 1, 0);
 
   useEffect(() => {
-    // Fresh starts when `phrases` / locale change so indices stay valid.
     linesRef.current = Array(MAX_LINES).fill("");
     typersRef.current = Array.from({ length: TYPER_COUNT }, (_, i) => ({
       slot: i,
@@ -158,8 +143,6 @@ export default function PainTyper() {
       return pool[Math.floor(Math.random() * pool.length)];
     };
 
-    // Elige el siguiente slot evitando el propio y los que ocupan otros typers.
-    // Prioriza slots vacíos mientras queden; si no hay, reutiliza uno libre.
     const pickNextSlot = (idx: number): number => {
       const typers = typersRef.current;
       const occupied = new Set<number>();
@@ -185,8 +168,6 @@ export default function PainTyper() {
         return free[Math.floor(Math.random() * free.length)];
       }
 
-      // Caso degenerado: todos los slots ocupados por typers activos.
-      // Elige cualquiera que no sea el propio para forzar el cambio.
       const fallback: number[] = [];
       for (let i = 0; i < MAX_LINES; i++) {
         if (i !== typers[idx].slot) fallback.push(i);
@@ -194,8 +175,6 @@ export default function PainTyper() {
       return fallback[Math.floor(Math.random() * fallback.length)];
     };
 
-    // Anima --glow de 1 → 0 en el slot recién completado para que el verde
-    // residual se desvanezca a blanco durante HOLD_MS.
     const startFade = (slot: number) => {
       const el = pRefs.current[slot];
       if (!el) return;
@@ -204,7 +183,6 @@ export default function PainTyper() {
       const anim = (now: number) => {
         if (cancelled) return;
         const tt = Math.min(1, (now - start) / FADE_MS);
-        // ease-out cubic
         const eased = 1 - Math.pow(1 - tt, 3);
         el.style.setProperty("--glow", String(1 - eased));
         if (tt < 1) {
@@ -221,7 +199,6 @@ export default function PainTyper() {
       const t = typersRef.current[idx];
       const target = phrases[t.phraseIdx];
 
-      // Frase completada: commit + hold + siguiente ciclo.
       if (t.typing.length >= target.length) {
         linesRef.current[t.slot] = target;
         t.phase = "holding";
@@ -252,7 +229,6 @@ export default function PainTyper() {
         return;
       }
 
-      // Añade la siguiente letra.
       const delay = TYPE_SPEED_MS + Math.random() * TYPE_JITTER_MS;
       const id = window.setTimeout(() => {
         if (cancelled) return;
@@ -263,7 +239,6 @@ export default function PainTyper() {
       timers.push(id);
     };
 
-    // Arranca cada typer con su desfase para que nunca coincidan letra a letra.
     for (let i = 0; i < TYPER_COUNT; i++) {
       const id = window.setTimeout(() => {
         if (cancelled) return;
@@ -281,23 +256,22 @@ export default function PainTyper() {
     };
   }, [phrases]);
 
-  // Mapa slot → typer activo para decidir qué renderizar por línea.
   const activeSlots = new Map<number, Typer>();
   typersRef.current.forEach((t) => {
     activeSlots.set(t.slot, t);
   });
 
+  const Wrapper = bare ? "div" : "section";
+
   return (
-    <section
-      style={{ borderBottom: "1px solid var(--border)" }}
+    <Wrapper
+      style={bare ? {} : { borderBottom: "1px solid var(--border)" }}
       aria-live="polite"
     >
-      <div className="px-5 sm:px-8 py-8 sm:py-10 md:py-14 flex flex-col gap-2">
+      <div className={bare ? "flex flex-col" : "px-5 sm:px-8 py-8 sm:py-10 md:py-14 flex flex-col gap-2"}>
         {linesRef.current.map((committed, i) => {
           const active = activeSlots.get(i);
           const isActive = active !== undefined;
-          // Durante la fase "holding" la frase ya está comprometida; durante
-          // "typing" mostramos el texto parcial que lleva escrito.
           const content = isActive ? active!.typing : committed;
           const activeStyle: React.CSSProperties = isActive
             ? { ["--glow" as string]: 1 }
@@ -313,6 +287,8 @@ export default function PainTyper() {
                 lineHeight: "1.5em",
                 textAlign: "left",
                 fontWeight: 500,
+                paddingLeft: bare ? (SLOT_INDENT[i] ?? "0") : undefined,
+                marginTop: bare ? SLOT_MARGIN_TOP[i] : undefined,
                 ...activeStyle,
               }}
             >
@@ -326,6 +302,6 @@ export default function PainTyper() {
           );
         })}
       </div>
-    </section>
+    </Wrapper>
   );
 }

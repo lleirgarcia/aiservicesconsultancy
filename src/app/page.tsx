@@ -316,10 +316,8 @@ export default function Home() {
       </div>
 
       {/* ── Footer ──────────────────────────────────────── */}
-      <div style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="max-w-[1280px] mx-auto">
-          <Footer />
-        </div>
+      <div className="max-w-[1280px] mx-auto">
+        <Footer />
       </div>
 
     </div>
