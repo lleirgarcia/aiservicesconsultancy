@@ -59,6 +59,16 @@ export function ExportModal({ isOpen, isLoading, error, onExport, onCancel }: Ex
             </div>
           )}
 
+          {/* Loading state */}
+          {isLoading && (
+            <div className="bg-[var(--bg-section)] rounded-lg p-4">
+              <p className="text-sm text-[var(--muted)] mb-2">Exporting image...</p>
+              <div className="h-2 bg-[var(--border)] rounded-full overflow-hidden">
+                <div className="h-full bg-[var(--accent)] animate-pulse" style={{ width: "100%" }} />
+              </div>
+            </div>
+          )}
+
           {/* Error */}
           {error && (
             <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">

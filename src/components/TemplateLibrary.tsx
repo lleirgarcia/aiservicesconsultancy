@@ -28,7 +28,28 @@ export function TemplateLibrary({
   }, [userId, storage]);
 
   if (storage.isLoading) {
-    return <div className="text-[var(--muted)]">Loading templates...</div>;
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="p-4 bg-[var(--bg-section)] border border-[var(--border)] rounded-lg animate-pulse"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 space-y-2">
+                <div className="h-5 bg-[var(--bg-elevated)] rounded w-1/3" />
+                <div className="h-4 bg-[var(--bg-elevated)] rounded w-2/3" />
+                <div className="h-3 bg-[var(--bg-elevated)] rounded w-1/4" />
+              </div>
+              <div className="flex gap-2">
+                <div className="h-10 w-16 bg-[var(--bg-elevated)] rounded" />
+                <div className="h-10 w-16 bg-[var(--bg-elevated)] rounded" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (templates.length === 0) {
