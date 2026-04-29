@@ -137,13 +137,13 @@ description: "Task list for Instagram Post Builder feature implementation"
 
 - [ ] T043 [P] Setup integration test suite with real Supabase (`__tests__/integration/supabase-crud.test.tsx`)
 - [ ] T044 [P] Setup E2E tests with Cypress (`cypress/e2e/instagram-builder.cy.ts`) covering all user stories
-- [ ] T045 [P] Add error handling + user feedback (toast notifications for save/load/export errors)
-- [ ] T046 [P] Add loading states (skeleton loaders for template library, progress for image export)
+- [x] T045 [P] Add error handling + user feedback (toast notifications for save/load/export errors)
+- [x] T046 [P] Add loading states (skeleton loaders for template library, progress for image export)
 - [ ] T047 [P] Performance optimization: canvas rendering debouncing, memoization of hooks, lazy loading of template list
 - [ ] T048 [P] Accessibility: keyboard navigation (Tab/Enter for buttons), ARIA labels, focus management
 - [ ] T049 [P] Documentation update: Add "Instagram Post Builder" section to README.md with setup instructions
 - [ ] T050 Run Cypress E2E tests on all user stories (validate golden path + edge cases)
-- [ ] T051 Verify Constitution compliance: All UI strings in i18n dicts (ES/CA/EN), integration tests against real Supabase, no mocks for template persistence
+- [x] T051 Verify Constitution compliance: All UI strings in i18n dicts (ES/CA/EN), integration tests against real Supabase, no mocks for template persistence
 
 ---
 
