@@ -6,9 +6,5 @@ export const metadata = {
 };
 
 export default function InstagramBuilderPage() {
-  return (
-    <div className="min-h-screen bg-[var(--bg)]">
-      <InstagramPostBuilder />
-    </div>
-  );
+  return <InstagramPostBuilder />;
 }
