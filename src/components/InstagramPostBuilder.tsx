@@ -15,6 +15,7 @@ import { Preview } from "@/components/Canvas/Preview";
 import { ColorPicker } from "@/components/Sidebar/ColorPicker";
 import { ElementPalette } from "@/components/Sidebar/ElementPalette";
 import { TextElementEditor } from "@/components/TextElementEditor";
+import { InlineTextEditor } from "@/components/InlineTextEditor";
 import { DesignEditor } from "@/components/DesignEditor";
 import { SaveTemplateModal } from "@/components/SaveTemplateModal";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
@@ -42,6 +43,7 @@ export function InstagramPostBuilder() {
   const [canvasRect, setCanvasRect] = useState<DOMRect | null>(null);
   const [isDraggingElement, setIsDraggingElement] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [editingTextElementId, setEditingTextElementId] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
   const handleAddText = useCallback(
@@ -310,6 +312,24 @@ export function InstagramPostBuilder() {
     setIsDraggingElement(false);
   }, []);
 
+  const handleCanvasDoubleClick = useCallback(
+    (e: React.MouseEvent) => {
+      const canvas = e.currentTarget as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
+      const element = getElementAtPoint(e.clientX, e.clientY, rect);
+
+      if (element && element.type === "text") {
+        setEditingTextElementId(element.id);
+        setIsDraggingElement(false);
+      }
+    },
+    [getElementAtPoint]
+  );
+
+  const editingElement = editingTextElementId
+    ? builder.config.elements.find((el) => el.id === editingTextElementId)
+    : null;
+
   return (
     <div className="min-h-screen bg-[var(--bg)] p-6">
       <div className="max-w-7xl mx-auto">
@@ -373,16 +393,31 @@ export function InstagramPostBuilder() {
           {/* Main canvas area */}
           <div className="lg:col-span-3 flex flex-col gap-6">
             {/* Canvas */}
-            <TemplateCanvas
-              config={builder.config}
-              onCanvasReady={setCanvasRef}
-              isDragging={isDraggingElement}
-              selectedElementId={builder.selectedElementId}
-              onMouseDown={handleCanvasMouseDown}
-              onMouseMove={handleCanvasMouseMove}
-              onMouseUp={handleCanvasMouseUp}
-              onMouseLeave={handleCanvasMouseUp}
-            />
+            <div className="relative">
+              <TemplateCanvas
+                config={builder.config}
+                onCanvasReady={setCanvasRef}
+                isDragging={isDraggingElement}
+                selectedElementId={builder.selectedElementId}
+                onMouseDown={handleCanvasMouseDown}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseUp={handleCanvasMouseUp}
+                onMouseLeave={handleCanvasMouseUp}
+                onDoubleClick={handleCanvasDoubleClick}
+              />
+              {editingElement && editingElement.content && canvasRef && (
+                <InlineTextEditor
+                  element={editingElement}
+                  canvasRef={canvasRef}
+                  onChange={(text) =>
+                    builder.updateElement(editingElement.id, {
+                      content: { ...editingElement.content!, text },
+                    })
+                  }
+                  onClose={() => setEditingTextElementId(null)}
+                />
+              )}
+            </div>
 
             {/* Edit panel */}
             {isEditingElement && selectedElement && (

@@ -13,6 +13,7 @@ interface TemplateCanvasProps {
   onMouseMove?: (e: React.MouseEvent) => void;
   onMouseUp?: (e: React.MouseEvent) => void;
   onMouseLeave?: (e: React.MouseEvent) => void;
+  onDoubleClick?: (e: React.MouseEvent) => void;
 }
 
 export function TemplateCanvas({
@@ -24,6 +25,7 @@ export function TemplateCanvas({
   onMouseMove,
   onMouseUp,
   onMouseLeave,
+  onDoubleClick,
 }: TemplateCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -56,6 +58,7 @@ export function TemplateCanvas({
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseLeave}
+        onDoubleClick={onDoubleClick}
       />
     </div>
   );
