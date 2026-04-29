@@ -103,11 +103,11 @@ description: "Task list for Instagram Post Builder feature implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Add "Edit Design" mode to InstagramPostBuilder (unlock all elements for repositioning + color/font changes)
-- [ ] T034 [P] [US3] Create `src/components/DesignEditor.tsx` panel for editing selected element (font, size, color, position inputs)
-- [ ] T035 [US3] Add z-index/layering controls in DesignEditor (move element forward/backward in stack)
-- [ ] T036 [US3] Add "Save Design Changes" handler to update template config in Supabase (updateTemplate call in templateService)
-- [ ] T037 [US3] Test user story 3 acceptance scenarios via React Testing Library (`__tests__/integration/template-edit.test.tsx`)
+- [x] T033 [US3] Add "Edit Design" mode to InstagramPostBuilder (unlock all elements for repositioning + color/font changes)
+- [x] T034 [P] [US3] Create `src/components/DesignEditor.tsx` panel for editing selected element (font, size, color, position inputs)
+- [x] T035 [US3] Add z-index/layering controls in DesignEditor (move element forward/backward in stack)
+- [x] T036 [US3] Add "Save Design Changes" handler to update template config in Supabase (updateTemplate call in templateService)
+- [x] T037 [US3] Test user story 3 acceptance scenarios via React Testing Library (`__tests__/integration/template-edit.test.tsx`)
 
 **Checkpoint**: All user stories 1, 2, 3 are independently functional
 

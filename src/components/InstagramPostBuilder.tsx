@@ -115,6 +115,9 @@ export function InstagramPostBuilder() {
   );
 
   const handleSaveDesignChanges = useCallback(async () => {
+    // Save design changes to Supabase
+    // Note: This requires a template ID which would come from loading a template
+    // For now, we close the design editor. Full save integration requires template loading flow.
     setIsEditingDesign(false);
   }, []);
 
@@ -183,12 +186,28 @@ export function InstagramPostBuilder() {
 
             {/* Design editor panel */}
             {isEditingDesign && selectedElement && (
-              <DesignEditor
-                element={selectedElement}
-                onChange={(updates) => builder.updateElement(selectedElement.id, updates)}
-                onMoveForward={() => builder.moveElementForward(selectedElement.id)}
-                onMoveBackward={() => builder.moveElementBackward(selectedElement.id)}
-              />
+              <>
+                <DesignEditor
+                  element={selectedElement}
+                  onChange={(updates) => builder.updateElement(selectedElement.id, updates)}
+                  onMoveForward={() => builder.moveElementForward(selectedElement.id)}
+                  onMoveBackward={() => builder.moveElementBackward(selectedElement.id)}
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveDesignChanges}
+                    className="flex-1 px-4 py-3 rounded-lg bg-[var(--accent)] text-[var(--accent-on)] font-medium hover:opacity-90 transition-opacity"
+                  >
+                    {t("instagram_builder.buttons.save")}
+                  </button>
+                  <button
+                    onClick={() => setIsEditingDesign(false)}
+                    className="flex-1 px-4 py-3 rounded-lg border border-[var(--border)] text-[var(--fg)] font-medium hover:bg-[var(--bg-elevated)] transition-colors"
+                  >
+                    {t("instagram_builder.buttons.cancel")}
+                  </button>
+                </div>
+              </>
             )}
 
             {/* Action buttons */}
