@@ -310,7 +310,6 @@ export function InstagramPostBuilder() {
               </button>
             </div>
           </div>
-        )}
 
           {/* Sidebar */}
           <div className="lg:col-span-1 flex flex-col gap-6">
@@ -353,6 +352,7 @@ export function InstagramPostBuilder() {
             )}
           </div>
         </div>
+        )}
       </div>
 
       {/* Save modal */}
