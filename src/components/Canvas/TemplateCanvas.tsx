@@ -8,6 +8,7 @@ interface TemplateCanvasProps {
   config: TemplateConfig;
   onCanvasReady?: (canvas: HTMLCanvasElement) => void;
   isDragging?: boolean;
+  selectedElementId?: string | null;
   onMouseDown?: (e: React.MouseEvent) => void;
   onMouseMove?: (e: React.MouseEvent) => void;
   onMouseUp?: (e: React.MouseEvent) => void;
@@ -18,6 +19,7 @@ export function TemplateCanvas({
   config,
   onCanvasReady,
   isDragging,
+  selectedElementId,
   onMouseDown,
   onMouseMove,
   onMouseUp,
@@ -30,12 +32,12 @@ export function TemplateCanvas({
     if (!canvas) return;
 
     try {
-      renderTemplateToCanvas(canvas, config);
+      renderTemplateToCanvas(canvas, config, { selectedElementId });
       onCanvasReady?.(canvas);
     } catch (error) {
       console.error("Failed to render canvas:", error);
     }
-  }, [config, onCanvasReady]);
+  }, [config, onCanvasReady, selectedElementId]);
 
   return (
     <div className="relative flex items-center justify-center bg-[var(--bg-section)] rounded-lg overflow-hidden border border-[var(--border)]">

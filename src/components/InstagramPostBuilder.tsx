@@ -246,7 +246,31 @@ export function InstagramPostBuilder() {
       const rect = canvas.getBoundingClientRect();
       setCanvasRect(rect);
 
+      const scaleX = 1080 / rect.width;
+      const scaleY = 1080 / rect.height;
+      const scaledX = (e.clientX - rect.left) * scaleX;
+      const scaledY = (e.clientY - rect.top) * scaleY;
+
+      console.log("[DRAG] MouseDown", {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        rectLeft: rect.left,
+        rectTop: rect.top,
+        rectWidth: rect.width,
+        rectHeight: rect.height,
+        scaledX,
+        scaledY,
+        elements: builder.config.elements.map((el) => ({
+          id: el.id,
+          x: el.position.x,
+          y: el.position.y,
+          w: el.size.width,
+          h: el.size.height,
+        })),
+      });
+
       const element = getElementAtPoint(e.clientX, e.clientY, rect);
+      console.log("[DRAG] Element found:", element?.id || "none");
 
       if (!element) {
         builder.setSelectedElementId(null);
@@ -254,12 +278,6 @@ export function InstagramPostBuilder() {
       }
 
       builder.setSelectedElementId(element.id);
-
-      const scaleX = 1080 / rect.width;
-      const scaleY = 1080 / rect.height;
-
-      const scaledX = (e.clientX - rect.left) * scaleX;
-      const scaledY = (e.clientY - rect.top) * scaleY;
 
       setIsDraggingElement(true);
       setDragOffset({
@@ -378,6 +396,7 @@ export function InstagramPostBuilder() {
               config={builder.config}
               onCanvasReady={setCanvasRef}
               isDragging={isDraggingElement}
+              selectedElementId={builder.selectedElementId}
               onMouseDown={handleCanvasMouseDown}
               onMouseMove={handleCanvasMouseMove}
               onMouseUp={handleCanvasMouseUp}

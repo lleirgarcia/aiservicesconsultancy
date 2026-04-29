@@ -6,6 +6,7 @@ export function renderTemplateToCanvas(
   options?: {
     fillBackground?: boolean;
     renderOutlines?: boolean;
+    selectedElementId?: string | null;
   }
 ): void {
   // Resize canvas to 1080x1080
@@ -15,7 +16,7 @@ export function renderTemplateToCanvas(
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Failed to get canvas 2D context");
 
-  const { fillBackground = true, renderOutlines = false } = options || {};
+  const { fillBackground = true, renderOutlines = false, selectedElementId = null } = options || {};
 
   // Render background
   if (fillBackground && template.canvas.background_color) {
@@ -27,14 +28,16 @@ export function renderTemplateToCanvas(
   const sortedElements = [...template.elements].sort((a, b) => a.z_index - b.z_index);
 
   for (const element of sortedElements) {
-    renderElement(ctx, element, renderOutlines);
+    const isSelected = element.id === selectedElementId;
+    renderElement(ctx, element, renderOutlines || isSelected, isSelected);
   }
 }
 
 function renderElement(
   ctx: CanvasRenderingContext2D,
   element: TemplateElement,
-  renderOutlines: boolean
+  renderOutlines: boolean,
+  isSelected: boolean = false
 ): void {
   ctx.save();
 
@@ -57,9 +60,16 @@ function renderElement(
     renderImageElement(ctx, element.image_url, element.size);
   }
 
-  // Debug outlines
-  if (renderOutlines) {
-    ctx.strokeStyle = "rgba(137, 206, 255, 0.5)";
+  // Selection outline (bright)
+  if (isSelected) {
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "#89ceff";
+    ctx.lineWidth = 4;
+    ctx.setLineDash([10, 5]);
+    ctx.strokeRect(-4, -4, element.size.width + 8, element.size.height + 8);
+    ctx.setLineDash([]);
+  } else if (renderOutlines) {
+    ctx.strokeStyle = "rgba(137, 206, 255, 0.3)";
     ctx.lineWidth = 2;
     ctx.strokeRect(0, 0, element.size.width, element.size.height);
   }
