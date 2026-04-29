@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useTemplateBuilder } from "@/hooks/useTemplateBuilder";
 import { useTemplateStorage } from "@/hooks/useTemplateStorage";
-import { Template, TemplateElement } from "@/types/instagram-builder";
+import { Template, TemplateElement, TemplateConfig } from "@/types/instagram-builder";
 import { generateElementId } from "@/utils/canvasUtils";
 import { exportCanvasToBlob } from "@/services/canvasRenderer";
 import { useTranslations } from "@/i18n/useTranslations";
@@ -19,6 +19,8 @@ import { DesignEditor } from "@/components/DesignEditor";
 import { SaveTemplateModal } from "@/components/SaveTemplateModal";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { ExportModal } from "@/components/ExportModal";
+import { ExportTemplateModal } from "@/components/ExportTemplateModal";
+import { ImportTemplateModal } from "@/components/ImportTemplateModal";
 
 export function InstagramPostBuilder() {
   const t = useTranslations();
@@ -31,6 +33,9 @@ export function InstagramPostBuilder() {
   const [isEditingDesign, setIsEditingDesign] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showExportTemplateModal, setShowExportTemplateModal] = useState(false);
+  const [showImportTemplateModal, setShowImportTemplateModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -120,6 +125,40 @@ export function InstagramPostBuilder() {
     // For now, we close the design editor. Full save integration requires template loading flow.
     setIsEditingDesign(false);
   }, []);
+
+  const handleExportTemplate = useCallback(async () => {
+    const template = {
+      name: "template",
+      description: "Exported template",
+      config: builder.config,
+      id: "temp-" + Date.now(),
+      user_id: "user-placeholder",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const jsonString = JSON.stringify(template.config, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `template-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setShowExportTemplateModal(false);
+  }, [builder.config]);
+
+  const handleImportTemplate = useCallback(
+    async (name: string, config: TemplateConfig) => {
+      await storage.createTemplate("user-placeholder", name, config, "Imported template");
+      setShowImportTemplateModal(false);
+      setActiveTab("library");
+    },
+    [storage]
+  );
 
   const selectedElement = builder.getSelectedElement();
 
@@ -290,6 +329,22 @@ export function InstagramPostBuilder() {
           setShowExportModal(false);
           setExportError(null);
         }}
+      />
+
+      {/* Export template modal */}
+      <ExportTemplateModal
+        isOpen={showExportTemplateModal}
+        template={selectedTemplate}
+        onExport={handleExportTemplate}
+        onCancel={() => setShowExportTemplateModal(false)}
+      />
+
+      {/* Import template modal */}
+      <ImportTemplateModal
+        isOpen={showImportTemplateModal}
+        error={storage.error}
+        onImport={handleImportTemplate}
+        onCancel={() => setShowImportTemplateModal(false)}
       />
     </div>
   );
