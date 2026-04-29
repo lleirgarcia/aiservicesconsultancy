@@ -255,7 +255,12 @@ export function InstagramPostBuilder() {
           {/* Main canvas area */}
           <div className="lg:col-span-3 flex flex-col gap-6">
             {/* Canvas */}
-            <ElementDragger config={builder.config} onElementDrop={handleElementDrop}>
+            <ElementDragger
+              config={builder.config}
+              onElementDrop={handleElementDrop}
+              selectedElementId={builder.selectedElementId}
+              onSelectElement={builder.setSelectedElementId}
+            >
               <TemplateCanvas config={builder.config} onCanvasReady={setCanvasRef} />
             </ElementDragger>
 
