@@ -56,7 +56,7 @@ export function ElementDragger({
   };
 
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent) => {
       const element = getClosestElement(e.clientX, e.clientY);
       if (!element || !containerRef.current) return;
 
@@ -83,7 +83,7 @@ export function ElementDragger({
   );
 
   const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent) => {
       if (!isDragging || !selectedElementId || !containerRef.current) return;
 
       const canvasRect = containerRef.current.querySelector("canvas")?.getBoundingClientRect();
@@ -117,10 +117,10 @@ export function ElementDragger({
   return (
     <div
       ref={containerRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => setIsDragging(false)}
+      onMouseDownCapture={handleMouseDown}
+      onMouseMoveCapture={handleMouseMove}
+      onMouseUpCapture={handleMouseUp}
+      onMouseLeaveCapture={() => setIsDragging(false)}
       className={`relative ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
     >
       {children}
