@@ -6,6 +6,7 @@ import { TemplateConfig, TemplateElement } from "@/types/instagram-builder";
 interface ElementDraggerProps {
   config: TemplateConfig;
   onElementDrop: (elementId: string, x: number, y: number) => void;
+  onElementDragging?: (elementId: string, x: number, y: number) => void;
   children: ReactNode;
 }
 
@@ -68,16 +69,7 @@ export function ElementDragger({ config, onElementDrop, children }: ElementDragg
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !draggedElementId || !containerRef.current) return;
 
-    // Visual feedback (optional: could add visual indicator here)
-  }, [isDragging, draggedElementId]);
-
-  const handleMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !draggedElementId) {
-      setIsDragging(false);
-      return;
-    }
-
-    const canvasRect = containerRef.current?.querySelector("canvas")?.getBoundingClientRect();
+    const canvasRect = containerRef.current.querySelector("canvas")?.getBoundingClientRect();
     if (!canvasRect) return;
 
     // Calculate scaled coordinates
@@ -87,19 +79,22 @@ export function ElementDragger({ config, onElementDrop, children }: ElementDragg
     const scaledX = (e.clientX - canvasRect.left) * scaleX;
     const scaledY = (e.clientY - canvasRect.top) * scaleY;
 
-    // Calculate new position (subtract the offset)
-    const newX = scaledX - dragOffset.x;
-    const newY = scaledY - dragOffset.y;
+    // Calculate current position (subtract the offset)
+    const currentX = scaledX - dragOffset.x;
+    const currentY = scaledY - dragOffset.y;
 
     // Clamp to canvas bounds
-    const clampedX = Math.max(0, Math.min(newX, 1080 - 50));
-    const clampedY = Math.max(0, Math.min(newY, 1080 - 50));
+    const clampedX = Math.max(0, Math.min(currentX, 1080 - 50));
+    const clampedY = Math.max(0, Math.min(currentY, 1080 - 50));
 
-    onElementDrop(draggedElementId, clampedX, clampedY);
+    // Update position in real-time
+    onElementDrop?.(draggedElementId, clampedX, clampedY);
+  }, [isDragging, draggedElementId, dragOffset, onElementDrop]);
 
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     setDraggedElementId(null);
-  }, [isDragging, draggedElementId, dragOffset, onElementDrop]);
+  }, []);
 
   return (
     <div
