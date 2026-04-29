@@ -49,8 +49,8 @@ export function InstagramPostBuilder() {
       const newElement: TemplateElement = {
         id: elementId,
         type: "text",
-        position: { x: 100, y: 100 },
-        size: { width: 880, height: 200 },
+        position: { x: 400, y: 490 },
+        size: { width: 280, height: 100 },
         content: {
           text: "Edit me",
           font_family: "Space Grotesk",
