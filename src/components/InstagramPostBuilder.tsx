@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef, CSSProperties } from "react";
 import { useTemplateBuilder } from "@/hooks/useTemplateBuilder";
 import { useTemplateStorage } from "@/hooks/useTemplateStorage";
 import { useToast } from "@/hooks/useToast";
@@ -24,6 +24,8 @@ import { ExportTemplateModal } from "@/components/ExportTemplateModal";
 import { ImportTemplateModal } from "@/components/ImportTemplateModal";
 import { Toast } from "@/components/Toast";
 
+type ResizeHandle = "nw" | "n" | "ne" | "w" | "e" | "sw" | "s" | "se";
+
 export function InstagramPostBuilder() {
   const t = useTranslations();
   const builder = useTemplateBuilder();
@@ -40,11 +42,19 @@ export function InstagramPostBuilder() {
   const [showImportTemplateModal, setShowImportTemplateModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
+  const [canvasContainerRef, setCanvasContainerRef] = useState<HTMLDivElement | null>(null);
   const [canvasRect, setCanvasRect] = useState<DOMRect | null>(null);
   const [isDraggingElement, setIsDraggingElement] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [editingTextElementId, setEditingTextElementId] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+
+  // Resize state
+  const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
+  const resizeStartRef = useRef<{
+    mouseX: number; mouseY: number;
+    x: number; y: number; w: number; h: number;
+  } | null>(null);
 
   const handleAddText = useCallback(
     (elementId: string) => {
@@ -77,6 +87,104 @@ export function InstagramPostBuilder() {
     },
     [builder]
   );
+
+  const handleElementResize = useCallback(
+    (elementId: string, position: { x: number; y: number }, size: { width: number; height: number }) => {
+      builder.updateElement(elementId, { position, size });
+    },
+    [builder]
+  );
+
+  const handleTextEdit = useCallback(
+    (elementId: string, text: string) => {
+      const element = builder.config.elements.find((el) => el.id === elementId);
+      if (!element?.content) return;
+      builder.updateElement(elementId, { content: { ...element.content, text } });
+    },
+    [builder]
+  );
+
+  const handleAddLine = useCallback(
+    (elementId: string) => {
+      const newElement: TemplateElement = {
+        id: elementId,
+        type: "shape",
+        position: { x: 140, y: 500 },
+        size: { width: 800, height: 4 },
+        shape: {
+          type: "line",
+          fill_color: "#45464d",
+        },
+        z_index: builder.config.elements.length + 1,
+      };
+      builder.addElement(newElement);
+    },
+    [builder]
+  );
+
+  const handleResizeMouseDown = useCallback(
+    (e: React.MouseEvent, handle: ResizeHandle) => {
+      if (!builder.selectedElementId || !canvasRef) return;
+      const el = builder.config.elements.find((el) => el.id === builder.selectedElementId);
+      if (!el) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setResizeHandle(handle);
+      resizeStartRef.current = {
+        mouseX: e.clientX,
+        mouseY: e.clientY,
+        x: el.position.x,
+        y: el.position.y,
+        w: el.size.width,
+        h: el.size.height,
+      };
+    },
+    [builder, canvasRef]
+  );
+
+  useEffect(() => {
+    if (!resizeHandle || !builder.selectedElementId) return;
+
+    const onMove = (e: MouseEvent) => {
+      const start = resizeStartRef.current;
+      if (!start || !canvasRef) return;
+      const rect = canvasRef.getBoundingClientRect();
+      const scaleX = 1080 / rect.width;
+      const scaleY = 1080 / rect.height;
+      const dx = (e.clientX - start.mouseX) * scaleX;
+      const dy = (e.clientY - start.mouseY) * scaleY;
+
+      let newX = start.x, newY = start.y, newW = start.w, newH = start.h;
+
+      if (resizeHandle.includes("e")) newW = Math.max(20, start.w + dx);
+      if (resizeHandle.includes("s")) newH = Math.max(20, start.h + dy);
+      if (resizeHandle.includes("w")) {
+        newW = Math.max(20, start.w - dx);
+        newX = start.x + (start.w - newW);
+      }
+      if (resizeHandle.includes("n")) {
+        newH = Math.max(20, start.h - dy);
+        newY = start.y + (start.h - newH);
+      }
+
+      builder.updateElement(builder.selectedElementId!, {
+        position: { x: newX, y: newY },
+        size: { width: newW, height: newH },
+      });
+    };
+
+    const onUp = () => {
+      setResizeHandle(null);
+      resizeStartRef.current = null;
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [resizeHandle, builder, canvasRef]);
 
   const handleSaveTemplate = useCallback(
     async (name: string, description?: string) => {
@@ -393,12 +501,12 @@ export function InstagramPostBuilder() {
           {/* Main canvas area */}
           <div className="lg:col-span-3 flex flex-col gap-6">
             {/* Canvas */}
-            <div className="relative">
+            <div className="relative" ref={setCanvasContainerRef}>
               <TemplateCanvas
                 config={builder.config}
                 onCanvasReady={setCanvasRef}
                 isDragging={isDraggingElement}
-                selectedElementId={builder.selectedElementId}
+                selectedElementId={resizeHandle ? null : builder.selectedElementId}
                 onMouseDown={handleCanvasMouseDown}
                 onMouseMove={handleCanvasMouseMove}
                 onMouseUp={handleCanvasMouseUp}
@@ -417,13 +525,58 @@ export function InstagramPostBuilder() {
                   onClose={() => setEditingTextElementId(null)}
                 />
               )}
+              {/* Resize handles overlay */}
+              {selectedElement && canvasRef && canvasContainerRef && !editingTextElementId && (() => {
+                const cr = canvasRef.getBoundingClientRect();
+                const pr = canvasContainerRef.getBoundingClientRect();
+                const sx = cr.width / 1080;
+                const sy = cr.height / 1080;
+                const ox = cr.left - pr.left;
+                const oy = cr.top - pr.top;
+                const left = selectedElement.position.x * sx + ox;
+                const top = selectedElement.position.y * sy + oy;
+                const w = selectedElement.size.width * sx;
+                const h = selectedElement.size.height * sy;
+                const H = 8;
+                const half = H / 2;
+                const mid = `calc(50% - ${half}px)`;
+                const handles: { id: ResizeHandle; style: CSSProperties }[] = [
+                  { id: "nw", style: { top: -half, left: -half, cursor: "nw-resize" } },
+                  { id: "n",  style: { top: -half, left: mid,    cursor: "n-resize"  } },
+                  { id: "ne", style: { top: -half, right: -half, cursor: "ne-resize" } },
+                  { id: "w",  style: { top: mid,   left: -half,  cursor: "w-resize"  } },
+                  { id: "e",  style: { top: mid,   right: -half, cursor: "e-resize"  } },
+                  { id: "sw", style: { bottom: -half, left: -half,  cursor: "sw-resize" } },
+                  { id: "s",  style: { bottom: -half, left: mid,    cursor: "s-resize"  } },
+                  { id: "se", style: { bottom: -half, right: -half, cursor: "se-resize" } },
+                ];
+                return (
+                  <div style={{ position: "absolute", left, top, width: w, height: h,
+                                border: "2px solid #89ceff", boxSizing: "border-box",
+                                pointerEvents: "none", zIndex: 10 }}>
+                    {handles.map(({ id, style }) => (
+                      <div key={id} style={{
+                        position: "absolute", width: H, height: H,
+                        background: "#fff", border: "2px solid #89ceff",
+                        borderRadius: 2, boxSizing: "border-box",
+                        pointerEvents: "auto", ...style,
+                      }}
+                        onMouseDown={(e) => handleResizeMouseDown(e, id)}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Edit panel */}
             {isEditingElement && selectedElement && (
               <TextElementEditor
                 content={selectedElement.content || { text: "", font_family: "Inter", font_size: 24, font_weight: 400, color: "#e0e3e5", text_align: "left" }}
-                onChange={(updates) => builder.updateElement(selectedElement.id, { content: { ...selectedElement.content, ...updates } })}
+                onChange={(updates) => {
+                  const base = selectedElement.content ?? { text: "", font_family: "Inter", font_size: 24, font_weight: 400, color: "#e0e3e5", text_align: "left" as const };
+                  builder.updateElement(selectedElement.id, { content: { ...base, ...updates } });
+                }}
                 onDone={() => setIsEditingElement(false)}
               />
             )}
@@ -477,7 +630,7 @@ export function InstagramPostBuilder() {
             <Preview config={builder.config} label="Live Preview" />
 
             {/* Element palette */}
-            <ElementPalette onAddText={handleAddText} />
+            <ElementPalette onAddText={handleAddText} onAddLine={handleAddLine} />
 
             {/* Background color */}
             <ColorPicker

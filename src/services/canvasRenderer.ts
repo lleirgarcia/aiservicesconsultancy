@@ -1,4 +1,4 @@
-import { TemplateConfig, TemplateElement, TextElementContent, ImageExport } from "@/types/instagram-builder";
+import { TemplateConfig, TemplateElement, TextElementContent, ShapeConfig, ImageExport } from "@/types/instagram-builder";
 
 export function renderTemplateToCanvas(
   canvas: HTMLCanvasElement,
@@ -58,6 +58,8 @@ function renderElement(
     renderTextElement(ctx, element.content, element.size);
   } else if (element.type === "image" && element.image_url) {
     renderImageElement(ctx, element.image_url, element.size);
+  } else if (element.type === "shape" && element.shape) {
+    renderShapeElement(ctx, element.shape, element.size);
   }
 
   // Selection outline (bright)
@@ -103,6 +105,53 @@ function renderTextElement(
   }
 
   ctx.fillText(text, x, y, size.width);
+}
+
+function renderShapeElement(
+  ctx: CanvasRenderingContext2D,
+  shape: ShapeConfig,
+  size: { width: number; height: number }
+): void {
+  ctx.fillStyle = getCSSColor(shape.fill_color);
+
+  if (shape.type === "circle") {
+    const rx = size.width / 2;
+    const ry = size.height / 2;
+    ctx.beginPath();
+    ctx.ellipse(rx, ry, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (shape.stroke_color) {
+      ctx.strokeStyle = getCSSColor(shape.stroke_color);
+      ctx.lineWidth = shape.stroke_width ?? 1;
+      ctx.stroke();
+    }
+    return;
+  }
+
+  // rectangle and line both fill a rect
+  if (shape.border_radius && shape.border_radius > 0) {
+    const r = shape.border_radius;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(size.width - r, 0);
+    ctx.arcTo(size.width, 0, size.width, r, r);
+    ctx.lineTo(size.width, size.height - r);
+    ctx.arcTo(size.width, size.height, size.width - r, size.height, r);
+    ctx.lineTo(r, size.height);
+    ctx.arcTo(0, size.height, 0, size.height - r, r);
+    ctx.lineTo(0, r);
+    ctx.arcTo(0, 0, r, 0, r);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    ctx.fillRect(0, 0, size.width, size.height);
+  }
+
+  if (shape.stroke_color) {
+    ctx.strokeStyle = getCSSColor(shape.stroke_color);
+    ctx.lineWidth = shape.stroke_width ?? 1;
+    ctx.strokeRect(0, 0, size.width, size.height);
+  }
 }
 
 function renderImageElement(
