@@ -11,7 +11,6 @@ import { useTranslations } from "@/i18n/useTranslations";
 
 // Components
 import { TemplateCanvas } from "@/components/Canvas/TemplateCanvas";
-import { ElementDragger } from "@/components/Canvas/ElementDragger";
 import { Preview } from "@/components/Canvas/Preview";
 import { ColorPicker } from "@/components/Sidebar/ColorPicker";
 import { ElementPalette } from "@/components/Sidebar/ElementPalette";
@@ -195,44 +194,64 @@ export function InstagramPostBuilder() {
 
   const selectedElement = builder.getSelectedElement();
 
-  const getClosestElement = useCallback(
-    (clientX: number, clientY: number) => {
-      if (!canvasRef) return null;
-      const rect = canvasRef.getBoundingClientRect();
-
+  const getElementAtPoint = useCallback(
+    (clientX: number, clientY: number, rect: DOMRect) => {
       const scaleX = 1080 / rect.width;
       const scaleY = 1080 / rect.height;
 
       const scaledX = (clientX - rect.left) * scaleX;
       const scaledY = (clientY - rect.top) * scaleY;
 
-      let closest = null;
-      let minDistance = 150;
+      // Check elements in reverse order (top-most first by z-index)
+      const sortedElements = [...builder.config.elements].sort(
+        (a, b) => b.z_index - a.z_index
+      );
 
-      for (let i = builder.config.elements.length - 1; i >= 0; i--) {
-        const el = builder.config.elements[i];
+      for (const el of sortedElements) {
+        if (
+          scaledX >= el.position.x &&
+          scaledX <= el.position.x + el.size.width &&
+          scaledY >= el.position.y &&
+          scaledY <= el.position.y + el.size.height
+        ) {
+          return el;
+        }
+      }
+
+      // Fallback: find closest element if nothing was hit directly
+      let closest = null;
+      let minDistance = 200;
+
+      for (const el of sortedElements) {
         const centerX = el.position.x + el.size.width / 2;
         const centerY = el.position.y + el.size.height / 2;
-        const distance = Math.sqrt(Math.pow(scaledX - centerX, 2) + Math.pow(scaledY - centerY, 2));
+        const distance = Math.sqrt(
+          Math.pow(scaledX - centerX, 2) + Math.pow(scaledY - centerY, 2)
+        );
 
         if (distance < minDistance) {
           minDistance = distance;
           closest = el;
         }
       }
+
       return closest;
     },
-    [canvasRef, builder.config.elements]
+    [builder.config.elements]
   );
 
   const handleCanvasMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (!canvasRef) return;
-      const rect = canvasRef.getBoundingClientRect();
+      const canvas = e.currentTarget as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
       setCanvasRect(rect);
 
-      const element = getClosestElement(e.clientX, e.clientY);
-      if (!element) return;
+      const element = getElementAtPoint(e.clientX, e.clientY, rect);
+
+      if (!element) {
+        builder.setSelectedElementId(null);
+        return;
+      }
 
       builder.setSelectedElementId(element.id);
 
@@ -247,31 +266,45 @@ export function InstagramPostBuilder() {
         x: scaledX - element.position.x,
         y: scaledY - element.position.y,
       });
+
+      e.preventDefault();
     },
-    [canvasRef, getClosestElement, builder]
+    [getElementAtPoint, builder]
   );
 
   const handleCanvasMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!isDraggingElement || !builder.selectedElementId || !canvasRect) return;
+      if (!isDraggingElement || !builder.selectedElementId) return;
 
-      const scaleX = 1080 / canvasRect.width;
-      const scaleY = 1080 / canvasRect.height;
+      const canvas = e.currentTarget as HTMLCanvasElement;
+      const rect = canvas.getBoundingClientRect();
 
-      const scaledX = (e.clientX - canvasRect.left) * scaleX;
-      const scaledY = (e.clientY - canvasRect.top) * scaleY;
+      const scaleX = 1080 / rect.width;
+      const scaleY = 1080 / rect.height;
+
+      const scaledX = (e.clientX - rect.left) * scaleX;
+      const scaledY = (e.clientY - rect.top) * scaleY;
 
       const currentX = scaledX - dragOffset.x;
       const currentY = scaledY - dragOffset.y;
 
-      const clampedX = Math.max(0, Math.min(currentX, 1080 - 50));
-      const clampedY = Math.max(0, Math.min(currentY, 1080 - 50));
+      const selectedEl = builder.config.elements.find(
+        (el) => el.id === builder.selectedElementId
+      );
+
+      const elWidth = selectedEl?.size.width || 100;
+      const elHeight = selectedEl?.size.height || 100;
+
+      const clampedX = Math.max(0, Math.min(currentX, 1080 - elWidth));
+      const clampedY = Math.max(0, Math.min(currentY, 1080 - elHeight));
 
       builder.updateElement(builder.selectedElementId, {
         position: { x: clampedX, y: clampedY },
       });
+
+      e.preventDefault();
     },
-    [isDraggingElement, canvasRect, dragOffset, builder]
+    [isDraggingElement, dragOffset, builder]
   );
 
   const handleCanvasMouseUp = useCallback(() => {
@@ -341,22 +374,15 @@ export function InstagramPostBuilder() {
           {/* Main canvas area */}
           <div className="lg:col-span-3 flex flex-col gap-6">
             {/* Canvas */}
-            <ElementDragger
+            <TemplateCanvas
               config={builder.config}
-              onElementDrop={handleElementDrop}
-              selectedElementId={builder.selectedElementId}
-              onSelectElement={builder.setSelectedElementId}
-            >
-              <TemplateCanvas
-                config={builder.config}
-                onCanvasReady={setCanvasRef}
-                isDragging={isDraggingElement}
-                onMouseDown={handleCanvasMouseDown}
-                onMouseMove={handleCanvasMouseMove}
-                onMouseUp={handleCanvasMouseUp}
-                onMouseLeave={handleCanvasMouseUp}
-              />
-            </ElementDragger>
+              onCanvasReady={setCanvasRef}
+              isDragging={isDraggingElement}
+              onMouseDown={handleCanvasMouseDown}
+              onMouseMove={handleCanvasMouseMove}
+              onMouseUp={handleCanvasMouseUp}
+              onMouseLeave={handleCanvasMouseUp}
+            />
 
             {/* Edit panel */}
             {isEditingElement && selectedElement && (

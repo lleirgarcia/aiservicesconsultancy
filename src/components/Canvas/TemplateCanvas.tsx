@@ -43,14 +43,16 @@ export function TemplateCanvas({
         ref={canvasRef}
         width={1080}
         height={1080}
-        className={`max-w-full max-h-[600px] cursor-${isDragging ? "grabbing" : "grab"}`}
+        className={`max-w-full max-h-[600px] ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
         style={{
           aspectRatio: "1 / 1",
-          imageRendering: "pixelPerfect",
+          imageRendering: "pixelated",
+          touchAction: "none",
+          userSelect: "none",
         }}
-        onMouseDownCapture={onMouseDown}
-        onMouseMoveCapture={onMouseMove}
-        onMouseUpCapture={onMouseUp}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
         onMouseLeave={onMouseLeave}
       />
     </div>
