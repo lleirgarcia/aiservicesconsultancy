@@ -40,6 +40,9 @@ export function InstagramPostBuilder() {
   const [showImportTemplateModal, setShowImportTemplateModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
+  const [canvasRect, setCanvasRect] = useState<DOMRect | null>(null);
+  const [isDraggingElement, setIsDraggingElement] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [exportError, setExportError] = useState<string | null>(null);
 
   const handleAddText = useCallback(
@@ -192,6 +195,89 @@ export function InstagramPostBuilder() {
 
   const selectedElement = builder.getSelectedElement();
 
+  const getClosestElement = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!canvasRef) return null;
+      const rect = canvasRef.getBoundingClientRect();
+
+      const scaleX = 1080 / rect.width;
+      const scaleY = 1080 / rect.height;
+
+      const scaledX = (clientX - rect.left) * scaleX;
+      const scaledY = (clientY - rect.top) * scaleY;
+
+      let closest = null;
+      let minDistance = 150;
+
+      for (let i = builder.config.elements.length - 1; i >= 0; i--) {
+        const el = builder.config.elements[i];
+        const centerX = el.position.x + el.size.width / 2;
+        const centerY = el.position.y + el.size.height / 2;
+        const distance = Math.sqrt(Math.pow(scaledX - centerX, 2) + Math.pow(scaledY - centerY, 2));
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closest = el;
+        }
+      }
+      return closest;
+    },
+    [canvasRef, builder.config.elements]
+  );
+
+  const handleCanvasMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!canvasRef) return;
+      const rect = canvasRef.getBoundingClientRect();
+      setCanvasRect(rect);
+
+      const element = getClosestElement(e.clientX, e.clientY);
+      if (!element) return;
+
+      builder.setSelectedElementId(element.id);
+
+      const scaleX = 1080 / rect.width;
+      const scaleY = 1080 / rect.height;
+
+      const scaledX = (e.clientX - rect.left) * scaleX;
+      const scaledY = (e.clientY - rect.top) * scaleY;
+
+      setIsDraggingElement(true);
+      setDragOffset({
+        x: scaledX - element.position.x,
+        y: scaledY - element.position.y,
+      });
+    },
+    [canvasRef, getClosestElement, builder]
+  );
+
+  const handleCanvasMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDraggingElement || !builder.selectedElementId || !canvasRect) return;
+
+      const scaleX = 1080 / canvasRect.width;
+      const scaleY = 1080 / canvasRect.height;
+
+      const scaledX = (e.clientX - canvasRect.left) * scaleX;
+      const scaledY = (e.clientY - canvasRect.top) * scaleY;
+
+      const currentX = scaledX - dragOffset.x;
+      const currentY = scaledY - dragOffset.y;
+
+      const clampedX = Math.max(0, Math.min(currentX, 1080 - 50));
+      const clampedY = Math.max(0, Math.min(currentY, 1080 - 50));
+
+      builder.updateElement(builder.selectedElementId, {
+        position: { x: clampedX, y: clampedY },
+      });
+    },
+    [isDraggingElement, canvasRect, dragOffset, builder]
+  );
+
+  const handleCanvasMouseUp = useCallback(() => {
+    setIsDraggingElement(false);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[var(--bg)] p-6">
       <div className="max-w-7xl mx-auto">
@@ -261,7 +347,15 @@ export function InstagramPostBuilder() {
               selectedElementId={builder.selectedElementId}
               onSelectElement={builder.setSelectedElementId}
             >
-              <TemplateCanvas config={builder.config} onCanvasReady={setCanvasRef} />
+              <TemplateCanvas
+                config={builder.config}
+                onCanvasReady={setCanvasRef}
+                isDragging={isDraggingElement}
+                onMouseDown={handleCanvasMouseDown}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseUp={handleCanvasMouseUp}
+                onMouseLeave={handleCanvasMouseUp}
+              />
             </ElementDragger>
 
             {/* Edit panel */}

@@ -8,9 +8,21 @@ interface TemplateCanvasProps {
   config: TemplateConfig;
   onCanvasReady?: (canvas: HTMLCanvasElement) => void;
   isDragging?: boolean;
+  onMouseDown?: (e: React.MouseEvent) => void;
+  onMouseMove?: (e: React.MouseEvent) => void;
+  onMouseUp?: (e: React.MouseEvent) => void;
+  onMouseLeave?: (e: React.MouseEvent) => void;
 }
 
-export function TemplateCanvas({ config, onCanvasReady, isDragging }: TemplateCanvasProps) {
+export function TemplateCanvas({
+  config,
+  onCanvasReady,
+  isDragging,
+  onMouseDown,
+  onMouseMove,
+  onMouseUp,
+  onMouseLeave,
+}: TemplateCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -36,6 +48,10 @@ export function TemplateCanvas({ config, onCanvasReady, isDragging }: TemplateCa
           aspectRatio: "1 / 1",
           imageRendering: "pixelPerfect",
         }}
+        onMouseDownCapture={onMouseDown}
+        onMouseMoveCapture={onMouseMove}
+        onMouseUpCapture={onMouseUp}
+        onMouseLeaveCapture={onMouseLeave}
       />
     </div>
   );
