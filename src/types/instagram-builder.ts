@@ -59,7 +59,7 @@ export interface TextElementContent {
 }
 
 export interface ShapeConfig {
-  type: "rectangle" | "circle";
+  type: "rectangle" | "circle" | "line";
   fill_color: string;
   stroke_color?: string;
   stroke_width?: number;

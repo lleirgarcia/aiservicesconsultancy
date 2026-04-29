@@ -34,7 +34,7 @@ export function TemplateCanvas({ config, onCanvasReady, isDragging }: TemplateCa
         className={`max-w-full max-h-[600px] cursor-${isDragging ? "grabbing" : "grab"}`}
         style={{
           aspectRatio: "1 / 1",
-          imageRendering: "pixelPerfect",
+          imageRendering: "pixelated",
         }}
       />
     </div>

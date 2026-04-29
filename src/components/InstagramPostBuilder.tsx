@@ -74,6 +74,40 @@ export function InstagramPostBuilder() {
     [builder]
   );
 
+  const handleElementResize = useCallback(
+    (elementId: string, position: { x: number; y: number }, size: { width: number; height: number }) => {
+      builder.updateElement(elementId, { position, size });
+    },
+    [builder]
+  );
+
+  const handleTextEdit = useCallback(
+    (elementId: string, text: string) => {
+      const element = builder.config.elements.find((el) => el.id === elementId);
+      if (!element?.content) return;
+      builder.updateElement(elementId, { content: { ...element.content, text } });
+    },
+    [builder]
+  );
+
+  const handleAddLine = useCallback(
+    (elementId: string) => {
+      const newElement: TemplateElement = {
+        id: elementId,
+        type: "shape",
+        position: { x: 140, y: 500 },
+        size: { width: 800, height: 4 },
+        shape: {
+          type: "line",
+          fill_color: "#45464d",
+        },
+        z_index: builder.config.elements.length + 1,
+      };
+      builder.addElement(newElement);
+    },
+    [builder]
+  );
+
   const handleSaveTemplate = useCallback(
     async (name: string, description?: string) => {
       try {
@@ -258,6 +292,8 @@ export function InstagramPostBuilder() {
             <ElementDragger
               config={builder.config}
               onElementDrop={handleElementDrop}
+              onElementResize={handleElementResize}
+              onTextEdit={handleTextEdit}
               selectedElementId={builder.selectedElementId}
               onSelectElement={builder.setSelectedElementId}
             >
@@ -268,7 +304,10 @@ export function InstagramPostBuilder() {
             {isEditingElement && selectedElement && (
               <TextElementEditor
                 content={selectedElement.content || { text: "", font_family: "Inter", font_size: 24, font_weight: 400, color: "#e0e3e5", text_align: "left" }}
-                onChange={(updates) => builder.updateElement(selectedElement.id, { content: { ...selectedElement.content, ...updates } })}
+                onChange={(updates) => {
+                  const base = selectedElement.content ?? { text: "", font_family: "Inter", font_size: 24, font_weight: 400, color: "#e0e3e5", text_align: "left" as const };
+                  builder.updateElement(selectedElement.id, { content: { ...base, ...updates } });
+                }}
                 onDone={() => setIsEditingElement(false)}
               />
             )}
@@ -322,7 +361,7 @@ export function InstagramPostBuilder() {
             <Preview config={builder.config} label="Live Preview" />
 
             {/* Element palette */}
-            <ElementPalette onAddText={handleAddText} />
+            <ElementPalette onAddText={handleAddText} onAddLine={handleAddLine} />
 
             {/* Background color */}
             <ColorPicker
