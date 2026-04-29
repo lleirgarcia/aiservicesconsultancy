@@ -121,11 +121,11 @@ description: "Task list for Instagram Post Builder feature implementation"
 
 ### Implementation for User Story 4
 
-- [ ] T038 [US4] Create `src/components/ExportTemplateModal.tsx` dialog for exporting template as .json file
-- [ ] T039 [US4] Add export handler to TemplateLibraryItem (downloads template_config as JSON)
-- [ ] T040 [US4] Create `src/components/ImportTemplateModal.tsx` dialog for importing .json template file
-- [ ] T041 [US4] Add import handler to InstagramPostBuilder (parses JSON, validates schema, saves as new template)
-- [ ] T042 [US4] Test user story 4 acceptance scenarios via React Testing Library (`__tests__/integration/template-export.test.tsx`)
+- [x] T038 [US4] Create `src/components/ExportTemplateModal.tsx` dialog for exporting template as .json file
+- [x] T039 [US4] Add export handler to TemplateLibraryItem (downloads template_config as JSON)
+- [x] T040 [US4] Create `src/components/ImportTemplateModal.tsx` dialog for importing .json template file
+- [x] T041 [US4] Add import handler to InstagramPostBuilder (parses JSON, validates schema, saves as new template)
+- [x] T042 [US4] Test user story 4 acceptance scenarios via React Testing Library (`__tests__/integration/template-export.test.tsx`)
 
 **Checkpoint**: All user stories 1-4 are independently functional (though P2 and P3 are deferred from MVP)
 

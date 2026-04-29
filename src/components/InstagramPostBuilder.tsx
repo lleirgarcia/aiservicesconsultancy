@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useTemplateBuilder } from "@/hooks/useTemplateBuilder";
 import { useTemplateStorage } from "@/hooks/useTemplateStorage";
+import { useToast } from "@/hooks/useToast";
 import { Template, TemplateElement, TemplateConfig } from "@/types/instagram-builder";
 import { generateElementId } from "@/utils/canvasUtils";
 import { exportCanvasToBlob } from "@/services/canvasRenderer";
@@ -21,11 +22,13 @@ import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { ExportModal } from "@/components/ExportModal";
 import { ExportTemplateModal } from "@/components/ExportTemplateModal";
 import { ImportTemplateModal } from "@/components/ImportTemplateModal";
+import { Toast } from "@/components/Toast";
 
 export function InstagramPostBuilder() {
   const t = useTranslations();
   const builder = useTemplateBuilder();
   const storage = useTemplateStorage();
+  const { toasts, success, error, removeToast } = useToast();
 
   // UI State
   const [activeTab, setActiveTab] = useState<"create" | "library">("create");
@@ -73,22 +76,32 @@ export function InstagramPostBuilder() {
 
   const handleSaveTemplate = useCallback(
     async (name: string, description?: string) => {
-      const userId = "user-placeholder";
-      const result = await storage.createTemplate(userId, name, builder.config, description);
-      if (result) {
-        builder.resetToDirty();
-        setShowSaveModal(false);
+      try {
+        const userId = "user-placeholder";
+        const result = await storage.createTemplate(userId, name, builder.config, description);
+        if (result) {
+          builder.resetToDirty();
+          setShowSaveModal(false);
+          success(`Template "${name}" saved successfully`);
+        }
+      } catch (err) {
+        error(err instanceof Error ? err.message : "Failed to save template");
       }
     },
-    [builder, storage]
+    [builder, storage, success, error]
   );
 
   const handleLoadTemplate = useCallback(
     (template: Template) => {
-      builder.setConfig(template.config);
-      setActiveTab("create");
+      try {
+        builder.setConfig(template.config);
+        setActiveTab("create");
+        success(`Template "${template.name}" loaded`);
+      } catch (err) {
+        error(err instanceof Error ? err.message : "Failed to load template");
+      }
     },
-    [builder]
+    [builder, success, error]
   );
 
   const handleDownloadImage = useCallback(
@@ -111,12 +124,14 @@ export function InstagramPostBuilder() {
 
         setShowExportModal(false);
         setExportError(null);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to export image";
+        success(`Image downloaded as ${filename}`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to export image";
         setExportError(message);
+        error(message);
       }
     },
-    [canvasRef]
+    [canvasRef, success, error]
   );
 
   const handleSaveDesignChanges = useCallback(async () => {
@@ -127,37 +142,47 @@ export function InstagramPostBuilder() {
   }, []);
 
   const handleExportTemplate = useCallback(async () => {
-    const template = {
-      name: "template",
-      description: "Exported template",
-      config: builder.config,
-      id: "temp-" + Date.now(),
-      user_id: "user-placeholder",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+    try {
+      const template = {
+        name: "template",
+        description: "Exported template",
+        config: builder.config,
+        id: "temp-" + Date.now(),
+        user_id: "user-placeholder",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
-    const jsonString = JSON.stringify(template.config, null, 2);
-    const blob = new Blob([jsonString], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `template-${Date.now()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+      const jsonString = JSON.stringify(template.config, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `template-${Date.now()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-    setShowExportTemplateModal(false);
-  }, [builder.config]);
+      setShowExportTemplateModal(false);
+      success("Template exported successfully");
+    } catch (err) {
+      error(err instanceof Error ? err.message : "Failed to export template");
+    }
+  }, [builder.config, success, error]);
 
   const handleImportTemplate = useCallback(
     async (name: string, config: TemplateConfig) => {
-      await storage.createTemplate("user-placeholder", name, config, "Imported template");
-      setShowImportTemplateModal(false);
-      setActiveTab("library");
+      try {
+        await storage.createTemplate("user-placeholder", name, config, "Imported template");
+        setShowImportTemplateModal(false);
+        setActiveTab("library");
+        success(`Template "${name}" imported successfully`);
+      } catch (err) {
+        error(err instanceof Error ? err.message : "Failed to import template");
+      }
     },
-    [storage]
+    [storage, success, error]
   );
 
   const handleShowExportTemplateModal = useCallback((template: Template) => {
@@ -366,6 +391,18 @@ export function InstagramPostBuilder() {
         onImport={handleImportTemplate}
         onCancel={() => setShowImportTemplateModal(false)}
       />
+
+      {/* Toast notifications */}
+      <div className="fixed bottom-6 right-6 space-y-2 z-40 max-w-md">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
