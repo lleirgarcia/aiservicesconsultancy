@@ -22,6 +22,11 @@ export function ElementDragger({ config, onElementDrop, children }: ElementDragg
     const canvasRect = containerRef.current.querySelector("canvas")?.getBoundingClientRect();
     if (!canvasRect) return null;
 
+    // Verificar si el click está dentro del canvas
+    if (x < canvasRect.left || x > canvasRect.right || y < canvasRect.top || y > canvasRect.bottom) {
+      return null;
+    }
+
     // Scale coordinates to canvas size (1080x1080)
     const scaleX = 1080 / canvasRect.width;
     const scaleY = 1080 / canvasRect.height;
@@ -32,11 +37,12 @@ export function ElementDragger({ config, onElementDrop, children }: ElementDragg
     // Find element at position (check in reverse order for z-index)
     for (let i = config.elements.length - 1; i >= 0; i--) {
       const el = config.elements[i];
+      const tolerance = 10; // Add tolerance for easier selection
       if (
-        scaledX >= el.position.x &&
-        scaledX <= el.position.x + el.size.width &&
-        scaledY >= el.position.y &&
-        scaledY <= el.position.y + el.size.height
+        scaledX >= el.position.x - tolerance &&
+        scaledX <= el.position.x + el.size.width + tolerance &&
+        scaledY >= el.position.y - tolerance &&
+        scaledY <= el.position.y + el.size.height + tolerance
       ) {
         return el;
       }
