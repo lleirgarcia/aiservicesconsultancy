@@ -8,9 +8,14 @@ import { useTemplateStorage } from "@/hooks/useTemplateStorage";
 interface TemplateLibraryProps {
   userId: string;
   onSelectTemplate: (template: Template) => void;
+  onExportTemplate?: (template: Template) => void;
 }
 
-export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryProps) {
+export function TemplateLibrary({
+  userId,
+  onSelectTemplate,
+  onExportTemplate,
+}: TemplateLibraryProps) {
   const storage = useTemplateStorage();
   const [templates, setTemplates] = useState<Template[]>([]);
 
@@ -41,6 +46,7 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
           key={template.id}
           template={template}
           onSelect={() => onSelectTemplate(template)}
+          onExport={onExportTemplate ? () => onExportTemplate(template) : undefined}
           onDelete={async () => {
             await storage.deleteTemplate(template.id);
             setTemplates(templates.filter((t) => t.id !== template.id));

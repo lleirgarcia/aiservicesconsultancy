@@ -7,9 +7,15 @@ interface TemplateLibraryItemProps {
   template: Template;
   onSelect: () => void;
   onDelete: () => Promise<void>;
+  onExport?: () => void;
 }
 
-export function TemplateLibraryItem({ template, onSelect, onDelete }: TemplateLibraryItemProps) {
+export function TemplateLibraryItem({
+  template,
+  onSelect,
+  onDelete,
+  onExport,
+}: TemplateLibraryItemProps) {
   const t = useTranslations();
 
   const createdDate = new Date(template.created_at).toLocaleDateString();
@@ -32,6 +38,14 @@ export function TemplateLibraryItem({ template, onSelect, onDelete }: TemplateLi
           >
             {t("instagram_builder.buttons.load")}
           </button>
+          {onExport && (
+            <button
+              onClick={onExport}
+              className="px-3 py-2 rounded-lg bg-[var(--bg-elevated)] text-[var(--fg)] text-sm font-medium hover:bg-[var(--border)] transition-colors whitespace-nowrap"
+            >
+              {t("instagram_builder.buttons.export")}
+            </button>
+          )}
           <button
             onClick={onDelete}
             className="px-3 py-2 rounded-lg bg-red-500/10 text-red-400 text-sm font-medium hover:bg-red-500/20 border border-red-500/30 whitespace-nowrap"

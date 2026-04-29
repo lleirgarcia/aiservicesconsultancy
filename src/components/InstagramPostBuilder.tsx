@@ -160,6 +160,11 @@ export function InstagramPostBuilder() {
     [storage]
   );
 
+  const handleShowExportTemplateModal = useCallback((template: Template) => {
+    setSelectedTemplate(template);
+    setShowExportTemplateModal(true);
+  }, []);
+
   const selectedElement = builder.getSelectedElement();
 
   return (
@@ -200,7 +205,22 @@ export function InstagramPostBuilder() {
         {/* Library Tab */}
         {activeTab === "library" && (
           <div className="mb-8">
-            <TemplateLibrary userId="user-placeholder" onSelectTemplate={handleLoadTemplate} />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-[var(--fg)]">
+                {t("instagram_builder.labels.myTemplates")}
+              </h2>
+              <button
+                onClick={() => setShowImportTemplateModal(true)}
+                className="px-4 py-2 rounded-lg border border-[var(--accent)] text-[var(--accent)] font-medium hover:bg-[var(--accent-dim)] transition-colors"
+              >
+                Import
+              </button>
+            </div>
+            <TemplateLibrary
+              userId="user-placeholder"
+              onSelectTemplate={handleLoadTemplate}
+              onExportTemplate={handleShowExportTemplateModal}
+            />
           </div>
         )}
 
