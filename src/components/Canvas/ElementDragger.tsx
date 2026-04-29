@@ -18,14 +18,10 @@ export function ElementDragger({ config, onElementDrop, children }: ElementDragg
   const getElementAtPosition = (x: number, y: number): TemplateElement | null => {
     if (!containerRef.current) return null;
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const canvasX = x - rect.left;
-    const canvasY = y - rect.top;
-
-    // Scale coordinates to canvas size (1080x1080)
     const canvasRect = containerRef.current.querySelector("canvas")?.getBoundingClientRect();
     if (!canvasRect) return null;
 
+    // Scale coordinates to canvas size (1080x1080)
     const scaleX = 1080 / canvasRect.width;
     const scaleY = 1080 / canvasRect.height;
 
@@ -49,13 +45,23 @@ export function ElementDragger({ config, onElementDrop, children }: ElementDragg
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const element = getElementAtPosition(e.clientX, e.clientY);
-    if (!element) return;
+    if (!element || !containerRef.current) return;
+
+    const canvasRect = containerRef.current.querySelector("canvas")?.getBoundingClientRect();
+    if (!canvasRect) return;
+
+    // Calculate scaled coordinates
+    const scaleX = 1080 / canvasRect.width;
+    const scaleY = 1080 / canvasRect.height;
+
+    const scaledX = (e.clientX - canvasRect.left) * scaleX;
+    const scaledY = (e.clientY - canvasRect.top) * scaleY;
 
     setIsDragging(true);
     setDraggedElementId(element.id);
     setDragOffset({
-      x: e.clientX - element.position.x,
-      y: e.clientY - element.position.y,
+      x: scaledX - element.position.x,
+      y: scaledY - element.position.y,
     });
   }, [config.elements]);
 
@@ -74,12 +80,16 @@ export function ElementDragger({ config, onElementDrop, children }: ElementDragg
     const canvasRect = containerRef.current?.querySelector("canvas")?.getBoundingClientRect();
     if (!canvasRect) return;
 
-    // Calculate new position in canvas coordinates
+    // Calculate scaled coordinates
     const scaleX = 1080 / canvasRect.width;
     const scaleY = 1080 / canvasRect.height;
 
-    const newX = (e.clientX - canvasRect.left) * scaleX - dragOffset.x;
-    const newY = (e.clientY - canvasRect.top) * scaleY - dragOffset.y;
+    const scaledX = (e.clientX - canvasRect.left) * scaleX;
+    const scaledY = (e.clientY - canvasRect.top) * scaleY;
+
+    // Calculate new position (subtract the offset)
+    const newX = scaledX - dragOffset.x;
+    const newY = scaledY - dragOffset.y;
 
     // Clamp to canvas bounds
     const clampedX = Math.max(0, Math.min(newX, 1080 - 50));
