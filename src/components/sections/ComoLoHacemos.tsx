@@ -106,25 +106,14 @@ export default function ComoLoHacemos() {
         <div className="max-w-[1280px] mx-auto px-6 sm:px-8 py-12 sm:py-16 lg:py-20">
           <div className="space-y-12 sm:space-y-16" style={{ marginTop: "15px" }}>
             {PROCESOS.map((proceso) => (
-              <div
-                key={proceso.id}
-                className={`flex ${
-                  proceso.align === "left"
-                    ? "justify-start"
-                    : "justify-end"
-                }`}
-              >
+              <div key={proceso.id}>
                 <div
                   ref={(el) => {
                     if (el) cardRefs.current.set(proceso.id, el);
                   }}
                   data-card-id={proceso.id}
-                  className={`w-full sm:w-[70%] opacity-0 ${
-                    visibleCards.has(proceso.id)
-                      ? proceso.align === "left"
-                        ? "card-visible-left"
-                        : "card-visible-right"
-                      : ""
+                  className={`w-full opacity-0 ${
+                    visibleCards.has(proceso.id) ? "card-visible-left" : ""
                   }`}
                   style={{
                     overflow: "hidden",
@@ -134,7 +123,7 @@ export default function ComoLoHacemos() {
                     boxShadow: "0 16px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
                     opacity: visibleCards.has(proceso.id) ? 1 : 0,
                     display: "flex",
-                    flexDirection: proceso.align === "right" ? "row-reverse" : "row",
+                    flexDirection: "row",
                     alignItems: "center",
                     height: 280,
                   }}
@@ -185,12 +174,14 @@ export default function ComoLoHacemos() {
                       background: "#0a1628",
                       display: "flex",
                       alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
                     }}
                   >
                     <img
                       src={proceso.image}
                       alt={proceso.title}
-                      style={{ width: "100%", display: "block" }}
+                      style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
                     />
                   </div>
                 </div>

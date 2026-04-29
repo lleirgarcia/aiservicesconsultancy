@@ -167,5 +167,32 @@
     "l2": "Problema (text de la targeta):",
     "l3": "Solució resumida (text de la targeta):",
     "l4": "Si encara no tens context sobre mi (nom, empresa, a què ens dediquem i mida aproximada de l'equip), demana-m'ho primer en poques preguntes. Quan ho tinguis, desenvolupa la solució amb detall i contextualitzada al nostre negoci."
+  },
+  "instagram_builder": {
+    "pageTitle": "Instagram Post Builder",
+    "buttons": {
+      "save": "Desar Plantilla",
+      "download": "Baixar Imatge",
+      "load": "Carregar",
+      "delete": "Eliminar",
+      "addText": "Afegir Text",
+      "edit": "Editar",
+      "editDesign": "Editar Disseny",
+      "cancel": "Cancel·lar",
+      "export": "Exportar"
+    },
+    "labels": {
+      "templateName": "Nom de plantilla",
+      "description": "Descripció",
+      "color": "Color",
+      "font": "Font",
+      "fontSize": "Mida de font",
+      "background": "Fons",
+      "myTemplates": "Les Meves Plantilles"
+    },
+    "placeholders": {
+      "templateName": "Ex: Estiu 2026",
+      "description": "Descriu la teva plantilla"
+    }
   }
 }

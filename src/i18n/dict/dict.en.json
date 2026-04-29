@@ -167,5 +167,32 @@
     "l2": "Problem (card text):",
     "l3": "Summary solution (card text):",
     "l4": "If you don't already have context about me (name, company, what we do, and approximate team size), ask me first in a few questions. When you have it, develop the solution in detail and contextualized to our business."
+  },
+  "instagram_builder": {
+    "pageTitle": "Instagram Post Builder",
+    "buttons": {
+      "save": "Save Template",
+      "download": "Download Image",
+      "load": "Load",
+      "delete": "Delete",
+      "addText": "Add Text",
+      "edit": "Edit",
+      "editDesign": "Edit Design",
+      "cancel": "Cancel",
+      "export": "Export"
+    },
+    "labels": {
+      "templateName": "Template Name",
+      "description": "Description",
+      "color": "Color",
+      "font": "Font",
+      "fontSize": "Font Size",
+      "background": "Background",
+      "myTemplates": "My Templates"
+    },
+    "placeholders": {
+      "templateName": "E.g., Summer 2026",
+      "description": "Describe your template"
+    }
   }
 }

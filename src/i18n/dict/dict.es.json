@@ -167,5 +167,32 @@
     "l2": "Problema (texto de la tarjeta):",
     "l3": "Solución resumida (texto de la tarjeta):",
     "l4": "Si aún no tienes contexto sobre mí (nombre, empresa, a qué nos dedicamos y tamaño aproximado del equipo), pídemelo primero en pocas preguntas. Cuando lo tengas, desarrolla la solución con detalle y contextualizada a nuestro negocio."
+  },
+  "instagram_builder": {
+    "pageTitle": "Instagram Post Builder",
+    "buttons": {
+      "save": "Guardar Plantilla",
+      "download": "Descargar Imagen",
+      "load": "Cargar",
+      "delete": "Eliminar",
+      "addText": "Añadir Texto",
+      "edit": "Editar",
+      "editDesign": "Editar Diseño",
+      "cancel": "Cancelar",
+      "export": "Exportar"
+    },
+    "labels": {
+      "templateName": "Nombre de plantilla",
+      "description": "Descripción",
+      "color": "Color",
+      "font": "Fuente",
+      "fontSize": "Tamaño de fuente",
+      "background": "Fondo",
+      "myTemplates": "Mis Plantillas"
+    },
+    "placeholders": {
+      "templateName": "Ej: Verano 2026",
+      "description": "Describe tu plantilla"
+    }
   }
 }
