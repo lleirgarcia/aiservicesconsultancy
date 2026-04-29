@@ -51,7 +51,7 @@ export function TemplateCanvas({
         onMouseDownCapture={onMouseDown}
         onMouseMoveCapture={onMouseMove}
         onMouseUpCapture={onMouseUp}
-        onMouseLeaveCapture={onMouseLeave}
+        onMouseLeave={onMouseLeave}
       />
     </div>
   );
