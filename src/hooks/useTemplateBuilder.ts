@@ -68,6 +68,55 @@ export function useTemplateBuilder(initialConfig?: TemplateConfig) {
     setIsDirty(true);
   }, []);
 
+  const moveElementForward = useCallback((id: string) => {
+    setConfig((prev) => {
+      const element = prev.elements.find((el) => el.id === id);
+      if (!element) return prev;
+
+      const maxZIndex = Math.max(...prev.elements.map((el) => el.z_index), 0);
+      return {
+        ...prev,
+        elements: prev.elements.map((el) =>
+          el.id === id ? { ...el, z_index: maxZIndex + 1 } : el
+        ),
+      };
+    });
+    setIsDirty(true);
+  }, []);
+
+  const moveElementBackward = useCallback((id: string) => {
+    setConfig((prev) => {
+      const element = prev.elements.find((el) => el.id === id);
+      if (!element || element.z_index === 0) return prev;
+
+      const elementsWithSameZIndex = prev.elements.filter(
+        (el) => el.z_index === element.z_index - 1
+      );
+
+      if (elementsWithSameZIndex.length > 0) {
+        const minZIndex = Math.min(
+          ...prev.elements.map((el) => el.z_index),
+          0
+        );
+        return {
+          ...prev,
+          elements: prev.elements.map((el) => {
+            if (el.id === id) return { ...el, z_index: minZIndex - 1 };
+            return el;
+          }),
+        };
+      }
+
+      return {
+        ...prev,
+        elements: prev.elements.map((el) =>
+          el.id === id ? { ...el, z_index: element.z_index - 1 } : el
+        ),
+      };
+    });
+    setIsDirty(true);
+  }, []);
+
   const resetToDirty = useCallback(() => {
     setIsDirty(false);
   }, []);
@@ -90,6 +139,8 @@ export function useTemplateBuilder(initialConfig?: TemplateConfig) {
     updateElement,
     deleteElement,
     setBackgroundColor,
+    moveElementForward,
+    moveElementBackward,
     reset,
   };
 }

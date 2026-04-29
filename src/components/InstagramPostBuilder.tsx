@@ -15,6 +15,7 @@ import { Preview } from "@/components/Canvas/Preview";
 import { ColorPicker } from "@/components/Sidebar/ColorPicker";
 import { ElementPalette } from "@/components/Sidebar/ElementPalette";
 import { TextElementEditor } from "@/components/TextElementEditor";
+import { DesignEditor } from "@/components/DesignEditor";
 import { SaveTemplateModal } from "@/components/SaveTemplateModal";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { ExportModal } from "@/components/ExportModal";
@@ -27,6 +28,7 @@ export function InstagramPostBuilder() {
   // UI State
   const [activeTab, setActiveTab] = useState<"create" | "library">("create");
   const [isEditingElement, setIsEditingElement] = useState(false);
+  const [isEditingDesign, setIsEditingDesign] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
@@ -112,6 +114,10 @@ export function InstagramPostBuilder() {
     [canvasRef]
   );
 
+  const handleSaveDesignChanges = useCallback(async () => {
+    setIsEditingDesign(false);
+  }, []);
+
   const selectedElement = builder.getSelectedElement();
 
   return (
@@ -175,6 +181,16 @@ export function InstagramPostBuilder() {
               />
             )}
 
+            {/* Design editor panel */}
+            {isEditingDesign && selectedElement && (
+              <DesignEditor
+                element={selectedElement}
+                onChange={(updates) => builder.updateElement(selectedElement.id, updates)}
+                onMoveForward={() => builder.moveElementForward(selectedElement.id)}
+                onMoveBackward={() => builder.moveElementBackward(selectedElement.id)}
+              />
+            )}
+
             {/* Action buttons */}
             <div className="flex gap-3">
               <button
@@ -217,6 +233,12 @@ export function InstagramPostBuilder() {
                   className="w-full px-3 py-2 mb-2 rounded-lg bg-[var(--accent)] text-[var(--accent-on)] text-sm font-medium hover:opacity-90"
                 >
                   {isEditingElement ? "Close Editor" : t("instagram_builder.buttons.edit")}
+                </button>
+                <button
+                  onClick={() => setIsEditingDesign(!isEditingDesign)}
+                  className="w-full px-3 py-2 mb-2 rounded-lg bg-[var(--bg-elevated)] text-[var(--fg)] text-sm font-medium hover:bg-[var(--border)]"
+                >
+                  {isEditingDesign ? "Close Design" : t("instagram_builder.buttons.editDesign")}
                 </button>
                 <button
                   onClick={() => builder.deleteElement(selectedElement.id)}
