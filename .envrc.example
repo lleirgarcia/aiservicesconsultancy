@@ -1,0 +1,13 @@
+# Copia este archivo a .envrc y ajusta el puerto a uno libre en tu máquina.
+#   cp .envrc.example .envrc
+#   direnv allow
+#
+# Cómo elegir puerto:
+#   1. Ver puertos ya usados en otros worktrees:
+#        find ~/projects -name ".envrc" -exec grep -H "PORT=" {} \;
+#   2. Ver puertos en LISTEN ahora:
+#        Linux:  ss -tln
+#        macOS:  lsof -iTCP -sTCP:LISTEN -P -n
+#   3. Elige uno libre. Sugerencia para este proyecto: 3010.
+
+export PORT=3010
