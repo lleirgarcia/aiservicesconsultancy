@@ -81,7 +81,8 @@ export default function Home() {
           <div className="flex items-center gap-3 sm:gap-4">
             <a
               href="/blog"
-              className="font-medium text-xs uppercase tracking-widest text-[var(--muted-hi)] hover:text-[var(--accent)] transition-colors"
+              className="text-xs font-medium uppercase tracking-widest transition-opacity hover:opacity-60"
+              style={{ color: "var(--muted)" }}
             >
               {t("blog.list.title")}
             </a>
