@@ -65,7 +65,7 @@ const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
   },
 ];
 
-export default function Footer() {
+export default function Footer({ slim = false }: { slim?: boolean }) {
   const { t } = useI18n();
   const year = new Date().getFullYear();
 
@@ -74,14 +74,53 @@ export default function Footer() {
       className="px-6 py-4 max-w-4xl mx-auto flex flex-col gap-3"
       style={{ color: "var(--muted)" }}
     >
-      {/* Fila 1: tagline + redes sociales */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm">
-        <p className="leading-relaxed">
-          {t("footer.taglineLead")}
-          <span style={{ color: "var(--accent)" }}>{t("footer.taglineHighlight")}</span>
-          <span className="text-xs"> — {t("footer.location")}</span>
-        </p>
-        <div className="flex items-center gap-5 shrink-0">
+      {!slim && (
+        <>
+          {/* Fila 1: tagline + redes sociales */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm">
+            <p className="leading-relaxed">
+              {t("footer.taglineLead")}
+              <span style={{ color: "var(--accent)" }}>{t("footer.taglineHighlight")}</span>
+              <span className="text-xs"> — {t("footer.location")}</span>
+            </p>
+            <div className="flex items-center gap-5 shrink-0">
+              {SOCIALS.map(({ label, href, icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="transition-opacity hover:opacity-60"
+                  style={{ color: "var(--muted)", display: "inline-flex" }}
+                >
+                  {icon}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Enlaces legales */}
+          <nav
+            aria-label={t("footer.legalNav")}
+            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs"
+          >
+            {LEGAL_HREFS.map(({ k, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="hover:opacity-70 transition-opacity"
+                style={{ color: "var(--muted)" }}
+              >
+                {t(`legal.${k}`)}
+              </Link>
+            ))}
+          </nav>
+        </>
+      )}
+
+      {slim && (
+        <div className="flex items-center justify-center gap-5">
           {SOCIALS.map(({ label, href, icon }) => (
             <a
               key={label}
@@ -96,27 +135,9 @@ export default function Footer() {
             </a>
           ))}
         </div>
-      </div>
+      )}
 
-      {/* Enlaces legales */}
-      <nav
-        aria-label={t("footer.legalNav")}
-        className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs"
-        style={{}}
-      >
-        {LEGAL_HREFS.map(({ k, href }) => (
-          <Link
-            key={href}
-            href={href}
-            className="hover:opacity-70 transition-opacity"
-            style={{ color: "var(--muted)" }}
-          >
-            {t(`legal.${k}`)}
-          </Link>
-        ))}
-      </nav>
-
-      {/* Filas 2 y 3: logo + copyright centrados, juntos */}
+      {/* Logo + copyright */}
       <div className="flex flex-col items-center gap-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

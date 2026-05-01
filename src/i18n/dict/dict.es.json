@@ -167,5 +167,112 @@
     "l2": "Problema (texto de la tarjeta):",
     "l3": "Solución resumida (texto de la tarjeta):",
     "l4": "Si aún no tienes contexto sobre mí (nombre, empresa, a qué nos dedicamos y tamaño aproximado del equipo), pídemelo primero en pocas preguntas. Cuando lo tengas, desarrolla la solución con detalle y contextualizada a nuestro negocio."
+  },
+  "instagram_builder": {
+    "pageTitle": "Instagram Post Builder",
+    "buttons": {
+      "save": "Guardar Plantilla",
+      "download": "Descargar Imagen",
+      "load": "Cargar",
+      "delete": "Eliminar",
+      "addText": "Añadir Texto",
+      "edit": "Editar",
+      "editDesign": "Editar Diseño",
+      "cancel": "Cancelar",
+      "export": "Exportar"
+    },
+    "labels": {
+      "templateName": "Nombre de plantilla",
+      "description": "Descripción",
+      "color": "Color",
+      "font": "Fuente",
+      "fontSize": "Tamaño de fuente",
+      "background": "Fondo",
+      "myTemplates": "Mis Plantillas"
+    },
+    "placeholders": {
+      "templateName": "Ej: Verano 2026",
+      "description": "Describe tu plantilla"
+    }
+  },
+  "blog": {
+    "list": {
+      "title": "Blog",
+      "subtitle": "Ideas para ahorrar tiempo y digitalizar tu empresa",
+      "empty": "Aún no hay artículos publicados.",
+      "readMore": "Leer artículo",
+      "readingTime": "{minutes} min de lectura",
+      "loadMore": "Cargar más",
+      "publishedOn": "Publicado el {date}"
+    },
+    "detail": {
+      "backToList": "Volver al blog",
+      "publishedOn": "Publicado el {date}",
+      "readingTime": "{minutes} min de lectura",
+      "tags": "Etiquetas"
+    },
+    "tag": {
+      "title": "Artículos sobre {tag}",
+      "empty": "No hay artículos publicados con esta etiqueta."
+    },
+    "notFound": {
+      "title": "Este artículo no existe o ya no está disponible",
+      "cta": "Volver al blog"
+    },
+    "editor": {
+      "newTitle": "Nuevo artículo",
+      "editTitle": "Editar artículo",
+      "fields": {
+        "title": "Título",
+        "slug": "Slug (URL)",
+        "summary": "Resumen",
+        "content": "Contenido (markdown)",
+        "cover": "Portada",
+        "tags": "Etiquetas"
+      },
+      "actions": {
+        "saveDraft": "Guardar borrador",
+        "preview": "Vista previa",
+        "edit": "Volver a editar",
+        "publish": "Publicar",
+        "unpublish": "Despublicar",
+        "delete": "Eliminar",
+        "back": "Volver"
+      },
+      "hints": {
+        "slugLocked": "El slug no se puede cambiar tras publicar.",
+        "coverDisabled": "Guarda como borrador para subir portada.",
+        "saving": "Guardando…",
+        "saved": "Guardado",
+        "errorSaving": "No se pudo guardar"
+      },
+      "confirms": {
+        "unpublish": "¿Seguro que quieres despublicar este artículo? Desaparecerá del blog.",
+        "delete": "¿Seguro que quieres eliminar este borrador? Esta acción no se puede deshacer."
+      }
+    },
+    "admin": {
+      "login": {
+        "title": "Acceso admin",
+        "passwordLabel": "Contraseña",
+        "submit": "Entrar",
+        "errorInvalid": "Contraseña incorrecta",
+        "errorRate": "Demasiados intentos. Espera un minuto."
+      },
+      "list": {
+        "title": "Artículos",
+        "newArticle": "Nuevo artículo",
+        "logout": "Cerrar sesión",
+        "columns": {
+          "title": "Título",
+          "status": "Estado",
+          "updatedAt": "Actualizado",
+          "actions": "Acciones"
+        },
+        "empty": "Aún no has creado ningún artículo.",
+        "statusDraft": "Borrador",
+        "statusPublished": "Publicado"
+      }
+    }
   }
 }

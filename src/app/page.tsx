@@ -79,6 +79,12 @@ export default function Home() {
             <Logo />
           </a>
           <div className="flex items-center gap-3 sm:gap-4">
+            <a
+              href="/blog"
+              className="font-medium text-xs uppercase tracking-widest text-[var(--muted-hi)] hover:text-[var(--accent)] transition-colors"
+            >
+              {t("blog.list.title")}
+            </a>
             <ContactTrigger />
             <LanguageSwitcher />
           </div>
@@ -280,23 +286,34 @@ export default function Home() {
       <TresPilares />
 
       {/* ── Qué ofrecemos (servicios) ───────────────────── */}
-      <QueOfrecemos />
+      <div style={{ marginTop: "clamp(3rem, 6vh, 5rem)" }}>
+        <QueOfrecemos />
+      </div>
 
       {/* ── Cómo lo hacemos ─────────────────────────────── */}
-      <ComoLoHacemos />
+      <div style={{ marginTop: "clamp(3rem, 6vh, 5rem)" }}>
+        <ComoLoHacemos />
+      </div>
 
       {/* ── Carrusel de servicios (full-width header rule; body max-w inside component) ── */}
-      <ServiciosCarrusel />
+      <div style={{ marginTop: "clamp(3rem, 6vh, 5rem)" }}>
+        <ServiciosCarrusel />
+      </div>
 
       {/* ── Cómo trabajamos ─────────────────────────────── */}
-      <ComoTrabajamos />
+      <div style={{ marginTop: "clamp(3rem, 6vh, 5rem)" }}>
+        <ComoTrabajamos />
+      </div>
 
       {/* ── Quiénes somos ───────────────────────────────── */}
-      <QuienesSomos />
+      <div style={{ marginTop: "clamp(3rem, 6vh, 5rem)" }}>
+        <QuienesSomos />
+      </div>
 
       {/* ── CTA — header ────────────────────────────────── */}
       <div
         style={{
+          marginTop: "clamp(3rem, 6vh, 5rem)",
           borderTop: "1px solid var(--border)",
           borderBottom: "1px solid var(--border)",
           background: "var(--bg-section)",
