@@ -9,6 +9,7 @@ interface TemplateCanvasProps {
   onCanvasReady?: (canvas: HTMLCanvasElement) => void;
   isDragging?: boolean;
   selectedElementId?: string | null;
+  hiddenElementId?: string | null;
   onMouseDown?: (e: React.MouseEvent) => void;
   onMouseMove?: (e: React.MouseEvent) => void;
   onMouseUp?: (e: React.MouseEvent) => void;
@@ -21,6 +22,7 @@ export function TemplateCanvas({
   onCanvasReady,
   isDragging,
   selectedElementId,
+  hiddenElementId,
   onMouseDown,
   onMouseMove,
   onMouseUp,
@@ -33,16 +35,21 @@ export function TemplateCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    try {
-      renderTemplateToCanvas(canvas, config, { selectedElementId });
-      onCanvasReady?.(canvas);
-    } catch (error) {
-      console.error("Failed to render canvas:", error);
-    }
-  }, [config, onCanvasReady, selectedElementId]);
+    const render = async () => {
+      try {
+        await document.fonts.ready;
+        renderTemplateToCanvas(canvas, config, { selectedElementId, hiddenElementId });
+        onCanvasReady?.(canvas);
+      } catch (error) {
+        console.error("Failed to render canvas:", error);
+      }
+    };
+
+    render();
+  }, [config, onCanvasReady, selectedElementId, hiddenElementId]);
 
   return (
-    <div className="relative flex items-center justify-center bg-[var(--bg-section)] rounded-lg overflow-hidden border border-[var(--border)]">
+    <div className="relative flex items-center justify-center bg-[var(--bg-section)] rounded-lg overflow-hidden border border-[var(--border)] w-full max-w-[600px] mx-auto aspect-square">
       <canvas
         ref={canvasRef}
         width={1080}
@@ -50,7 +57,7 @@ export function TemplateCanvas({
         className={`max-w-full max-h-[600px] ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
         style={{
           aspectRatio: "1 / 1",
-          imageRendering: "pixelated",
+          imageRendering: "auto",
           touchAction: "none",
           userSelect: "none",
         }}

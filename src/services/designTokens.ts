@@ -68,7 +68,15 @@ export const TEMPLATE_COLOR_OPTIONS = [
 ] as const;
 
 // Available fonts for templates
-export const TEMPLATE_FONTS = [COMPANY_FONTS.headline, COMPANY_FONTS.body] as const;
+export const TEMPLATE_FONTS = [
+  COMPANY_FONTS.headline,
+  COMPANY_FONTS.body,
+  "DM Sans",
+  "Manrope",
+  "Plus Jakarta Sans",
+  "Outfit",
+  "Sora",
+] as const;
 
 // Helper function to get color label
 export function getColorLabel(value: string): string {

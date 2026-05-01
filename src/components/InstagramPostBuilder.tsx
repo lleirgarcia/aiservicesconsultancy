@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef, CSSProperties } from "react";
 import { useTemplateBuilder } from "@/hooks/useTemplateBuilder";
 import { useTemplateStorage } from "@/hooks/useTemplateStorage";
 import { useToast } from "@/hooks/useToast";
-import { Template, TemplateElement, TemplateConfig } from "@/types/instagram-builder";
+import { Template, TemplateElement, TemplateConfig, ShapeConfig } from "@/types/instagram-builder";
 import { generateElementId } from "@/utils/canvasUtils";
 import { exportCanvasToBlob } from "@/services/canvasRenderer";
 import { useTranslations } from "@/i18n/useTranslations";
@@ -14,6 +14,7 @@ import { TemplateCanvas } from "@/components/Canvas/TemplateCanvas";
 import { Preview } from "@/components/Canvas/Preview";
 import { ColorPicker } from "@/components/Sidebar/ColorPicker";
 import { ElementPalette } from "@/components/Sidebar/ElementPalette";
+import { FontSelector } from "@/components/Sidebar/FontSelector";
 import { TextElementEditor } from "@/components/TextElementEditor";
 import { InlineTextEditor } from "@/components/InlineTextEditor";
 import { DesignEditor } from "@/components/DesignEditor";
@@ -54,6 +55,7 @@ export function InstagramPostBuilder() {
   const resizeStartRef = useRef<{
     mouseX: number; mouseY: number;
     x: number; y: number; w: number; h: number;
+    isText: boolean; fontSize: number;
   } | null>(null);
 
   const handleAddText = useCallback(
@@ -82,7 +84,7 @@ export function InstagramPostBuilder() {
   const handleElementDrop = useCallback(
     (elementId: string, x: number, y: number) => {
       builder.updateElement(elementId, {
-        position: { x: Math.max(0, x - 50), y: Math.max(0, y - 50) },
+        position: { x: x - 50, y: y - 50 },
       });
     },
     [builder]
@@ -104,17 +106,65 @@ export function InstagramPostBuilder() {
     [builder]
   );
 
-  const handleAddLine = useCallback(
-    (elementId: string) => {
+  const handleAddShape = useCallback(
+    (elementId: string, kind: ShapeConfig["type"] | "rounded-rect") => {
+      const cx = 540, cy = 540;
+      let shape: ShapeConfig;
+      let size = { width: 300, height: 300 };
+
+      switch (kind) {
+        case "line":
+          shape = { type: "line", fill_color: "#45464d" };
+          size = { width: 800, height: 4 };
+          break;
+        case "rectangle":
+          shape = { type: "rectangle", fill_color: "#272a2c" };
+          size = { width: 400, height: 200 };
+          break;
+        case "rounded-rect":
+          shape = { type: "rectangle", fill_color: "#272a2c", border_radius: 24 };
+          size = { width: 400, height: 200 };
+          break;
+        case "circle":
+          shape = { type: "circle", fill_color: "#272a2c" };
+          size = { width: 300, height: 300 };
+          break;
+        case "ellipse":
+          shape = { type: "ellipse", fill_color: "#272a2c" };
+          size = { width: 400, height: 240 };
+          break;
+        case "triangle":
+          shape = { type: "triangle", fill_color: "#272a2c" };
+          break;
+        case "diamond":
+          shape = { type: "diamond", fill_color: "#272a2c" };
+          break;
+        case "pentagon":
+          shape = { type: "pentagon", fill_color: "#272a2c" };
+          break;
+        case "hexagon":
+          shape = { type: "hexagon", fill_color: "#272a2c" };
+          break;
+        case "star":
+          shape = { type: "star", fill_color: "#89ceff" };
+          break;
+        case "heart":
+          shape = { type: "heart", fill_color: "#ef4444" };
+          break;
+        case "arrow":
+          shape = { type: "arrow", fill_color: "#272a2c" };
+          size = { width: 400, height: 160 };
+          break;
+        default:
+          return;
+      }
+
       const newElement: TemplateElement = {
         id: elementId,
         type: "shape",
-        position: { x: 140, y: 500 },
-        size: { width: 800, height: 4 },
-        shape: {
-          type: "line",
-          fill_color: "#45464d",
-        },
+        position: { x: cx - size.width / 2, y: cy - size.height / 2 },
+        size,
+        shape,
         z_index: builder.config.elements.length + 1,
       };
       builder.addElement(newElement);
@@ -137,6 +187,8 @@ export function InstagramPostBuilder() {
         y: el.position.y,
         w: el.size.width,
         h: el.size.height,
+        isText: el.type === "text",
+        fontSize: el.content?.font_size ?? 48,
       };
     },
     [builder, canvasRef]
@@ -155,6 +207,38 @@ export function InstagramPostBuilder() {
       const dy = (e.clientY - start.mouseY) * scaleY;
 
       let newX = start.x, newY = start.y, newW = start.w, newH = start.h;
+
+      if (start.isText) {
+        // For text: scale font_size proportionally and keep aspect ratio of the box
+        const isCorner = resizeHandle.length === 2;
+        const fx = resizeHandle.includes("e")
+          ? (start.w + dx) / start.w
+          : resizeHandle.includes("w")
+            ? (start.w - dx) / start.w
+            : 1;
+        const fy = resizeHandle.includes("s")
+          ? (start.h + dy) / start.h
+          : resizeHandle.includes("n")
+            ? (start.h - dy) / start.h
+            : 1;
+        const factor = Math.max(0.1, isCorner ? Math.max(fx, fy) : (fx !== 1 ? fx : fy));
+
+        newW = Math.max(20, start.w * factor);
+        newH = Math.max(20, start.h * factor);
+        if (resizeHandle.includes("w")) newX = start.x + (start.w - newW);
+        if (resizeHandle.includes("n")) newY = start.y + (start.h - newH);
+
+        const newFontSize = Math.max(8, Math.round(start.fontSize * factor));
+        const el = builder.config.elements.find((e) => e.id === builder.selectedElementId);
+        if (el?.content) {
+          builder.updateElement(builder.selectedElementId!, {
+            position: { x: newX, y: newY },
+            size: { width: newW, height: newH },
+            content: { ...el.content, font_size: newFontSize },
+          });
+        }
+        return;
+      }
 
       if (resizeHandle.includes("e")) newW = Math.max(20, start.w + dx);
       if (resizeHandle.includes("s")) newH = Math.max(20, start.h + dy);
@@ -185,6 +269,95 @@ export function InstagramPostBuilder() {
       window.removeEventListener("mouseup", onUp);
     };
   }, [resizeHandle, builder, canvasRef]);
+
+  const handleDeleteSelected = useCallback(() => {
+    if (!builder.selectedElementId) return;
+    builder.deleteElement(builder.selectedElementId);
+    setEditingTextElementId(null);
+  }, [builder]);
+
+  const clipboardRef = useRef<TemplateElement | null>(null);
+
+  const handleCopySelected = useCallback(() => {
+    const el = builder.config.elements.find((e) => e.id === builder.selectedElementId);
+    if (!el) return;
+    clipboardRef.current = el;
+  }, [builder]);
+
+  const handlePasteClipboard = useCallback(() => {
+    const src = clipboardRef.current;
+    if (!src) return;
+    const offset = 30;
+    const newElement: TemplateElement = {
+      ...src,
+      id: generateElementId(),
+      position: {
+        x: src.position.x + offset,
+        y: src.position.y + offset,
+      },
+      content: src.content ? { ...src.content } : undefined,
+      shape: src.shape ? { ...src.shape } : undefined,
+      z_index: builder.config.elements.length + 1,
+    };
+    builder.addElement(newElement);
+  }, [builder]);
+
+  const handleDuplicateSelected = useCallback(() => {
+    handleCopySelected();
+    handlePasteClipboard();
+  }, [handleCopySelected, handlePasteClipboard]);
+
+  useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null) => {
+      const el = target as HTMLElement | null;
+      if (!el) return false;
+      const tag = el.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable;
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (editingTextElementId) return;
+      const editable = isEditableTarget(e.target);
+      const mod = e.metaKey || e.ctrlKey;
+
+      if (mod && (e.key === "c" || e.key === "C")) {
+        if (!builder.selectedElementId) return;
+        if (editable) return;
+        e.preventDefault();
+        handleCopySelected();
+        return;
+      }
+      if (mod && (e.key === "v" || e.key === "V")) {
+        if (editable) return;
+        if (!clipboardRef.current) return;
+        e.preventDefault();
+        handlePasteClipboard();
+        return;
+      }
+      if (mod && (e.key === "d" || e.key === "D")) {
+        if (!builder.selectedElementId) return;
+        if (editable) return;
+        e.preventDefault();
+        handleDuplicateSelected();
+        return;
+      }
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (!builder.selectedElementId) return;
+        if (editable) return;
+        e.preventDefault();
+        handleDeleteSelected();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    builder.selectedElementId,
+    editingTextElementId,
+    handleDeleteSelected,
+    handleCopySelected,
+    handlePasteClipboard,
+    handleDuplicateSelected,
+  ]);
 
   const handleSaveTemplate = useCallback(
     async (name: string, description?: string) => {
@@ -401,14 +574,8 @@ export function InstagramPostBuilder() {
         (el) => el.id === builder.selectedElementId
       );
 
-      const elWidth = selectedEl?.size.width || 100;
-      const elHeight = selectedEl?.size.height || 100;
-
-      const clampedX = Math.max(0, Math.min(currentX, 1080 - elWidth));
-      const clampedY = Math.max(0, Math.min(currentY, 1080 - elHeight));
-
       builder.updateElement(builder.selectedElementId, {
-        position: { x: clampedX, y: clampedY },
+        position: { x: currentX, y: currentY },
       });
 
       e.preventDefault();
@@ -440,7 +607,7 @@ export function InstagramPostBuilder() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[var(--fg)] mb-2">
@@ -497,9 +664,9 @@ export function InstagramPostBuilder() {
 
         {/* Create Tab */}
         {activeTab === "create" && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Main canvas area */}
-          <div className="lg:col-span-3 flex flex-col gap-6">
+          <div className="w-full lg:w-[600px] lg:shrink-0 flex flex-col gap-6">
             {/* Canvas */}
             <div className="relative" ref={setCanvasContainerRef}>
               <TemplateCanvas
@@ -507,6 +674,7 @@ export function InstagramPostBuilder() {
                 onCanvasReady={setCanvasRef}
                 isDragging={isDraggingElement}
                 selectedElementId={resizeHandle ? null : builder.selectedElementId}
+                hiddenElementId={editingTextElementId}
                 onMouseDown={handleCanvasMouseDown}
                 onMouseMove={handleCanvasMouseMove}
                 onMouseUp={handleCanvasMouseUp}
@@ -520,6 +688,11 @@ export function InstagramPostBuilder() {
                   onChange={(text) =>
                     builder.updateElement(editingElement.id, {
                       content: { ...editingElement.content!, text },
+                    })
+                  }
+                  onChangeFont={(font) =>
+                    builder.updateElement(editingElement.id, {
+                      content: { ...editingElement.content!, font_family: font },
                     })
                   }
                   onClose={() => setEditingTextElementId(null)}
@@ -625,12 +798,15 @@ export function InstagramPostBuilder() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
+          <div className="w-full lg:w-[360px] lg:shrink-0 flex flex-col gap-6">
             {/* Preview */}
             <Preview config={builder.config} label="Live Preview" />
 
             {/* Element palette */}
-            <ElementPalette onAddText={handleAddText} onAddLine={handleAddLine} />
+            <ElementPalette
+              onAddText={handleAddText}
+              onAddShape={handleAddShape}
+            />
 
             {/* Background color */}
             <ColorPicker
@@ -639,10 +815,47 @@ export function InstagramPostBuilder() {
               label={t("instagram_builder.labels.background")}
             />
 
-            {/* Selected element controls */}
-            {selectedElement && (
+          </div>
+
+          {/* Selected element panel (right column) */}
+          {selectedElement && (
+            <div className="w-full lg:w-[320px] lg:shrink-0 flex flex-col gap-6">
               <div className="p-4 bg-[var(--bg-section)] rounded-lg border border-[var(--border)]">
                 <p className="text-sm text-[var(--muted)] mb-2">Selected Element</p>
+                {selectedElement.type === "text" && selectedElement.content && (
+                  <div className="mb-3 flex flex-col gap-3">
+                    <FontSelector
+                      value={selectedElement.content.font_family}
+                      onChange={(font) =>
+                        builder.updateElement(selectedElement.id, {
+                          content: { ...selectedElement.content!, font_family: font },
+                        })
+                      }
+                    />
+                    <ColorPicker
+                      value={selectedElement.content.color}
+                      onChange={(color) =>
+                        builder.updateElement(selectedElement.id, {
+                          content: { ...selectedElement.content!, color },
+                        })
+                      }
+                      label="Text Color"
+                    />
+                  </div>
+                )}
+                {selectedElement.type === "shape" && selectedElement.shape && (
+                  <div className="mb-3">
+                    <ColorPicker
+                      value={selectedElement.shape.fill_color}
+                      onChange={(color) =>
+                        builder.updateElement(selectedElement.id, {
+                          shape: { ...selectedElement.shape!, fill_color: color },
+                        })
+                      }
+                      label="Fill Color"
+                    />
+                  </div>
+                )}
                 <button
                   onClick={() => setIsEditingElement(!isEditingElement)}
                   className="w-full px-3 py-2 mb-2 rounded-lg bg-[var(--accent)] text-[var(--accent-on)] text-sm font-medium hover:opacity-90"
@@ -656,14 +869,22 @@ export function InstagramPostBuilder() {
                   {isEditingDesign ? "Close Design" : t("instagram_builder.buttons.editDesign")}
                 </button>
                 <button
-                  onClick={() => builder.deleteElement(selectedElement.id)}
+                  onClick={handleDuplicateSelected}
+                  className="w-full px-3 py-2 mb-2 rounded-lg bg-[var(--bg-elevated)] text-[var(--fg)] text-sm font-medium hover:bg-[var(--border)]"
+                  title="Duplicate (Cmd/Ctrl+D)"
+                >
+                  Duplicar
+                </button>
+                <button
+                  onClick={handleDeleteSelected}
                   className="w-full px-3 py-2 rounded-lg bg-red-500/10 text-red-400 text-sm font-medium hover:bg-red-500/20 border border-red-500/30"
+                  title="Delete (Del/Backspace)"
                 >
                   {t("instagram_builder.buttons.delete")}
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         )}
       </div>

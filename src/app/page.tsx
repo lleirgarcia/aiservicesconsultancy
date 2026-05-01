@@ -79,6 +79,12 @@ export default function Home() {
             <Logo />
           </a>
           <div className="flex items-center gap-3 sm:gap-4">
+            <a
+              href="/blog"
+              className="font-medium text-xs uppercase tracking-widest text-[var(--muted-hi)] hover:text-[var(--accent)] transition-colors"
+            >
+              {t("blog.list.title")}
+            </a>
             <ContactTrigger />
             <LanguageSwitcher />
           </div>
