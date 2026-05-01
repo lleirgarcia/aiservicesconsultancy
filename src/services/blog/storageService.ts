@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { supabase } from "@/lib/supabase";
 import { generateSlug } from "@/lib/blog/slug";
 
@@ -10,6 +11,9 @@ export const ALLOWED_IMAGE_MIMES = new Set([
   "image/avif",
 ]);
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+const MAX_DIMENSION_PX = 1600;
+const WEBP_QUALITY = 80;
 
 export class StorageServiceError extends Error {
   constructor(
@@ -37,26 +41,31 @@ export interface UploadImageResult {
   publicUrl: string;
 }
 
-function extFromMime(mime: string): string {
-  switch (mime) {
-    case "image/jpeg":
-      return "jpg";
-    case "image/png":
-      return "png";
-    case "image/webp":
-      return "webp";
-    case "image/avif":
-      return "avif";
-    default:
-      return "bin";
-  }
+function buildObjectPath(articleId: string, filename: string) {
+  const base = generateSlug(filename.replace(/\.[^.]+$/, "")) || "image";
+  const ts = Date.now();
+  return `${articleId}/${ts}-${base}.webp`;
 }
 
-function buildObjectPath(articleId: string, filename: string, mime: string) {
-  const base = generateSlug(filename.replace(/\.[^.]+$/, "")) || "image";
-  const ext = extFromMime(mime);
-  const ts = Date.now();
-  return `${articleId}/${ts}-${base}.${ext}`;
+async function optimizeImage(input: Uint8Array): Promise<Uint8Array> {
+  try {
+    const buffer = await sharp(input)
+      .rotate()
+      .resize({
+        width: MAX_DIMENSION_PX,
+        height: MAX_DIMENSION_PX,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer();
+    return new Uint8Array(buffer);
+  } catch (err) {
+    throw new StorageServiceError(
+      "upload_failed",
+      `image optimization failed: ${(err as Error).message}`,
+    );
+  }
 }
 
 export async function uploadImage(
@@ -72,16 +81,17 @@ export async function uploadImage(
     throw new StorageServiceError("size_too_large", "image too large");
   }
 
-  const path = buildObjectPath(input.articleId, input.filename, input.contentType);
-  const body =
+  const path = buildObjectPath(input.articleId, input.filename);
+  const raw =
     input.buffer instanceof Uint8Array
       ? input.buffer
       : new Uint8Array(input.buffer);
+  const body = await optimizeImage(raw);
 
   const { error } = await supabase.storage
     .from(BLOG_IMAGES_BUCKET)
     .upload(path, body, {
-      contentType: input.contentType,
+      contentType: "image/webp",
       upsert: false,
     });
 
