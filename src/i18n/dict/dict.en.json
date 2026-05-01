@@ -194,5 +194,85 @@
       "templateName": "E.g., Summer 2026",
       "description": "Describe your template"
     }
+  },
+  "blog": {
+    "list": {
+      "title": "Blog",
+      "subtitle": "Ideas to save time and digitize your business",
+      "empty": "No articles published yet.",
+      "readMore": "Read article",
+      "readingTime": "{minutes} min read",
+      "loadMore": "Load more",
+      "publishedOn": "Published on {date}"
+    },
+    "detail": {
+      "backToList": "Back to blog",
+      "publishedOn": "Published on {date}",
+      "readingTime": "{minutes} min read",
+      "tags": "Tags"
+    },
+    "tag": {
+      "title": "Articles about {tag}",
+      "empty": "No articles published with this tag."
+    },
+    "notFound": {
+      "title": "This article doesn't exist or is no longer available",
+      "cta": "Back to blog"
+    },
+    "editor": {
+      "newTitle": "New article",
+      "editTitle": "Edit article",
+      "fields": {
+        "title": "Title",
+        "slug": "Slug (URL)",
+        "summary": "Summary",
+        "content": "Content (markdown)",
+        "cover": "Cover image",
+        "tags": "Tags"
+      },
+      "actions": {
+        "saveDraft": "Save draft",
+        "preview": "Preview",
+        "edit": "Back to editing",
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "delete": "Delete",
+        "back": "Back"
+      },
+      "hints": {
+        "slugLocked": "The slug cannot be changed after publishing.",
+        "coverDisabled": "Save as draft to upload the cover.",
+        "saving": "Saving…",
+        "saved": "Saved",
+        "errorSaving": "Could not save"
+      },
+      "confirms": {
+        "unpublish": "Are you sure you want to unpublish this article? It will disappear from the blog.",
+        "delete": "Delete this draft? This action cannot be undone."
+      }
+    },
+    "admin": {
+      "login": {
+        "title": "Admin access",
+        "passwordLabel": "Password",
+        "submit": "Sign in",
+        "errorInvalid": "Wrong password",
+        "errorRate": "Too many attempts. Wait a minute."
+      },
+      "list": {
+        "title": "Articles",
+        "newArticle": "New article",
+        "logout": "Log out",
+        "columns": {
+          "title": "Title",
+          "status": "Status",
+          "updatedAt": "Updated",
+          "actions": "Actions"
+        },
+        "empty": "You haven't created any articles yet.",
+        "statusDraft": "Draft",
+        "statusPublished": "Published"
+      }
+    }
   }
 }
