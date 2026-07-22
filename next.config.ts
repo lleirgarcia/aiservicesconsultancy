@@ -10,7 +10,7 @@ const supabaseHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.1.70"],
+  allowedDevOrigins: ["192.168.1.70", "vps", "localhost"],
   images: {
     remotePatterns: [
       {
