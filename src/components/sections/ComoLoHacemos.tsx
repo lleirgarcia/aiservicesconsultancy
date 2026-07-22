@@ -112,7 +112,9 @@ export default function ComoLoHacemos() {
                     if (el) cardRefs.current.set(proceso.id, el);
                   }}
                   data-card-id={proceso.id}
-                  className={`w-full opacity-0 ${
+                  className={`w-full opacity-0 flex flex-col md:items-center md:h-[280px] ${
+                    proceso.align === "right" ? "md:flex-row-reverse" : "md:flex-row"
+                  } ${
                     visibleCards.has(proceso.id) ? `card-visible-${proceso.align}` : ""
                   }`}
                   style={{
@@ -122,13 +124,9 @@ export default function ComoLoHacemos() {
                     background: "var(--bg-elevated)",
                     boxShadow: "0 16px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
                     opacity: visibleCards.has(proceso.id) ? 1 : 0,
-                    display: "flex",
-                    flexDirection: proceso.align === "right" ? "row-reverse" : "row",
-                    alignItems: "center",
-                    height: 280,
                   }}
                 >
-                  <div style={{ flex: 1, minWidth: 0, padding: "clamp(1.5rem, 3vw, 2rem)" }}>
+                  <div className="w-full md:flex-1" style={{ minWidth: 0, padding: "clamp(1.5rem, 3vw, 2rem)" }}>
                     <div
                       style={{
                         fontFamily: "var(--font-geist-mono), monospace",
@@ -167,10 +165,9 @@ export default function ComoLoHacemos() {
                     </p>
                   </div>
                   <div
+                    className="w-full h-[200px] sm:h-[240px] md:h-auto md:w-1/2 md:self-stretch"
                     style={{
-                      width: "50%",
                       flexShrink: 0,
-                      alignSelf: "stretch",
                       background: "#0a1628",
                       display: "flex",
                       alignItems: "center",
