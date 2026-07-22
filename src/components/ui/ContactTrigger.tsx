@@ -7,7 +7,7 @@ import { useI18n } from "@/i18n/LocaleContext";
 const PHONE_DISPLAY = "+34 626 572 151";
 const PHONE_TEL = "+34626572151";
 const WHATSAPP_URL = "https://wa.me/34626572151";
-const EMAIL_PRIMARY = "kromix@kroomix.com";
+const EMAIL_PRIMARY = "hola@kroomix.com";
 
 export default function ContactTrigger() {
   const { t } = useI18n();

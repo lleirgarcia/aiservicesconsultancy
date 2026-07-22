@@ -119,7 +119,7 @@ const JSON_LD = {
   image: `${SITE_URL}/og-image.png`,
   description: SITE_DESCRIPTION,
   telephone: "+34626572151",
-  email: "kromix@kroomix.com",
+  email: "hola@kroomix.com",
   areaServed: [
     { "@type": "Place", name: "Osona" },
     { "@type": "Place", name: "Barcelona" },

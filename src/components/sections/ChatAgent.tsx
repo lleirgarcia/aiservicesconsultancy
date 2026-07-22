@@ -27,7 +27,7 @@ const CONV_END_MARKER = "<<CONV_END>>";
 const PHONE_DISPLAY = "+34 626 572 151";
 const PHONE_TEL = "+34626572151";
 const WHATSAPP_URL = "https://wa.me/34626572151";
-const EMAIL = "kromix@kroomix.com";
+const EMAIL = "hola@kroomix.com";
 
 function LimitModal({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
