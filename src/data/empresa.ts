@@ -1,6 +1,6 @@
 export const EMPRESA = {
   marca: "Kroomix",
-  razonSocial: "Lleïr Garcia",
+  razonSocial: "Kroomix",
   cif: "",
   domicilio: "Passatge la Garsa 10, Llinars del Vallès, Barcelona (España)",
   domicilioCorto: "Llinars del Vallès, Barcelona",
