@@ -1,16 +1,12 @@
 import type { MetadataRoute } from "next";
 import { listAllPublishedSlugs } from "@/services/blog/articleQueries";
-import { readOptional } from "@/lib/env";
+import { SITE_URL } from "@/lib/siteUrl";
 
 /** Blog oculto hasta lanzamiento — poner a false para publicarlo. */
 const BLOG_HIDDEN = true;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = (readOptional("BLOG_PUBLIC_SITE_URL") ?? "").replace(
-    /\/+$/,
-    "",
-  );
-  if (!baseUrl) return [];
+  const baseUrl = SITE_URL;
 
   const now = new Date();
 
