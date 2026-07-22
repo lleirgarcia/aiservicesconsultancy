@@ -16,7 +16,7 @@ export default function PoliticaDePrivacidadPage() {
       <h2>1. Responsable del tratamiento</h2>
       <ul>
         <li>
-          <strong>Responsable:</strong> {EMPRESA.razonSocial} ({EMPRESA.marca})
+          <strong>Responsable:</strong> {EMPRESA.razonSocial}
         </li>
         <li>
           <strong>Domicilio:</strong> {EMPRESA.domicilio}
