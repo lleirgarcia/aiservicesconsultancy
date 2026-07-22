@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "@/i18n/LocaleContext";
 
-const PHONE_DISPLAY = "+34 626 572 151";
 const PHONE_TEL = "+34626572151";
 const WHATSAPP_URL = "https://wa.me/34626572151";
 const EMAIL_PRIMARY = "hola@kroomix.com";
@@ -96,9 +95,6 @@ export default function ContactTrigger() {
           <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
             {t("contact.call")}
           </span>
-          <span className="text-sm" style={{ color: "var(--muted)" }}>
-            {PHONE_DISPLAY}
-          </span>
         </a>
 
         <a
@@ -109,9 +105,6 @@ export default function ContactTrigger() {
         >
           <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--accent)" }}>
             {t("contact.email")}
-          </span>
-          <span className="text-sm" style={{ color: "var(--muted)" }}>
-            {EMAIL_PRIMARY}
           </span>
         </a>
 
