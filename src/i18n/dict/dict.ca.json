@@ -106,7 +106,7 @@
     "moreButton": "Explica'm més sobre aquesta solució"
   },
   "chat": {
-    "initial": "Hola, sóc Kromi, l'assistent de Kroomix. En dos minuts t'ajudo a detectar on pot haver-hi una oportunitat de millora a la teva operativa.\\n\\nCom et dius, de quina empresa ets i a què es dedica?",
+    "initial": "Hola, sóc Kromi, l'assistent virtual amb IA de Kroomix. En dos minuts t'ajudo a detectar on pot haver-hi una oportunitat de millora a la teva operativa.\\n\\nCom et dius, de quina empresa ets i a què es dedica?",
     "limitTitle": "Hem arribat al límit",
     "limitBody": "Amb el que m'has explicat ja tenim prou context. El pas següent és parlar directament.",
     "close": "Tancar",
@@ -120,7 +120,7 @@
     "newConv2": "↻ Nova conversa",
     "limitContact": "Contactar directament →",
     "micLog": "Micròfon",
-    "hint": "Shift + Enter per a nova línia. Les dades que compartiu només s'utilitzen per a aquest diagnòstic.",
+    "hint": "Kromi és un assistent d'intel·ligència artificial (IA): les seves respostes es generen automàticament i poden contenir errors. Les dades que comparteixis s'usen només per a aquest diagnòstic. Shift + Enter per a una línia nova.",
     "mic": {
       "rec": "Aturar enregistrament",
       "req": "Demanant permís de micròfon…",

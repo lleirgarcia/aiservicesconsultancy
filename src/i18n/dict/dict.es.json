@@ -106,7 +106,7 @@
     "moreButton": "Cuéntame más sobre esta solución"
   },
   "chat": {
-    "initial": "Hola, soy Kromi, el asistente de Kroomix. En dos minutos te ayudo a detectar dónde puede haber una oportunidad de mejora en tu operativa.\\n\\n¿Cómo te llamas, de qué empresa eres y a qué se dedica?",
+    "initial": "Hola, soy Kromi, el asistente virtual con IA de Kroomix. En dos minutos te ayudo a detectar dónde puede haber una oportunidad de mejora en tu operativa.\\n\\n¿Cómo te llamas, de qué empresa eres y a qué se dedica?",
     "limitTitle": "Hemos llegado al límite",
     "limitBody": "Con lo que me has contado ya tenemos suficiente contexto. El siguiente paso es hablar directamente.",
     "close": "Cerrar",
@@ -120,7 +120,7 @@
     "newConv2": "↻ Nueva conversación",
     "limitContact": "Contactar directamente →",
     "micLog": "Micrófono",
-    "hint": "Shift + Enter para nueva línea. Los datos que compartas se usan solo para este diagnóstico.",
+    "hint": "Kromi es un asistente de inteligencia artificial (IA): sus respuestas se generan automáticamente y pueden contener errores. Los datos que compartas se usan solo para este diagnóstico. Shift + Enter para nueva línea.",
     "mic": {
       "rec": "Detener grabación",
       "req": "Pidiendo permiso de micrófono…",

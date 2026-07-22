@@ -19,9 +19,6 @@ export default function PoliticaDePrivacidadPage() {
           <strong>Responsable:</strong> {EMPRESA.razonSocial} ({EMPRESA.marca})
         </li>
         <li>
-          <strong>CIF:</strong> {EMPRESA.cif}
-        </li>
-        <li>
           <strong>Domicilio:</strong> {EMPRESA.domicilio}
         </li>
         <li>

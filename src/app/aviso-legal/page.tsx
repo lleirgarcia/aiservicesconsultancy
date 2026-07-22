@@ -26,9 +26,6 @@ export default function AvisoLegalPage() {
           <strong>Nombre comercial:</strong> {EMPRESA.marca}
         </li>
         <li>
-          <strong>CIF:</strong> {EMPRESA.cif}
-        </li>
-        <li>
           <strong>Domicilio social:</strong> {EMPRESA.domicilio}
         </li>
         <li>

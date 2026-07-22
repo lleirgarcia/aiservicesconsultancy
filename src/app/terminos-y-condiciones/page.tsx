@@ -16,7 +16,7 @@ export default function TerminosYCondicionesPage() {
       <h2>1. Identificación del prestador</h2>
       <p>
         Los servicios son prestados por <strong>{EMPRESA.razonSocial}</strong>,
-        con CIF {EMPRESA.cif} y domicilio en {EMPRESA.domicilio} (en adelante,
+        con domicilio en {EMPRESA.domicilio} (en adelante,
         &quot;{EMPRESA.marca}&quot;).
       </p>
 
