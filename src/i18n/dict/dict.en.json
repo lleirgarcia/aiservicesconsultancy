@@ -18,7 +18,7 @@
   "sectionSolution": {
     "heading": "If any of this resonates with you…",
     "rightPlace": "You're in the right place",
-    "verticalsLead": "These are all DIGITAL problems across these three verticals"
+    "verticalsLead": "These are all **DIGITAL** problems across these **three** verticals"
   },
   "sectionOfrecemos": {
     "heading": "Fair enough — what do we offer?",
@@ -95,7 +95,8 @@
     "callNow": "Call now",
     "email": "Send email",
     "wa": "Send WhatsApp",
-    "waHint": "We usually reply within 24h"
+    "waHint": "We usually reply within 24h",
+    "waText": "Hi! I'm interested in improving work processes in my company."
   },
   "servicios": {
     "problem": "Problem",
@@ -131,7 +132,8 @@
       "noDevice": "No microphone detected",
       "network": "Network error in speech recognition",
       "startFailed": "Could not start the microphone"
-    }
+    },
+    "direct": "If you prefer, let's talk directly:"
   },
   "pilares": {
     "problemas": {
@@ -166,7 +168,8 @@
     "l1": "I have seen the case «{titulo}» on your website and I want you to explain this solution applied to my company well.",
     "l2": "Problem (card text):",
     "l3": "Summary solution (card text):",
-    "l4": "If you don't already have context about me (name, company, what we do, and approximate team size), ask me first in a few questions. When you have it, develop the solution in detail and contextualized to our business."
+    "l4": "If you don't already have context about me (name, company, what we do, and approximate team size), ask me first in a few questions. When you have it, develop the solution in detail and contextualized to our business.",
+    "display": "I'm interested in the «{titulo}» case, can you explain it applied to my company?"
   },
   "instagram_builder": {
     "pageTitle": "Instagram Post Builder",
@@ -274,5 +277,17 @@
         "statusPublished": "Published"
       }
     }
+  },
+  "links": {
+    "tagline": "Automation and AI for your business",
+    "nav": "Contact",
+    "homeAria": "Go to homepage",
+    "call": "Call us, no strings attached!",
+    "wa": "Leave us a message!",
+    "web": "Snoop around our website",
+    "assistant": "Talk to Kroomix",
+    "waDetail": "We'll reply right away",
+    "webDetail": "kroomix.com",
+    "assistantDetail": "Ask it anything"
   }
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BackToDemos } from "./BackToDemos";
 
 export const metadata: Metadata = {
   title: "Demos — Kroomix",
@@ -31,6 +32,7 @@ export default function DemosLayout({ children }: { children: React.ReactNode })
           >
             Datos de ejemplo
           </span>
+          <BackToDemos />
           <Link
             href="/"
             className="text-xs font-medium uppercase tracking-widest"

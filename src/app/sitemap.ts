@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 import { listAllPublishedSlugs } from "@/services/blog/articleQueries";
 import { readOptional } from "@/lib/env";
 
+/** Blog oculto hasta lanzamiento — poner a false para publicarlo. */
+const BLOG_HIDDEN = true;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = (readOptional("BLOG_PUBLIC_SITE_URL") ?? "").replace(
     /\/+$/,
@@ -18,25 +21,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1,
     },
-    {
+  ];
+
+  // Blog oculto hasta lanzamiento: no se incluye en el sitemap.
+  if (!BLOG_HIDDEN) {
+    staticEntries.push({
       url: `${baseUrl}/blog`,
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.8,
-    },
-  ];
+    });
+  }
 
   let articleEntries: MetadataRoute.Sitemap = [];
-  try {
-    const slugs = await listAllPublishedSlugs();
-    articleEntries = slugs.map(({ slug, updatedAt }) => ({
-      url: `${baseUrl}/blog/${slug}`,
-      lastModified: new Date(updatedAt),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    }));
-  } catch {
-    // si la BD no responde, sitemap sigue con las rutas estáticas
+  if (!BLOG_HIDDEN) {
+    try {
+      const slugs = await listAllPublishedSlugs();
+      articleEntries = slugs.map(({ slug, updatedAt }) => ({
+        url: `${baseUrl}/blog/${slug}`,
+        lastModified: new Date(updatedAt),
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      }));
+    } catch {
+      // si la BD no responde, sitemap sigue con las rutas estáticas
+    }
   }
 
   return [...staticEntries, ...articleEntries];

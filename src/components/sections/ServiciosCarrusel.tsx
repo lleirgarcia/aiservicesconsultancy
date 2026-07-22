@@ -246,6 +246,7 @@ export default function ServiciosCarrusel() {
                     onClick={() =>
                       openChatWithPrompt({
                         prompt: buildChatPromptForCaso(servicio, t),
+                        displayText: t("chatCaso.display", { titulo: servicio.titulo }),
                         autoSend: true,
                       })
                     }

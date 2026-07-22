@@ -19,79 +19,14 @@ export interface ResultadoClasificacion {
   pasos: PasoRazonamiento[];
 }
 
-const PALABRAS_URGENTE = [
-  "urgente",
-  "vencimiento",
-  "vence hoy",
-  "embargo",
-  "requerimiento",
-  "sanción",
-  "ultimo aviso",
-  "último aviso",
-];
-
-export function clasificarEmail(email: EmailEntrada): ResultadoClasificacion {
-  const textoCompleto = `${email.asunto} ${email.cuerpo}`.toLowerCase();
-  const esUrgente = PALABRAS_URGENTE.some((p) => textoCompleto.includes(p));
-  const carpetaTipo: Record<TipoDocumento, string> = {
-    Factura: "01_Facturas",
-    Nómina: "02_Nóminas",
-    "Modelo 303": "03_Modelos/303",
-    "Modelo 111": "03_Modelos/111",
-    Contrato: "04_Contratos",
-    "Justificante bancario": "05_Bancos",
-    Otros: "99_Otros",
-  };
-  const destino = `/${email.pista.clienteSlug}/${carpetaTipo[email.pista.tipo]}/`;
-
-  const pasos: PasoRazonamiento[] = [
-    {
-      etiqueta: "Lectura",
-      texto: `Asunto: «${email.asunto}». Remitente: ${email.remitenteEmail}.`,
-      duracionMs: 320,
-    },
-    {
-      etiqueta: "Adjuntos",
-      texto:
-        email.adjuntos.length > 0
-          ? `${email.adjuntos.length} adjunto${email.adjuntos.length > 1 ? "s" : ""}: ${email.adjuntos.map((a) => a.nombre).join(", ")}.`
-          : "Sin adjuntos relevantes — cuerpo plano.",
-      duracionMs: 280,
-    },
-    {
-      etiqueta: "Tipo de documento",
-      texto: `Identificado como «${email.pista.tipo}». ${email.pista.razon}.`,
-      duracionMs: 380,
-    },
-    {
-      etiqueta: "Cliente",
-      texto: `Asociado a «${email.pista.clienteNombre}» (${email.pista.clienteSlug}).`,
-      duracionMs: 260,
-    },
-    {
-      etiqueta: "Renombrado",
-      texto: `Nombre final: ${email.pista.nombreFinal}.`,
-      duracionMs: 220,
-    },
-    {
-      etiqueta: "Archivado",
-      texto: `Movido a ${destino}${email.pista.nombreFinal}.`,
-      duracionMs: 180,
-    },
-  ];
-
-  return {
-    tipo: email.pista.tipo,
-    clienteSlug: email.pista.clienteSlug,
-    clienteNombre: email.pista.clienteNombre,
-    fechaDocumento: email.pista.fechaDocumento,
-    confianza: email.pista.confianza,
-    razon: email.pista.razon,
-    nombreFinal: email.pista.nombreFinal,
-    destino,
-    esUrgente,
-    pasos,
-  };
+export async function clasificarEmail(email: EmailEntrada): Promise<ResultadoClasificacion> {
+  const res = await fetch("/api/demos/asesoria-emails/clasificar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(email),
+  });
+  if (!res.ok) throw new Error("Error al clasificar el email");
+  return res.json();
 }
 
 export function formatoHora(iso: string): string {

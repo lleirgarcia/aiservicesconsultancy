@@ -116,7 +116,7 @@ export default function ContactTrigger() {
         </a>
 
         <a
-          href={WHATSAPP_URL}
+          href={`${WHATSAPP_URL}?text=${encodeURIComponent(t("contact.waText"))}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => setOpen(false)}

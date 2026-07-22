@@ -5,6 +5,8 @@ export type OpenChatPromptDetail = {
   prompt: string;
   /** If true (default), the message is sent immediately. If false, only the input is filled. */
   autoSend?: boolean;
+  /** Short text shown in the chat bubble instead of the full prompt (the prompt is still what gets sent to the model). */
+  displayText?: string;
 };
 
 export function openChatWithPrompt(detail: OpenChatPromptDetail) {

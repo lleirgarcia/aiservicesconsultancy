@@ -18,7 +18,7 @@
   "sectionSolution": {
     "heading": "Si alguna frase resuena contigo…",
     "rightPlace": "Estás en el lugar correcto",
-    "verticalsLead": "Problemas DIGITALES en estas TRES verticales"
+    "verticalsLead": "Problemas **DIGITALES** en estas **TRES** verticales"
   },
   "sectionOfrecemos": {
     "heading": "Vale, pero, ¿qué ofrecemos?",
@@ -95,7 +95,8 @@
     "callNow": "Llamar ahora",
     "email": "Enviar email",
     "wa": "Enviar WhatsApp",
-    "waHint": "Te respondemos en menos de 24h"
+    "waHint": "Te respondemos en menos de 24h",
+    "waText": "Hola! Estoy interesado en mejorar procesos de trabajo en mi empresa."
   },
   "servicios": {
     "problem": "Problema",
@@ -131,7 +132,8 @@
       "noDevice": "No se detecta ningún micrófono",
       "network": "Error de red en el reconocimiento de voz",
       "startFailed": "No se pudo iniciar el micrófono"
-    }
+    },
+    "direct": "Si lo prefieres, lo hablamos en directo:"
   },
   "pilares": {
     "problemas": {
@@ -166,7 +168,8 @@
     "l1": "He visto en vuestra web el caso «{titulo}» y quiero que me expliques bien esa solución aplicada a mi empresa.",
     "l2": "Problema (texto de la tarjeta):",
     "l3": "Solución resumida (texto de la tarjeta):",
-    "l4": "Si aún no tienes contexto sobre mí (nombre, empresa, a qué nos dedicamos y tamaño aproximado del equipo), pídemelo primero en pocas preguntas. Cuando lo tengas, desarrolla la solución con detalle y contextualizada a nuestro negocio."
+    "l4": "Si aún no tienes contexto sobre mí (nombre, empresa, a qué nos dedicamos y tamaño aproximado del equipo), pídemelo primero en pocas preguntas. Cuando lo tengas, desarrolla la solución con detalle y contextualizada a nuestro negocio.",
+    "display": "Me interesa el caso «{titulo}», ¿me lo explicas aplicado a mi empresa?"
   },
   "instagram_builder": {
     "pageTitle": "Instagram Post Builder",
@@ -274,5 +277,17 @@
         "statusPublished": "Publicado"
       }
     }
+  },
+  "links": {
+    "tagline": "Automatización e IA para tu negocio",
+    "nav": "Contacto",
+    "homeAria": "Ir a la página principal",
+    "call": "¡Llama sin compromiso!",
+    "wa": "¡Déjanos un mensaje!",
+    "web": "Chafardea nuestra web",
+    "assistant": "Habla con Kroomix",
+    "waDetail": "Te respondemos en nada",
+    "webDetail": "kroomix.com",
+    "assistantDetail": "Te dirá lo que quieras saber"
   }
 }

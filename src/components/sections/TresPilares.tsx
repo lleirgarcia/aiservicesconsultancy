@@ -5,6 +5,19 @@ import { useI18n } from "@/i18n/LocaleContext";
 
 const HEADLINE_FONT = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif";
 
+/** Renders **word** segments with the .kw highlighter-pen style. */
+function renderKw(text: string) {
+  return text.split(/\*\*(.+?)\*\*/g).map((part, i) =>
+    i % 2 === 1 ? (
+      <span key={i} className="kw">
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+}
+
 const PILARES = [
   {
     key: "problemas",
@@ -103,7 +116,7 @@ export default function TresPilares() {
               className="mb-8 sm:mb-10 md:mb-12 w-full max-w-3xl mx-auto text-center text-balance text-[1.05rem] sm:text-[1.2rem] md:text-[1.35rem] leading-snug relative z-10"
               style={{ color: "var(--fg)" }}
             >
-              {t("sectionSolution.verticalsLead")}
+              {renderKw(t("sectionSolution.verticalsLead"))}
             </p>
           </div>
 

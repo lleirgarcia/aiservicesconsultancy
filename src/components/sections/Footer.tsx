@@ -14,7 +14,7 @@ const LEGAL_HREFS: { k: "aviso" | "privacidad" | "cookies" | "terminos"; href: s
 const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
   {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/",
+    href: "https://www.linkedin.com/company/kroomix/",
     icon: (
       <svg
         viewBox="0 0 24 24"

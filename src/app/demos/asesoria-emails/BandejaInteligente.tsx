@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CLIENTES,
-  EMAILS_INICIALES,
   type EmailEntrada,
   type TipoDocumento,
 } from "./data";
@@ -42,9 +41,9 @@ const cardBase: React.CSSProperties = {
 };
 
 export function BandejaInteligente() {
-  const [emails, setEmails] = useState<EmailEnEjecucion[]>(() =>
-    EMAILS_INICIALES.map((e) => ({ email: e, estado: "pendiente", pasosVistos: [] })),
-  );
+  const [emails, setEmails] = useState<EmailEnEjecucion[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState<string | null>(null);
   const [archivados, setArchivados] = useState<DocumentoArchivado[]>([]);
   const [emailEnFoco, setEmailEnFoco] = useState<string | null>(null);
   const [auto, setAuto] = useState(false);
@@ -54,6 +53,25 @@ export function BandejaInteligente() {
 
   const factor = velocidad === "rapido" ? 0.35 : 1;
 
+  const cargarBandeja = useCallback(async () => {
+    setCargando(true);
+    setErrorCarga(null);
+    try {
+      const res = await fetch("/api/demos/asesoria-emails/bandeja");
+      if (!res.ok) throw new Error("Error al conectar con Gmail");
+      const data: EmailEntrada[] = await res.json();
+      setEmails(data.map((e) => ({ email: e, estado: "pendiente", pasosVistos: [] })));
+    } catch {
+      setErrorCarga("No se pudo conectar a Gmail. Revisa las credenciales en .env.local.");
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarBandeja();
+  }, [cargarBandeja]);
+
   const procesarEmail = async (id: string) => {
     if (procesandoRef.current.has(id)) return;
     procesandoRef.current.add(id);
@@ -62,14 +80,29 @@ export function BandejaInteligente() {
       procesandoRef.current.delete(id);
       return;
     }
-    const resultado = clasificarEmail(target.email);
+
     setEmailEnFoco(id);
     setEmails((prev) =>
       prev.map((e) =>
         e.email.id === id
-          ? { ...e, estado: "procesando", resultado, pasosVistos: [] }
+          ? { ...e, estado: "procesando", resultado: undefined, pasosVistos: [] }
           : e,
       ),
+    );
+
+    let resultado: ResultadoClasificacion;
+    try {
+      resultado = await clasificarEmail(target.email);
+    } catch {
+      procesandoRef.current.delete(id);
+      setEmails((prev) =>
+        prev.map((e) => (e.email.id === id ? { ...e, estado: "pendiente" } : e)),
+      );
+      return;
+    }
+
+    setEmails((prev) =>
+      prev.map((e) => (e.email.id === id ? { ...e, resultado } : e)),
     );
 
     for (const paso of resultado.pasos) {
@@ -132,9 +165,7 @@ export function BandejaInteligente() {
     setAuto(false);
     setArchivados([]);
     setEmailEnFoco(null);
-    setEmails(
-      EMAILS_INICIALES.map((e) => ({ email: e, estado: "pendiente", pasosVistos: [] })),
-    );
+    cargarBandeja();
   };
 
   const procesarTodo = () => setAuto(true);
@@ -167,6 +198,45 @@ export function BandejaInteligente() {
     }
     return grupos;
   }, [archivados]);
+
+  if (cargando) {
+    return (
+      <div className="px-5 sm:px-8 py-8 max-w-7xl mx-auto flex items-center justify-center min-h-96">
+        <div style={{ textAlign: "center", color: "var(--muted)" }}>
+          <div
+            className="blinking-cursor"
+            style={{ background: "var(--accent)", width: 2, height: 32, display: "inline-block", marginBottom: 16 }}
+          />
+          <p className="text-sm uppercase tracking-widest">Conectando con Gmail…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorCarga) {
+    return (
+      <div className="px-5 sm:px-8 py-8 max-w-7xl mx-auto flex items-center justify-center min-h-96">
+        <div
+          style={{
+            padding: 24,
+            border: "1px solid var(--accent)",
+            background: "var(--bg-soft)",
+            maxWidth: 480,
+            textAlign: "center",
+          }}
+        >
+          <p className="text-sm mb-4" style={{ color: "var(--fg)" }}>{errorCarga}</p>
+          <button
+            onClick={cargarBandeja}
+            className="text-xs font-medium uppercase tracking-widest px-4 py-2"
+            style={{ border: "1px solid var(--accent)", color: "var(--accent)", background: "transparent", cursor: "pointer" }}
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-5 sm:px-8 py-8 max-w-7xl mx-auto">
@@ -527,9 +597,33 @@ function EstadoVacio() {
 function RazonamientoVivo({ email }: { email: EmailEnEjecucion }) {
   const { email: e, estado, resultado, pasosVistos } = email;
   const completo = estado === "archivado" && resultado;
+  const esperandoIA = estado === "procesando" && !resultado;
 
   return (
     <div className="flex flex-col gap-5">
+      {esperandoIA && (
+        <div
+          style={{
+            padding: "10px 14px",
+            background: "var(--accent-dim)",
+            border: "1px solid var(--accent)",
+            fontSize: 11,
+            color: "var(--accent)",
+            fontWeight: 600,
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span
+            className="blinking-cursor"
+            style={{ background: "var(--accent)", width: 1.5, height: "0.85em", display: "inline-block" }}
+          />
+          Claude analizando…
+        </div>
+      )}
       <div
         style={{
           padding: 14,

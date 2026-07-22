@@ -11,6 +11,13 @@ import { useI18n } from "@/i18n/LocaleContext";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  /** Texto corto que se muestra en la burbuja en lugar de content (content es lo que se envía al modelo). */
+  display?: string;
+}
+
+/** Lo que viaja a la API: sin el campo display (el modelo recibe content). */
+function toApiMessages(msgs: Message[]): { role: Message["role"]; content: string }[] {
+  return msgs.map(({ role, content }) => ({ role, content }));
 }
 
 const MAX_MESSAGES = 40;
@@ -192,6 +199,7 @@ export default function ChatAgent() {
   const [showModal, setShowModal] = useState(false);
   const [convClosed, setConvClosed] = useState(false);
   const [leadId, setLeadId] = useState<string | null>(null);
+  const [waLoading, setWaLoading] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const rawContentRef = useRef("");
@@ -201,7 +209,7 @@ export default function ChatAgent() {
   ]);
   const savedRef = useRef(false);
   const wasLoadingRef = useRef(false);
-  const submitFromUserTextRef = useRef<(text: string) => Promise<void>>(async () => {});
+  const submitFromUserTextRef = useRef<(text: string, display?: string) => Promise<void>>(async () => {});
 
   const {
     supported: micSupported,
@@ -284,7 +292,7 @@ export default function ChatAgent() {
       if (!prompt) return;
       const autoSend = ce.detail.autoSend !== false;
       const canAutoSend = autoSend && !inputBlockedRef.current && !loadingRef.current;
-      if (canAutoSend) void submitFromUserTextRef.current(prompt);
+      if (canAutoSend) void submitFromUserTextRef.current(prompt, ce.detail.displayText?.trim() || undefined);
       else {
         setInput(prompt);
         queueMicrotask(() => inputRef.current?.focus());
@@ -302,7 +310,7 @@ export default function ChatAgent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: msgs,
+          messages: toApiMessages(msgs),
           leadId: leadId,
           isManualSave: true,
           locale,
@@ -343,12 +351,12 @@ export default function ChatAgent() {
     inputRef.current?.focus();
   }
 
-  async function submitFromUserText(text: string) {
+  async function submitFromUserText(text: string, display?: string) {
     const trimmed = text.trim();
     if (!trimmed || loading || inputBlocked) return;
 
     const prev = latestMessagesRef.current;
-    const userMessage: Message = { role: "user", content: trimmed };
+    const userMessage: Message = { role: "user", content: trimmed, display };
     const next = [...prev, userMessage];
     setMessages(next);
     setInput("");
@@ -363,7 +371,7 @@ export default function ChatAgent() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, leadId, locale }),
+        body: JSON.stringify({ messages: toApiMessages(next), leadId, locale }),
       });
 
       if (!res.ok) throw new Error("bad response");
@@ -531,7 +539,7 @@ export default function ChatAgent() {
                     {msg.content.replace(CONV_END_MARKER, "").trimEnd()}
                   </ReactMarkdown>
                 ) : (
-                  msg.content
+                  msg.display ?? msg.content
                 )}
                 {i === messages.length - 1 &&
                   msg.role === "assistant" &&
@@ -541,6 +549,82 @@ export default function ChatAgent() {
               </div>
             </div>
           ))}
+
+          {messages.filter((m) => m.role === "user").length >= 2 && !loading && (
+            <div style={{ display: "flex", justifyContent: "flex-start" }}>
+              <div
+                style={{
+                  maxWidth: "78%",
+                  padding: "10px 14px",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  background: "var(--bg-soft)",
+                  border: "1px solid var(--border)",
+                  color: "var(--muted)",
+                }}
+              >
+                <div style={{ marginBottom: 8 }}>{t("chat.direct")}</div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    disabled={waLoading}
+                    onClick={async () => {
+                      if (waLoading) return;
+                      setWaLoading(true);
+                      // Abrir la ventana en el gesto de usuario para evitar
+                      // el bloqueador de pop-ups; la URL se asigna tras el fetch.
+                      const win = window.open("", "_blank");
+                      let text = t("contact.waText");
+                      try {
+                        const res = await fetch("/api/chat/summary", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ messages: toApiMessages(messages), locale }),
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          if (data.summary) text = `${text}\n\n${data.summary}`;
+                        }
+                      } catch {
+                        /* sin resumen: se envía solo el texto base */
+                      }
+                      const url = `${WHATSAPP_URL}?text=${encodeURIComponent(text)}`;
+                      if (win) win.location.href = url;
+                      else window.open(url, "_blank");
+                      setWaLoading(false);
+                    }}
+                    className="text-xs font-medium uppercase tracking-widest transition-opacity hover:opacity-60"
+                    style={{
+                      color: "var(--accent)",
+                      background: "transparent",
+                      border: "1px solid var(--border)",
+                      borderRadius: 4,
+                      padding: "8px 12px",
+                      whiteSpace: "nowrap",
+                      cursor: waLoading ? "wait" : "pointer",
+                      opacity: waLoading ? 0.6 : 1,
+                    }}
+                  >
+                    {waLoading ? "…" : t("contact.wa")}
+                  </button>
+                  <a
+                    href={`tel:${PHONE_TEL}`}
+                    className="text-xs font-medium uppercase tracking-widest transition-opacity hover:opacity-60"
+                    style={{
+                      color: "var(--accent)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 4,
+                      padding: "8px 12px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {t("contact.callNow")}
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div

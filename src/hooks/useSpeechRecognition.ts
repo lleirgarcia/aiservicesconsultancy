@@ -83,6 +83,17 @@ export function useSpeechRecognition(
   const onTranscriptRef = useRef(onTranscript);
   const isRecordingRef = useRef(false);
   const permissionGrantedRef = useRef(false);
+  /** Watchdog: si tras start() nunca llega onstart/onerror, no dejar el botón colgado en "requesting". */
+  const watchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Último resultado provisional aún no finalizado, para no perderlo al parar. */
+  const pendingInterimRef = useRef("");
+
+  const clearWatchdog = useCallback(() => {
+    if (watchdogRef.current !== null) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
+    }
+  }, []);
   const i18nRef = useRef<SpeechI18n>({ ...DEFAULT_I18N, ...i18n });
   useEffect(() => {
     i18nRef.current = { ...DEFAULT_I18N, ...i18n };
@@ -96,7 +107,9 @@ export function useSpeechRecognition(
     if (typeof window === "undefined") return;
     const w = window as WindowWithSpeech;
     const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!SR) {
+    // Sin contexto seguro (http en IP de red local) el micrófono nunca va a
+    // funcionar: mejor ocultar el botón que dejarlo colgado.
+    if (!SR || !window.isSecureContext) {
       setSupported(false);
       return;
     }
@@ -105,36 +118,58 @@ export function useSpeechRecognition(
 
     const rec = new SR();
     rec.lang = i18nRef.current.lang;
-    rec.continuous = false;
-    rec.interimResults = false;
+    // continuous + interimResults: los resultados provisionales llegan casi en
+    // tiempo real; sin ellos, parar justo después de hablar pierde la frase
+    // (el resultado final tarda ~1-2 s en consolidarse).
+    rec.continuous = true;
+    rec.interimResults = true;
     rec.maxAlternatives = 1;
 
     rec.onstart = () => {
+      clearWatchdog();
       isRecordingRef.current = true;
+      pendingInterimRef.current = "";
       setState("recording");
       setError(null);
     };
 
     rec.onresult = (e: SpeechRecognitionEvent) => {
-      const parts: string[] = [];
+      // Finales nuevos desde resultIndex: se emiten ya.
+      const finals: string[] = [];
       for (let i = e.resultIndex ?? 0; i < e.results.length; i++) {
         const result = e.results[i];
-        if (result.isFinal ?? true) {
-          parts.push(result[0].transcript);
-        }
+        if (result.isFinal) finals.push(result[0].transcript);
       }
-      const transcript = parts.join(" ").trim();
-      if (transcript) onTranscriptRef.current(transcript);
+      // Provisionales pendientes (cola aún no finalizada): se guardan por si
+      // el usuario para antes de que se consoliden.
+      const interims: string[] = [];
+      for (let i = 0; i < e.results.length; i++) {
+        const result = e.results[i];
+        if (!result.isFinal) interims.push(result[0].transcript);
+      }
+      pendingInterimRef.current = interims.join(" ").trim();
+
+      const finalText = finals.join(" ").trim();
+      if (finalText) onTranscriptRef.current(finalText);
     };
 
     rec.onend = () => {
+      clearWatchdog();
       isRecordingRef.current = false;
+      // Si se paró antes de que el servicio finalizara la frase, usar el
+      // último provisional para no perder lo dicho.
+      const tail = pendingInterimRef.current.trim();
+      pendingInterimRef.current = "";
+      if (tail) onTranscriptRef.current(tail);
       setState((prev) => (prev === "error" ? prev : "idle"));
     };
 
     rec.onerror = (e: SpeechRecognitionErrorEvent) => {
+      clearWatchdog();
       isRecordingRef.current = false;
       const code = e.error || "unknown";
+
+      if (code === "aborted") pendingInterimRef.current = "";
 
       if (code === "no-speech" || code === "aborted") {
         setState("idle");
@@ -166,6 +201,7 @@ export function useSpeechRecognition(
 
     recognitionRef.current = rec;
     return () => {
+      clearWatchdog();
       rec.onstart = null;
       rec.onresult = null;
       rec.onend = null;
@@ -177,7 +213,7 @@ export function useSpeechRecognition(
       }
       recognitionRef.current = null;
     };
-  }, []);
+  }, [clearWatchdog]);
 
   const isSafari = useCallback(() => {
     if (typeof window === "undefined") return false;
@@ -185,15 +221,34 @@ export function useSpeechRecognition(
     return /Safari/.test(ua) && !/Chrome/.test(ua);
   }, []);
 
+  const armWatchdog = useCallback((rec: SpeechRecognitionInstance) => {
+    clearWatchdog();
+    watchdogRef.current = setTimeout(() => {
+      watchdogRef.current = null;
+      if (isRecordingRef.current) return;
+      try {
+        rec.abort();
+      } catch {
+        // ignore
+      }
+      console.warn("[speech-recognition] watchdog: onstart nunca llegó");
+      setState("error");
+      setError(i18nRef.current.errStart);
+      setTimeout(() => { setState("idle"); setError(null); }, 2500);
+    }, 7000);
+  }, [clearWatchdog]);
+
   const startRecognition = useCallback((rec: SpeechRecognitionInstance) => {
     try {
       rec.start();
+      armWatchdog(rec);
     } catch (err) {
       try {
         rec.abort();
         setTimeout(() => {
           try {
             rec.start();
+            armWatchdog(rec);
           } catch (err2) {
             console.warn("[speech-recognition] retry start failed:", err2);
             setState("error");
@@ -208,7 +263,7 @@ export function useSpeechRecognition(
         setTimeout(() => { setState("idle"); setError(null); }, 2500);
       }
     }
-  }, []);
+  }, [armWatchdog]);
 
   const toggle = useCallback(async () => {
     const rec = recognitionRef.current;

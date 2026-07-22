@@ -113,7 +113,7 @@ export default function ComoLoHacemos() {
                   }}
                   data-card-id={proceso.id}
                   className={`w-full opacity-0 ${
-                    visibleCards.has(proceso.id) ? "card-visible-left" : ""
+                    visibleCards.has(proceso.id) ? `card-visible-${proceso.align}` : ""
                   }`}
                   style={{
                     overflow: "hidden",
@@ -123,7 +123,7 @@ export default function ComoLoHacemos() {
                     boxShadow: "0 16px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
                     opacity: visibleCards.has(proceso.id) ? 1 : 0,
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: proceso.align === "right" ? "row-reverse" : "row",
                     alignItems: "center",
                     height: 280,
                   }}
@@ -181,7 +181,7 @@ export default function ComoLoHacemos() {
                     <img
                       src={proceso.image}
                       alt={proceso.title}
-                      style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                     />
                   </div>
                 </div>

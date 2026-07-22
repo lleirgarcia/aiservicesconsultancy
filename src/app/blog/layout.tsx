@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { blogT } from "@/i18n/blogServer";
 import Footer from "@/components/sections/Footer";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
+
+// Blog oculto hasta lanzamiento: accesible por URL directa pero sin indexar.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function BlogLayout({ children }: { children: ReactNode }) {
   const t = blogT();
