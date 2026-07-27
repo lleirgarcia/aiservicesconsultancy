@@ -480,6 +480,8 @@ curl -s -X POST http://localhost:3003/api/chat/summary \
 
 ---
 
+> **Auth de la demo de asesoría:** todas las rutas `/demos/asesoria-emails*` y `/api/demos/asesoria-emails/*` pasan por `src/proxy.ts`, que exige **Basic Auth** (`DEMO_USER` / `DEMO_PASSWORD`) cuando `DEMO_PASSWORD` está definida. Sin esa variable (p. ej. en local), quedan abiertas. Con curl: `curl -u "$DEMO_USER:$DEMO_PASSWORD" …`. Las líneas "Auth" de los endpoints siguientes describen la ruta en sí, sin contar este proxy.
+
 ## GET /api/demos/asesoria-emails/bandeja
 
 - **Descripción:** Alimenta la demo "bandeja inteligente de asesoría". Se conecta por IMAP a la cuenta Gmail configurada, busca en INBOX los emails cuyo asunto contiene `[DEMO KROOMIX]`, los parsea y los devuelve normalizados (el prefijo `[DEMO KROOMIX]` se elimina del asunto), ordenados por fecha descendente.
@@ -855,4 +857,5 @@ curl -s -X POST http://localhost:3003/api/save-lead \
 | `BLOG_ADMIN_SESSION_SECRET` | blog auth + todos los endpoints admin del blog |
 | `ANTHROPIC_API_KEY` | chat, chat/summary, demos clasificar, demos escenario/chat |
 | `GMAIL_USER` / `GMAIL_APP_PASSWORD` | demos bandeja y limpiar (IMAP Gmail), demos enviar (SMTP Gmail) |
+| `DEMO_USER` / `DEMO_PASSWORD` | Basic Auth de toda la demo de asesoría (`src/proxy.ts`); sin `DEMO_PASSWORD`, abierta |
 | `NODE_ENV` | flag `Secure` de la cookie admin |
