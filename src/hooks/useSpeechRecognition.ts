@@ -53,6 +53,8 @@ interface UseSpeechRecognitionReturn {
   state: SpeechState;
   error: string | null;
   toggle: () => void;
+  /** Para el dictado descartando lo pendiente, sin emitirlo como transcript. */
+  cancel: () => void;
 }
 
 type SpeechI18n = {
@@ -73,7 +75,9 @@ const DEFAULT_I18N: SpeechI18n = {
 
 export function useSpeechRecognition(
   onTranscript: (text: string) => void,
-  i18n?: Partial<SpeechI18n>
+  i18n?: Partial<SpeechI18n>,
+  /** Opcional: recibe el texto provisional en vivo mientras se habla ("" al consolidarse o parar). */
+  onInterim?: (text: string) => void
 ): UseSpeechRecognitionReturn {
   const [supported, setSupported] = useState(false);
   const [state, setState] = useState<SpeechState>("idle");
@@ -81,6 +85,7 @@ export function useSpeechRecognition(
 
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const onTranscriptRef = useRef(onTranscript);
+  const onInterimRef = useRef(onInterim);
   const isRecordingRef = useRef(false);
   const permissionGrantedRef = useRef(false);
   /** Watchdog: si tras start() nunca llega onstart/onerror, no dejar el botón colgado en "requesting". */
@@ -102,6 +107,10 @@ export function useSpeechRecognition(
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
   }, [onTranscript]);
+
+  useEffect(() => {
+    onInterimRef.current = onInterim;
+  }, [onInterim]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -148,6 +157,7 @@ export function useSpeechRecognition(
         if (!result.isFinal) interims.push(result[0].transcript);
       }
       pendingInterimRef.current = interims.join(" ").trim();
+      onInterimRef.current?.(pendingInterimRef.current);
 
       const finalText = finals.join(" ").trim();
       if (finalText) onTranscriptRef.current(finalText);
@@ -160,6 +170,7 @@ export function useSpeechRecognition(
       // último provisional para no perder lo dicho.
       const tail = pendingInterimRef.current.trim();
       pendingInterimRef.current = "";
+      onInterimRef.current?.("");
       if (tail) onTranscriptRef.current(tail);
       setState((prev) => (prev === "error" ? prev : "idle"));
     };
@@ -169,7 +180,10 @@ export function useSpeechRecognition(
       isRecordingRef.current = false;
       const code = e.error || "unknown";
 
-      if (code === "aborted") pendingInterimRef.current = "";
+      if (code === "aborted") {
+        pendingInterimRef.current = "";
+        onInterimRef.current?.("");
+      }
 
       if (code === "no-speech" || code === "aborted") {
         setState("idle");
@@ -305,5 +319,18 @@ export function useSpeechRecognition(
     startRecognition(rec);
   }, [isSafari, startRecognition]);
 
-  return { supported, state, error, toggle };
+  const cancel = useCallback(() => {
+    const rec = recognitionRef.current;
+    if (!rec || !isRecordingRef.current) return;
+    // Descarta lo provisional ANTES de abortar: onend no debe re-emitirlo.
+    pendingInterimRef.current = "";
+    onInterimRef.current?.("");
+    try {
+      rec.abort();
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  return { supported, state, error, toggle, cancel };
 }

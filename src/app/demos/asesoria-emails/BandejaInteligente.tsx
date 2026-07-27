@@ -1,11 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  CLIENTES,
-  type EmailEntrada,
-  type TipoDocumento,
-} from "./data";
+import { type EmailEntrada } from "./data";
+import { ESCENARIO_DEFECTO, type Escenario } from "./escenario";
 import {
   clasificarEmail,
   formatoHora,
@@ -27,12 +25,22 @@ interface DocumentoArchivado {
   emailId: string;
   clienteSlug: string;
   clienteNombre: string;
-  tipo: TipoDocumento;
+  tipo: string;
   carpeta: string;
   nombreFinal: string;
   fechaArchivado: string;
   esUrgente: boolean;
   confianza: number;
+}
+
+/** Estado de la bandeja que se persiste por escenario. */
+interface BandejaGuardada {
+  emails: {
+    email: EmailEntrada;
+    estado: EstadoEmail;
+    resultado?: ResultadoClasificacion;
+  }[];
+  archivados: DocumentoArchivado[];
 }
 
 const cardBase: React.CSSProperties = {
@@ -49,28 +57,151 @@ export function BandejaInteligente() {
   const [auto, setAuto] = useState(false);
   const [velocidad, setVelocidad] = useState<"normal" | "rapido">("normal");
   const [filtroCliente, setFiltroCliente] = useState<string>("");
+  const [comprobando, setComprobando] = useState(false);
+  const [escenario, setEscenario] = useState<Escenario>(ESCENARIO_DEFECTO);
+  const [escenarioId, setEscenarioId] = useState<string | null>(null);
+  const [listaEscenarios, setListaEscenarios] = useState<
+    { id: string; nombre: string; activo: boolean }[]
+  >([]);
   const procesandoRef = useRef<Set<string>>(new Set());
+  /** Evita autoguardar mientras se restaura el estado inicial. */
+  const listoRef = useRef(false);
+  const emailsRef = useRef<EmailEnEjecucion[]>([]);
+
+  useEffect(() => {
+    emailsRef.current = emails;
+  }, [emails]);
 
   const factor = velocidad === "rapido" ? 0.35 : 1;
 
-  const cargarBandeja = useCallback(async () => {
-    setCargando(true);
-    setErrorCarga(null);
+  const cargarLista = useCallback(async () => {
     try {
-      const res = await fetch("/api/demos/asesoria-emails/bandeja");
-      if (!res.ok) throw new Error("Error al conectar con Gmail");
-      const data: EmailEntrada[] = await res.json();
-      setEmails(data.map((e) => ({ email: e, estado: "pendiente", pasosVistos: [] })));
+      const res = await fetch("/api/demos/asesoria-emails/escenarios");
+      if (!res.ok) return;
+      setListaEscenarios(await res.json());
     } catch {
-      setErrorCarga("No se pudo conectar a Gmail. Revisa las credenciales en .env.local.");
-    } finally {
-      setCargando(false);
+      // silencioso
     }
   }, []);
 
+  // Carga escenario activo + bandeja guardada, y mezcla con el correo vivo de
+  // Gmail: lo restaurado conserva su estado; lo nuevo entra como pendiente.
+  const cargarTodo = useCallback(async () => {
+    setCargando(true);
+    setErrorCarga(null);
+    setAuto(false);
+    setEmailEnFoco(null);
+    procesandoRef.current.clear();
+    listoRef.current = false;
+
+    let guardada: BandejaGuardada | null = null;
+    try {
+      const res = await fetch("/api/demos/asesoria-emails/escenario");
+      if (res.ok) {
+        const data = await res.json();
+        setEscenario(data.escenario);
+        setEscenarioId(data.id ?? null);
+        guardada = data.bandeja ?? null;
+      }
+    } catch {
+      // Se queda el escenario por defecto.
+    }
+
+    let gmail: EmailEntrada[] = [];
+    let gmailOk = true;
+    try {
+      const res = await fetch("/api/demos/asesoria-emails/bandeja");
+      if (!res.ok) throw new Error();
+      gmail = await res.json();
+    } catch {
+      gmailOk = false;
+    }
+
+    const restaurados: EmailEnEjecucion[] = (guardada?.emails ?? []).map((s) => ({
+      email: s.email,
+      estado: s.estado === "procesando" ? "pendiente" : s.estado,
+      resultado: s.resultado,
+      pasosVistos: s.estado === "archivado" && s.resultado ? s.resultado.pasos : [],
+    }));
+    const conocidos = new Set(restaurados.map((e) => e.email.id));
+    const nuevos: EmailEnEjecucion[] = gmail
+      .filter((e) => !conocidos.has(e.id))
+      .map((e) => ({ email: e, estado: "pendiente", pasosVistos: [] }));
+
+    setEmails([...nuevos, ...restaurados]);
+    setArchivados(guardada?.archivados ?? []);
+    if (!gmailOk && !guardada) {
+      setErrorCarga("No se pudo conectar a Gmail. Revisa las credenciales en .env.local.");
+    }
+    setCargando(false);
+    listoRef.current = true;
+  }, []);
+
   useEffect(() => {
-    cargarBandeja();
-  }, [cargarBandeja]);
+    cargarTodo();
+    cargarLista();
+  }, [cargarTodo, cargarLista]);
+
+  // Autoguardado: cada vez que cambia lo archivado, persiste la bandeja del
+  // escenario activo (emails con su estado y resultado + documentos).
+  useEffect(() => {
+    if (!listoRef.current) return;
+    const bandeja: BandejaGuardada = {
+      emails: emailsRef.current.map(({ email, estado, resultado }) => ({
+        email,
+        estado,
+        resultado,
+      })),
+      archivados,
+    };
+    fetch("/api/demos/asesoria-emails/bandeja-estado", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bandeja }),
+    }).catch(() => {
+      // Autoguardado silencioso: si falla, la demo sigue en memoria.
+    });
+  }, [archivados]);
+
+  const cambiarEscenario = async (valor: string) => {
+    if (valor === "__nuevo__") {
+      window.location.href = "/demos/asesoria-emails/escenario";
+      return;
+    }
+    setCargando(true);
+    try {
+      if (valor === "__defecto__") {
+        await fetch("/api/demos/asesoria-emails/escenario", { method: "DELETE" });
+      } else {
+        await fetch(`/api/demos/asesoria-emails/escenarios/${valor}`, { method: "PATCH" });
+      }
+    } catch {
+      // cargarTodo reflejará el estado real.
+    }
+    await cargarLista();
+    await cargarTodo();
+  };
+
+  // Trae los emails nuevos de Gmail sin tocar el estado de los ya procesados.
+  const comprobarCorreo = async () => {
+    setComprobando(true);
+    try {
+      const res = await fetch("/api/demos/asesoria-emails/bandeja");
+      if (!res.ok) throw new Error();
+      const data: EmailEntrada[] = await res.json();
+      setEmails((prev) => {
+        const conocidos = new Set(prev.map((e) => e.email.id));
+        const nuevos = data
+          .filter((e) => !conocidos.has(e.id))
+          .map((e) => ({ email: e, estado: "pendiente" as EstadoEmail, pasosVistos: [] }));
+        return [...nuevos, ...prev];
+      });
+    } catch {
+      // Silencioso: la bandeja actual sigue siendo válida.
+    } finally {
+      setComprobando(false);
+    }
+  };
 
   const procesarEmail = async (id: string) => {
     if (procesandoRef.current.has(id)) return;
@@ -160,12 +291,21 @@ export function BandejaInteligente() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auto]);
 
-  const reiniciar = () => {
+  // Borra el estado procesado guardado del escenario activo y recarga.
+  const reiniciar = async () => {
     procesandoRef.current.clear();
     setAuto(false);
-    setArchivados([]);
-    setEmailEnFoco(null);
-    cargarBandeja();
+    listoRef.current = false;
+    try {
+      await fetch("/api/demos/asesoria-emails/bandeja-estado", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bandeja: null }),
+      });
+    } catch {
+      // Si falla, cargarTodo restaurará lo que haya guardado.
+    }
+    await cargarTodo();
   };
 
   const procesarTodo = () => setAuto(true);
@@ -190,14 +330,15 @@ export function BandejaInteligente() {
 
   const carpetasPorCliente = useMemo(() => {
     const grupos = new Map<string, DocumentoArchivado[]>();
-    for (const cliente of CLIENTES) {
+    for (const cliente of escenario.clientes) {
       grupos.set(cliente.slug, []);
     }
     for (const doc of archivados) {
+      if (!grupos.has(doc.clienteSlug)) grupos.set(doc.clienteSlug, []);
       grupos.get(doc.clienteSlug)?.push(doc);
     }
     return grupos;
-  }, [archivados]);
+  }, [archivados, escenario]);
 
   if (cargando) {
     return (
@@ -227,7 +368,7 @@ export function BandejaInteligente() {
         >
           <p className="text-sm mb-4" style={{ color: "var(--fg)" }}>{errorCarga}</p>
           <button
-            onClick={cargarBandeja}
+            onClick={cargarTodo}
             className="text-xs font-medium uppercase tracking-widest px-4 py-2"
             style={{ border: "1px solid var(--accent)", color: "var(--accent)", background: "transparent", cursor: "pointer" }}
           >
@@ -250,12 +391,17 @@ export function BandejaInteligente() {
           className="font-headline text-2xl sm:text-3xl"
           style={{ color: "var(--fg)", letterSpacing: "-0.02em" }}
         >
-          La IA lee los emails entrantes y archiva sola los documentos.
+          {escenario.titular}
         </h1>
         <p className="text-sm mt-2 max-w-3xl" style={{ color: "var(--muted)" }}>
-          Pulsa <span style={{ color: "var(--fg)" }}>Procesar todo</span> y observa cómo cada email
-          se identifica (factura, nómina, modelo 303…), se renombra y se archiva en la carpeta del
-          cliente que toca. Sin abrir nada a mano.
+          {escenario.subtitulo} ¿Quieres simular la llegada de correos en vivo? Usa el{" "}
+          <Link
+            href="/demos/asesoria-emails/emisor"
+            style={{ color: "var(--fg)", textDecoration: "underline" }}
+          >
+            emisor de emails
+          </Link>
+          .
         </p>
       </header>
 
@@ -263,6 +409,33 @@ export function BandejaInteligente() {
         className="flex flex-wrap items-center gap-3 mb-6 p-4"
         style={{ ...cardBase }}
       >
+        <label className="flex items-center gap-2 text-xs" style={{ color: "var(--muted)" }}>
+          Demo
+          <select
+            value={escenarioId ?? "__defecto__"}
+            onChange={(e) => cambiarEscenario(e.target.value)}
+            style={{
+              background: "var(--bg)",
+              border: "1px solid var(--accent)",
+              color: "var(--fg)",
+              fontSize: 12,
+              padding: "4px 8px",
+              maxWidth: 220,
+            }}
+          >
+            {(escenarioId === null ||
+              !listaEscenarios.some((l) => l.nombre === ESCENARIO_DEFECTO.nombre)) && (
+              <option value="__defecto__">{ESCENARIO_DEFECTO.nombre}</option>
+            )}
+            {listaEscenarios.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.nombre}
+              </option>
+            ))}
+            <option value="__nuevo__">＋ Crear nueva con IA…</option>
+          </select>
+        </label>
+        <div style={{ width: 1, height: 24, background: "var(--border)" }} />
         <button
           onClick={procesarTodo}
           disabled={auto || stats.pendientes === 0}
@@ -275,6 +448,19 @@ export function BandejaInteligente() {
           }}
         >
           {auto ? "Procesando…" : "▶ Procesar todo"}
+        </button>
+        <button
+          onClick={comprobarCorreo}
+          disabled={comprobando}
+          className="text-xs font-medium uppercase tracking-widest px-4 py-2"
+          style={{
+            border: "1px solid var(--border)",
+            background: "transparent",
+            color: "var(--muted-hi)",
+            cursor: comprobando ? "default" : "pointer",
+          }}
+        >
+          {comprobando ? "Comprobando…" : "✉ Comprobar correo"}
         </button>
         <button
           onClick={reiniciar}
@@ -356,7 +542,7 @@ export function BandejaInteligente() {
         {/* Carpetas */}
         <section style={cardBase} className="flex flex-col min-h-0">
           <Encabezado
-            titulo="Carpetas de cliente"
+            titulo={escenario.carpetasLabel}
             sub={`${archivados.length} documentos archivados`}
           />
           <div style={{ padding: "12px 16px" }}>
@@ -372,8 +558,8 @@ export function BandejaInteligente() {
                 padding: "6px 8px",
               }}
             >
-              <option value="">Todos los clientes</option>
-              {CLIENTES.map((c) => (
+              <option value="">Todos</option>
+              {escenario.clientes.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.nombre}
                 </option>
@@ -384,11 +570,12 @@ export function BandejaInteligente() {
             {filtroCliente ? (
               <CarpetasCliente
                 clienteSlug={filtroCliente}
+                clientes={escenario.clientes}
                 docs={archivadosFiltrados}
               />
             ) : (
               <div className="space-y-3">
-                {CLIENTES.map((c) => {
+                {escenario.clientes.map((c) => {
                   const docs = carpetasPorCliente.get(c.slug) ?? [];
                   return (
                     <ResumenCliente
@@ -826,12 +1013,14 @@ function ResumenCliente({
 
 function CarpetasCliente({
   clienteSlug,
+  clientes,
   docs,
 }: {
   clienteSlug: string;
+  clientes: { slug: string; nombre: string }[];
   docs: DocumentoArchivado[];
 }) {
-  const cliente = CLIENTES.find((c) => c.slug === clienteSlug);
+  const cliente = clientes.find((c) => c.slug === clienteSlug);
   const porTipo = new Map<string, DocumentoArchivado[]>();
   for (const d of docs) {
     if (!porTipo.has(d.tipo)) porTipo.set(d.tipo, []);
@@ -922,13 +1111,13 @@ function CTAKroomix() {
         clasificación que entiende tus clientes y tus carpetas. Procesa entre 30 y 50 emails al día
         sin que nadie los toque, y notifica al responsable cuando algo es urgente.
       </p>
-      <a
+      <Link
         href="/?seccion=contacto"
         className="text-xs font-medium uppercase tracking-widest"
         style={{ color: "var(--fg)", textDecoration: "underline" }}
       >
         Hablar con Kroomix →
-      </a>
+      </Link>
     </div>
   );
 }

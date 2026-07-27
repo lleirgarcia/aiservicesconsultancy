@@ -1,4 +1,4 @@
-import type { EmailEntrada, TipoDocumento } from "./data";
+import type { EmailEntrada } from "./data";
 
 export interface PasoRazonamiento {
   etiqueta: string;
@@ -7,7 +7,7 @@ export interface PasoRazonamiento {
 }
 
 export interface ResultadoClasificacion {
-  tipo: TipoDocumento;
+  tipo: string;
   clienteSlug: string;
   clienteNombre: string;
   fechaDocumento?: string;

@@ -1,18 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
-import { CLIENTES, TIPOS_DOCUMENTO, type EmailEntrada, type TipoDocumento } from "../../../../demos/asesoria-emails/data";
+import type { EmailEntrada } from "../../../../demos/asesoria-emails/data";
+import type { Escenario } from "../../../../demos/asesoria-emails/escenario";
+import { obtenerEscenario } from "@/lib/escenario-store";
 
 const client = new Anthropic();
-
-const CARPETA_TIPO: Record<TipoDocumento, string> = {
-  Factura: "01_Facturas",
-  Nómina: "02_Nóminas",
-  "Modelo 303": "03_Modelos/303",
-  "Modelo 111": "03_Modelos/111",
-  Contrato: "04_Contratos",
-  "Justificante bancario": "05_Bancos",
-  Otros: "99_Otros",
-};
 
 const PASOS_ETIQUETAS = [
   "Lectura",
@@ -30,27 +22,27 @@ const PALABRAS_URGENTE = [
   "requerimiento", "sanción", "ultimo aviso", "último aviso",
 ];
 
-const clientesStr = CLIENTES.map((c) => `  - ${c.slug}: ${c.nombre}`).join("\n");
-const tiposStr = TIPOS_DOCUMENTO.join(", ");
+function construirSystemPrompt(escenario: Escenario): string {
+  const clientesStr = escenario.clientes.map((c) => `  - ${c.slug}: ${c.nombre}`).join("\n");
+  const tiposStr = escenario.tipos.map((t) => t.tipo).join(", ");
 
-const SYSTEM_PROMPT = `Eres el asistente de clasificación de una asesoría contable española. Recibes emails entrantes, identificas el tipo de documento y el cliente al que pertenecen, y propones cómo archivarlos.
+  return `Eres el asistente de clasificación de documentos de "${escenario.nombre}". ${escenario.contextoNegocio}
 
-Clientes registrados (usa exactamente estos slugs y nombres):
+Recibes emails entrantes, identificas el tipo de documento y la entidad a la que pertenecen, y propones cómo archivarlos.
+
+Entidades registradas (usa exactamente estos slugs y nombres):
 ${clientesStr}
 
 Tipos de documento válidos (usa exactamente estos valores): ${tiposStr}
 
-Convención de nombres de archivo: YYYY-MM-DD_TipoDocumento_Proveedor_Cliente.ext
-Ejemplos:
-  2026-04-30_Factura_Endesa_GaratgePuig.pdf
-  2026-04-30_Nóminas_Abril_BistróMercè.zip
-  2026-04-20_Modelo303_1T_FusteriaVidal.pdf
+Convención de nombres de archivo: YYYY-MM-DD_TipoDocumento_Remitente_Entidad.ext
+Ejemplo: 2026-04-30_Factura_Endesa_GaratgePuig.pdf
 
 Reglas:
-- Si el cliente no está en la lista registrada, usa el más parecido o "consultora-mas" como fallback y baja la confianza.
+- Si la entidad no está en la lista registrada, usa la más parecida y baja la confianza.
 - Si el tipo no está claro, usa "Otros".
 - La confianza refleja cuánto te fías de tu clasificación (0.0 = no sabes, 1.0 = certeza total).
-- Los pasoTextos deben ser frases cortas (máx. 2 líneas), en presente, narrando qué observas o decides en ese paso. Sin tecnicismos, como si se lo explicaras al responsable de la asesoría.
+- Los pasoTextos deben ser frases cortas (máx. 2 líneas), en presente, narrando qué observas o decides en ese paso. Sin tecnicismos, como si se lo explicaras al responsable de la empresa.
 
 Responde ÚNICAMENTE con JSON válido, sin texto adicional ni bloques de código markdown:
 {
@@ -65,11 +57,12 @@ Responde ÚNICAMENTE con JSON válido, sin texto adicional ni bloques de código
     "<Lectura: qué ves en el asunto y el remitente>",
     "<Adjuntos: qué archivos hay y qué indican, o que no hay adjuntos>",
     "<Tipo de documento: cómo llegas a identificarlo>",
-    "<Cliente: cómo identificas a qué cliente pertenece>",
+    "<Cliente: cómo identificas a qué entidad pertenece>",
     "<Renombrado: cómo construyes el nombre final del archivo>",
     "<Archivado: en qué carpeta queda y por qué>"
   ]
 }`;
+}
 
 export async function POST(req: Request) {
   const email: EmailEntrada = await req.json();
@@ -90,13 +83,16 @@ Cuerpo:
 ${email.cuerpo}`;
 
   try {
+    const { escenario } = await obtenerEscenario();
+    const carpetaPorTipo = new Map(escenario.tipos.map((t) => [t.tipo, t.carpeta]));
+
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
       system: [
         {
           type: "text",
-          text: SYSTEM_PROMPT,
+          text: construirSystemPrompt(escenario),
           cache_control: { type: "ephemeral" },
         },
       ],
@@ -107,9 +103,9 @@ ${email.cuerpo}`;
     const json = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(json);
 
-    const tipo = parsed.tipo as TipoDocumento;
+    const tipo = parsed.tipo as string;
     const clienteSlug = parsed.clienteSlug as string;
-    const destino = `/${clienteSlug}/${CARPETA_TIPO[tipo] ?? "99_Otros"}/`;
+    const destino = `/${clienteSlug}/${carpetaPorTipo.get(tipo) ?? "99_Otros"}/`;
 
     const textoCompleto = `${email.asunto} ${email.cuerpo}`.toLowerCase();
     const esUrgente = PALABRAS_URGENTE.some((p) => textoCompleto.includes(p));

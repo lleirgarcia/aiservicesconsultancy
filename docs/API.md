@@ -22,6 +22,13 @@ Base URL en desarrollo: `http://localhost:3003` (puerto configurado del dev serv
 | POST | `/api/chat/summary` | Genera un resumen de la conversación para enviarlo por WhatsApp |
 | GET | `/api/demos/asesoria-emails/bandeja` | Lee por IMAP los emails de demo de la cuenta Gmail configurada |
 | POST | `/api/demos/asesoria-emails/clasificar` | Clasifica un email de asesoría con Claude (tipo, cliente, archivado) |
+| POST | `/api/demos/asesoria-emails/enviar` | Envía por SMTP un email de cliente ficticio a la bandeja Gmail de la demo |
+| POST | `/api/demos/asesoria-emails/limpiar` | Borra de INBOX los emails de demo (`[DEMO KROOMIX]`) |
+| GET/PUT/DELETE | `/api/demos/asesoria-emails/escenario` | Lee el escenario activo (+bandeja), guarda y activa uno, o vuelve al de defecto |
+| POST | `/api/demos/asesoria-emails/escenario/chat` | Chat con Claude que genera un escenario a medida para un prospecto |
+| GET | `/api/demos/asesoria-emails/escenarios` | Lista la biblioteca de escenarios guardados |
+| PATCH/DELETE | `/api/demos/asesoria-emails/escenarios/{id}` | Activa o elimina un escenario guardado |
+| PUT | `/api/demos/asesoria-emails/bandeja-estado` | Persiste la bandeja procesada del escenario activo |
 | POST | `/api/save-lead` | Extrae email del historial de chat y guarda un lead en Supabase |
 
 ---
@@ -516,7 +523,7 @@ curl -s http://localhost:3003/api/demos/asesoria-emails/bandeja
 
 ## POST /api/demos/asesoria-emails/clasificar
 
-- **Descripción:** Clasifica un email entrante de una asesoría contable usando Claude (`claude-sonnet-4-6`, máx. 1024 tokens, system prompt con caché ephemeral). Determina tipo de documento, cliente, nombre de archivo final según la convención `YYYY-MM-DD_TipoDocumento_Proveedor_Cliente.ext`, carpeta destino y una narración paso a paso para la animación de la demo. Además marca `esUrgente` si el asunto/cuerpo contiene palabras clave (urgente, vencimiento, embargo, requerimiento, sanción, último aviso…).
+- **Descripción:** Clasifica un email entrante usando Claude (`claude-sonnet-4-6`, máx. 1024 tokens, system prompt con caché ephemeral). El system prompt se construye desde el **escenario activo** (ver `GET /escenario`): empresa, entidades y tipos de documento válidos. Determina tipo de documento, entidad, nombre de archivo final según la convención `YYYY-MM-DD_TipoDocumento_Remitente_Entidad.ext`, carpeta destino y una narración paso a paso para la animación de la demo. Además marca `esUrgente` si el asunto/cuerpo contiene palabras clave (urgente, vencimiento, embargo, requerimiento, sanción, último aviso…).
 - **Auth:** público, sin autenticación. CORS: mismo origen.
 - **Headers:** `Content-Type: application/json`.
 - **Body** (shape `EmailEntrada`; todos los campos obligatorios, `adjuntos` puede ser `[]`):
@@ -533,10 +540,10 @@ curl -s http://localhost:3003/api/demos/asesoria-emails/bandeja
 }
 ```
 
-- **Valores cerrados que devuelve:**
-  - `tipo`: `Factura` | `Nómina` | `Modelo 303` | `Modelo 111` | `Contrato` | `Justificante bancario` | `Otros`.
-  - `clienteSlug` / `clienteNombre` (clientes registrados de la demo): `garatge-puig` (Garatge Puig SL), `bistro-merce` (Bistró Mercè), `fusteria-vidal` (Fusteria Vidal), `oliveres-vall` (Oliveres del Vall SCP), `consultora-mas` (Consultora Mas, fallback), `constructora-roca` (Constructora Roca).
-  - `destino`: `/<clienteSlug>/<carpeta>/` donde carpeta ∈ `01_Facturas`, `02_Nóminas`, `03_Modelos/303`, `03_Modelos/111`, `04_Contratos`, `05_Bancos`, `99_Otros`.
+- **Valores cerrados que devuelve** (dependen del escenario activo; los indicados son los del escenario por defecto "asesoría contable"):
+  - `tipo`: uno de `escenario.tipos[].tipo` (defecto: `Factura` | `Nómina` | `Modelo 303` | `Modelo 111` | `Contrato` | `Justificante bancario` | `Otros`).
+  - `clienteSlug` / `clienteNombre`: una de `escenario.clientes` (defecto: `garatge-puig`, `bistro-merce`, `fusteria-vidal`, `oliveres-vall`, `consultora-mas`, `constructora-roca`).
+  - `destino`: `/<clienteSlug>/<carpeta>/` con carpeta de `escenario.tipos` (fallback `99_Otros` si el tipo no está en el escenario).
   - `pasos`: siempre 6 pasos con etiquetas fijas `Lectura`, `Adjuntos`, `Tipo de documento`, `Cliente`, `Renombrado`, `Archivado` y duraciones fijas `[350,280,450,300,250,200]` ms.
 - **Respuesta de éxito:** `200`
 
@@ -566,7 +573,7 @@ curl -s http://localhost:3003/api/demos/asesoria-emails/bandeja
 - **Errores:**
   - `500 {"error":"Error al clasificar"}` — fallo de la API de Anthropic o JSON del modelo no parseable. (Un body no-JSON también acaba en error 500 no controlado.)
 - **Efectos colaterales:** llamada a la API de Anthropic (coste por tokens). No toca BD, ficheros ni el buzón: el "archivado" es simulado, solo devuelve la propuesta.
-- **Variables de entorno:** `ANTHROPIC_API_KEY`.
+- **Variables de entorno:** `ANTHROPIC_API_KEY`; `NEXT_PUBLIC_SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` (lectura del escenario activo).
 - **Precondiciones:** API key configurada. El email suele venir de `GET /api/demos/asesoria-emails/bandeja`, pero acepta cualquier objeto con el shape indicado.
 - **Idempotencia:** sin efectos sobre estado; seguro reintentar (la clasificación puede variar ligeramente entre llamadas y cada una consume tokens).
 - **Ejemplo:**
@@ -578,6 +585,226 @@ curl -s -X POST http://localhost:3003/api/demos/asesoria-emails/clasificar \
 ```
 
 Respuesta: como el JSON de éxito de arriba.
+
+---
+
+## POST /api/demos/asesoria-emails/enviar
+
+- **Descripción:** Envía un email real por SMTP de Gmail a la propia cuenta configurada (`GMAIL_USER` → `GMAIL_USER`), simulando que un cliente ficticio manda documentación a la asesoría. El asunto se prefija automáticamente con `[DEMO KROOMIX]` para que `GET /bandeja` lo encuentre. Cada adjunto declarado se genera como PDF de relleno (~640 B) con el nombre indicado. Es el backend de la página `/demos/asesoria-emails/emisor`.
+- **Auth:** público, sin autenticación. CORS: mismo origen. **Ojo:** permite a cualquiera enviar emails desde la cuenta Gmail configurada (hacia sí misma).
+- **Headers:** `Content-Type: application/json`.
+- **Body** (`remitenteNombre`, `asunto` y `cuerpo` obligatorios; `remitenteAlias` y `adjuntos` opcionales):
+
+```json
+{
+  "remitenteNombre": "Endesa Energía",
+  "remitenteAlias": "endesa",
+  "asunto": "Factura abril 2026 — Garatge Puig SL",
+  "cuerpo": "Adjuntamos la factura del suministro eléctrico...",
+  "adjuntos": [ { "nombre": "ENDE-2026-04-G7821.pdf", "contenido": "Factura eléctrica de abril, 412,67 €." } ]
+}
+```
+
+  `adjuntos[].contenido` (opcional) es un resumen que se imprime dentro del PDF de relleno. `remitenteAlias` intenta usar plus-addressing (`user+alias@gmail.com`) como From; en la práctica Gmail lo reescribe a la cuenta base, pero el nombre visible (`remitenteNombre`) sí se conserva. Se sanea a `[a-z0-9.-]`.
+- **Respuesta de éxito:** `200 {"ok":true}`.
+- **Errores:**
+  - `400 {"error":"Faltan campos: remitenteNombre, asunto y cuerpo son obligatorios"}`.
+  - `500 {"error":"No se pudo enviar el email"}` — credenciales inválidas o fallo SMTP.
+- **Efectos colaterales:** envía un email real vía `smtp.gmail.com:465`; el mensaje queda en INBOX (y en Enviados) de la cuenta hasta que se limpie con `POST /limpiar`.
+- **Variables de entorno:** `GMAIL_USER`, `GMAIL_APP_PASSWORD`.
+- **Precondiciones:** cuenta Gmail con app password válida y SMTP habilitado.
+- **Idempotencia:** NO idempotente: cada llamada envía (y acumula en la bandeja) un email nuevo. Transición: (nada) → email en INBOX visible para `GET /bandeja`.
+- **Ejemplo:**
+
+```bash
+curl -s -X POST http://localhost:3003/api/demos/asesoria-emails/enviar \
+  -H "Content-Type: application/json" \
+  -d '{"remitenteNombre":"Endesa Energía","remitenteAlias":"endesa","asunto":"Factura abril 2026 — Garatge Puig SL","cuerpo":"Adjuntamos la factura del suministro eléctrico.","adjuntos":[{"nombre":"ENDE-2026-04-G7821.pdf"}]}'
+```
+
+```json
+{"ok":true}
+```
+
+---
+
+## POST /api/demos/asesoria-emails/limpiar
+
+- **Descripción:** Borra de INBOX (mueve a la papelera de Gmail) todos los emails cuyo asunto contiene `[DEMO KROOMIX]`. Se usa para dejar la bandeja a cero antes de repetir la demo delante de un cliente.
+- **Auth:** público, sin autenticación. CORS: mismo origen. **Ojo:** cualquiera puede vaciar los emails de demo de la cuenta configurada.
+- **Parámetros / Body:** ninguno.
+- **Respuesta de éxito:** `200 {"ok":true,"eliminados":5}` — `eliminados` es el número de mensajes borrados (0 si no había ninguno).
+- **Errores:**
+  - `500 {"error":"No se pudo limpiar la bandeja"}` — credenciales inválidas, red o fallo IMAP.
+- **Efectos colaterales:** conexión IMAP a `imap.gmail.com:993`; borra mensajes reales del buzón (solo los que llevan el prefijo `[DEMO KROOMIX]` en el asunto; el resto del buzón no se toca).
+- **Variables de entorno:** `GMAIL_USER`, `GMAIL_APP_PASSWORD`.
+- **Precondiciones:** cuenta Gmail con IMAP habilitado y app password válida.
+- **Idempotencia:** idempotente en efecto (repetir cuando ya está limpio devuelve `eliminados: 0`). Transición: emails demo en INBOX → papelera.
+- **Ejemplo:**
+
+```bash
+curl -s -X POST http://localhost:3003/api/demos/asesoria-emails/limpiar
+```
+
+```json
+{"ok":true,"eliminados":5}
+```
+
+---
+
+## GET / PUT / DELETE /api/demos/asesoria-emails/escenario
+
+- **Descripción:** Gestiona el **escenario activo** de la demo: la empresa ficticia cuyo mundo se muestra (entidades/carpetas, tipos de documento y los 5 emails predefinidos del emisor). `GET` devuelve el activo de la biblioteca (`demo_escenarios`) con su `id` y su `bandeja` procesada guardada, o el escenario por defecto (asesoría contable, `id: null`, `bandeja: null`) si no hay ninguno activo. `PUT` guarda el escenario como fila nueva de la biblioteca y lo activa (con `?id=<uuid>` actualiza esa fila en vez de crear); responde `{"ok":true,"id":"<uuid>"}`. `DELETE` **desactiva** el activo (no borra la fila) y vuelve al de defecto. Lo consumen el emisor, la bandeja y el clasificador.
+- **Auth:** público, sin autenticación. CORS: mismo origen. **Ojo:** cualquiera puede cambiar el escenario de la demo.
+- **Body de PUT** (shape `Escenario`; todos los campos obligatorios):
+
+```json
+{
+  "nombre": "Metalúrgica Serra SA",
+  "contextoNegocio": "Taller de calderería y mecanizado en Vic que recibe pedidos, albaranes, ofertas de acero...",
+  "titular": "La IA de Metalúrgica Serra lee y archiva sola el correo del taller.",
+  "subtitulo": "Pulsa Procesar todo y observa cómo cada pedido, albarán u oferta se archiva en la carpeta que toca.",
+  "carpetasLabel": "Carpetas de cliente / proveedor",
+  "clientes": [ { "slug": "aceros-bages", "nombre": "Aceros del Bages SL" } ],
+  "tipos": [ { "tipo": "Pedido", "carpeta": "01_Pedidos" }, { "tipo": "Otros", "carpeta": "99_Otros" } ],
+  "emails": [
+    {
+      "id": "p1",
+      "etiqueta": "Pedido industrial",
+      "remitenteNombre": "Jordi Puigdomènech",
+      "remitenteAlias": "industriasroca",
+      "asunto": "Pedido nº 2026-0312 – Depósitos a presión",
+      "cuerpo": "Os adjunto el pedido...",
+      "adjuntos": [ { "nombre": "Pedido_2026-0312.pdf", "contenido": "Pedido de 3 depósitos a presión, entrega en 4 semanas." } ]
+    }
+  ]
+}
+```
+
+- **Respuestas de éxito:**
+  - `GET` → `200 {"id":"<uuid>|null","escenario":{…},"bandeja":{…}|null,"porDefecto":true|false}`.
+  - `PUT` → `200 {"ok":true,"id":"<uuid>"}`.
+  - `DELETE` → `200 {"ok":true}` (idempotente: desactiva si hay activo).
+- **Errores:**
+  - `PUT 400 {"error":"Escenario inválido"}` — no pasa la validación de shape.
+  - `500 {"error":"No se pudo leer/guardar/restaurar el escenario"}` — fallo Supabase.
+- **Efectos colaterales:** `PUT` inserta/actualiza en `demo_escenarios` y desactiva el resto; `DELETE` pone `activo=false` en todas. El cambio afecta inmediatamente al emisor, la bandeja y el system prompt de `POST /clasificar`.
+- **Variables de entorno:** `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
+- **Precondiciones:** tabla `demo_escenarios` (migración `20260724000002_demo_escenarios_biblioteca.sql`). `GET` nunca falla por falta de fila activa: cae al defecto.
+- **Idempotencia:** `GET` lectura pura. `PUT` sin `?id` crea una fila nueva por llamada (NO idempotente); con `?id` es idempotente. `DELETE` idempotente. Transición: defecto ↔ escenario de la biblioteca activo.
+- **Ejemplo:**
+
+```bash
+curl -s http://localhost:3003/api/demos/asesoria-emails/escenario
+# → {"id":"0233b6ac-…","escenario":{"nombre":"K Duque",…},"bandeja":null,"porDefecto":false}
+curl -s -X DELETE http://localhost:3003/api/demos/asesoria-emails/escenario
+# → {"ok":true}
+```
+
+---
+
+## GET /api/demos/asesoria-emails/escenarios
+
+- **Descripción:** Lista la biblioteca de escenarios guardados, ordenados por `updated_at` descendente. Alimenta el selector de demos de la bandeja y la lista "Demos guardadas" del generador.
+- **Auth:** público, sin autenticación. CORS: mismo origen.
+- **Parámetros / Body:** ninguno.
+- **Respuesta de éxito:** `200` — array (posiblemente `[]`):
+
+```json
+[
+  { "id": "0233b6ac-3671-487c-9b57-cf6227f9908f", "nombre": "K Duque", "activo": true, "updated_at": "2026-07-24T12:30:00.000Z" }
+]
+```
+
+- **Errores:** `500 {"error":"No se pudieron listar los escenarios"}` — fallo Supabase.
+- **Efectos colaterales:** ninguno (lectura de `demo_escenarios`).
+- **Variables de entorno:** `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
+- **Precondiciones:** tabla `demo_escenarios`.
+- **Idempotencia:** lectura pura, seguro reintentar.
+- **Ejemplo:**
+
+```bash
+curl -s http://localhost:3003/api/demos/asesoria-emails/escenarios
+```
+
+---
+
+## PATCH / DELETE /api/demos/asesoria-emails/escenarios/{id}
+
+- **Descripción:** `PATCH` activa el escenario guardado `{id}` (desactiva cualquier otro); su escenario y su bandeja procesada pasan a ser los que muestran emisor, bandeja y clasificador. `DELETE` elimina la fila de la biblioteca (escenario + bandeja procesada, irrecuperable).
+- **Auth:** público, sin autenticación. CORS: mismo origen. **Ojo:** cualquiera puede activar o borrar demos guardadas.
+- **Parámetros:** `id` (uuid) en la ruta. Body: ninguno.
+- **Respuesta de éxito:** `200 {"ok":true}`.
+- **Errores:** `500 {"error":"No se pudo activar/eliminar el escenario"}` — fallo Supabase (un `id` inexistente en `PATCH` deja el sistema sin activo → la demo cae al defecto; en `DELETE` es un no-op con `200`).
+- **Efectos colaterales:** escritura en `demo_escenarios`.
+- **Variables de entorno:** `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
+- **Precondiciones:** la fila `{id}` debe existir para que `PATCH` tenga efecto.
+- **Idempotencia:** ambos idempotentes. Transición `PATCH`: activo actual → `{id}` activo. `DELETE`: fila existente → eliminada.
+- **Ejemplo:**
+
+```bash
+curl -s -X PATCH http://localhost:3003/api/demos/asesoria-emails/escenarios/0233b6ac-3671-487c-9b57-cf6227f9908f
+# → {"ok":true}
+```
+
+---
+
+## PUT /api/demos/asesoria-emails/bandeja-estado
+
+- **Descripción:** Persiste el estado procesado de la bandeja del **escenario activo**: los emails con su estado (`pendiente`/`archivado`) y resultado de clasificación, más la lista de documentos archivados. La bandeja lo autoguarda tras cada email procesado y lo restaura al abrir; «Reiniciar» envía `{"bandeja":null}` para borrarlo. Si el activo es el escenario por defecto (sin fila), se materializa como fila de la biblioteca para poder guardar.
+- **Auth:** público, sin autenticación. CORS: mismo origen.
+- **Headers:** `Content-Type: application/json`.
+- **Body:** `{"bandeja": {…}|null}` — el shape lo define el cliente (`BandejaGuardada`: `{emails:[{email,estado,resultado?}],archivados:[…]}`); el servidor lo trata como JSON opaco. `null` borra el estado guardado.
+- **Respuesta de éxito:** `200 {"ok":true}`.
+- **Errores:**
+  - `400 {"error":"Falta el campo bandeja"}`.
+  - `500 {"error":"No se pudo guardar la bandeja"}` — fallo Supabase.
+- **Efectos colaterales:** escribe la columna `bandeja` de la fila activa de `demo_escenarios` (o crea la fila del escenario por defecto si no hay activa).
+- **Variables de entorno:** `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
+- **Precondiciones:** ninguna estricta; sin fila activa, materializa el defecto.
+- **Idempotencia:** idempotente para el mismo body (sobrescribe). Transición: bandeja guardada anterior → nueva (o vacía con `null`).
+- **Ejemplo:**
+
+```bash
+curl -s -X PUT http://localhost:3003/api/demos/asesoria-emails/bandeja-estado \
+  -H "Content-Type: application/json" -d '{"bandeja":null}'
+# → {"ok":true}
+```
+
+---
+
+## POST /api/demos/asesoria-emails/escenario/chat
+
+- **Descripción:** Chat con Claude (`claude-sonnet-4-6`, máx. 4096 tokens) que genera un escenario a medida a partir de la descripción de una empresa prospecto ("Metalúrgica Serra SA, taller de calderería en Vic…"). Devuelve una respuesta conversacional y, cuando tiene información suficiente, el objeto `escenario` completo (mismo shape que el `PUT` de arriba). **No lo activa**: activar es responsabilidad del cliente vía `PUT /escenario`. Soporta conversación iterativa para refinar (reenviar todo el historial).
+- **Auth:** público, sin autenticación. CORS: mismo origen.
+- **Headers:** `Content-Type: application/json`.
+- **Body:**
+
+```json
+{
+  "messages": [
+    { "role": "user", "content": "Metalúrgica Serra SA, taller de calderería en Vic. Reciben pedidos, albaranes y ofertas de proveedores de acero." }
+  ]
+}
+```
+
+- **Respuesta de éxito:** `200 {"respuesta":"Aquí tienes el escenario…","escenario":{…}|null}` — `escenario` es `null` si el modelo aún necesita información (entonces `respuesta` contiene la pregunta) o si el JSON generado no pasa la validación.
+- **Errores:**
+  - `400 {"error":"Faltan mensajes"}` — `messages` ausente o vacío.
+  - `500 {"error":"Error al generar el escenario"}` — fallo Anthropic o JSON no parseable.
+- **Efectos colaterales:** llamada a la API de Anthropic (coste por tokens). No guarda nada.
+- **Variables de entorno:** `ANTHROPIC_API_KEY`.
+- **Precondiciones:** API key configurada.
+- **Idempotencia:** sin efectos sobre estado; seguro reintentar (el escenario generado varía entre llamadas).
+- **Ejemplo:**
+
+```bash
+curl -s -X POST http://localhost:3003/api/demos/asesoria-emails/escenario/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Metalúrgica Serra SA, taller de calderería en Vic."}]}'
+```
+
+Respuesta: `{"respuesta":"…","escenario":{"nombre":"Metalúrgica Serra SA",…}}`.
 
 ---
 
@@ -622,10 +849,10 @@ curl -s -X POST http://localhost:3003/api/save-lead \
 
 | Variable | Usada por |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | blog articles/upload, chat, save-lead |
-| `SUPABASE_SERVICE_ROLE_KEY` | blog articles/upload, chat, save-lead |
+| `NEXT_PUBLIC_SUPABASE_URL` | blog articles/upload, chat, save-lead, demos escenario y clasificar |
+| `SUPABASE_SERVICE_ROLE_KEY` | blog articles/upload, chat, save-lead, demos escenario y clasificar |
 | `BLOG_ADMIN_PASSWORD` | blog auth (login y check) |
 | `BLOG_ADMIN_SESSION_SECRET` | blog auth + todos los endpoints admin del blog |
-| `ANTHROPIC_API_KEY` | chat, chat/summary, demos clasificar |
-| `GMAIL_USER` / `GMAIL_APP_PASSWORD` | demos bandeja (IMAP Gmail) |
+| `ANTHROPIC_API_KEY` | chat, chat/summary, demos clasificar, demos escenario/chat |
+| `GMAIL_USER` / `GMAIL_APP_PASSWORD` | demos bandeja y limpiar (IMAP Gmail), demos enviar (SMTP Gmail) |
 | `NODE_ENV` | flag `Secure` de la cookie admin |

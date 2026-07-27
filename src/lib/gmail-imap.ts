@@ -60,6 +60,30 @@ export async function fetchDemoEmails(): Promise<EmailEntrada[]> {
   );
 }
 
+export async function limpiarDemoEmails(): Promise<number> {
+  const client = new ImapFlow({
+    host: "imap.gmail.com",
+    port: 993,
+    secure: true,
+    auth: {
+      user: process.env.GMAIL_USER!,
+      pass: process.env.GMAIL_APP_PASSWORD!,
+    },
+    logger: false,
+  });
+
+  await client.connect();
+  try {
+    await client.mailboxOpen("INBOX");
+    const uids = await client.search({ subject: DEMO_PREFIX });
+    if (!uids || uids.length === 0) return 0;
+    await client.messageDelete(uids);
+    return uids.length;
+  } finally {
+    await client.logout();
+  }
+}
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
