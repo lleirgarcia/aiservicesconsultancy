@@ -1,0 +1,26 @@
+# Las pruebas de aiservicesconsultancy, en un runner de GitHub y no en el VPS (norma 8 de
+# theObserver/mapa/NORMAS.md): el cierre de un encargo lee este veredicto con
+# `gh pr checks` y no vuelve a lanzar la suite en la máquina.
+name: pruebas
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: las pruebas
+        run: npm test
