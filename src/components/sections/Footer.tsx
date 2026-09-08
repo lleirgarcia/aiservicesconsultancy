@@ -65,7 +65,17 @@ const SOCIALS: { label: string; href: string; icon: ReactElement }[] = [
   },
 ];
 
-export default function Footer({ slim = false }: { slim?: boolean }) {
+export default function Footer({
+  slim = false,
+  madeBy,
+  logoNode,
+}: {
+  slim?: boolean;
+  /** Línea de crédito opcional, se muestra justo encima del copyright. */
+  madeBy?: ReactElement;
+  /** Logo alternativo, para fondos que no son siempre oscuros. */
+  logoNode?: ReactElement;
+}) {
   const { t } = useI18n();
   const year = new Date().getFullYear();
 
@@ -139,12 +149,15 @@ export default function Footer({ slim = false }: { slim?: boolean }) {
 
       {/* Logo + copyright */}
       <div className="flex flex-col items-center gap-2">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/kroomix-logo.png"
-          alt="Kroomix.com"
-          style={{ height: 100, width: "auto", mixBlendMode: "screen", display: "block" }}
-        />
+        {logoNode ?? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src="/kroomix-logo.png"
+            alt="Kroomix.com"
+            style={{ height: 100, width: "auto", mixBlendMode: "screen", display: "block" }}
+          />
+        )}
+        {madeBy && <p className="text-xs">{madeBy}</p>}
         <p className="text-xs">
           © {year} · {t("footer.rights")}
         </p>

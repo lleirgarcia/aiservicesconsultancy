@@ -694,3 +694,350 @@ html.collapse-intro-armed.sections-expanded [data-collapsible] {
   color: var(--muted);
   font-style: italic;
 }
+
+/* ── Landing v2 — tema claro (el contenido manda) ───────────────────
+   El campo de estrellas queda de fondo, atenuado por un velo blanco que
+   crece con `--night`: el cielo nunca llega a oscurecer, así que el
+   interfaz conserva sus colores claros de siempre. */
+.v3-theme {
+  --night: 0;
+  --ink: 0; /* el tema ya no vira a oscuro: se mantiene claro de arriba abajo */
+  position: relative;
+  isolation: isolate; /* mantiene el canvas (z-index negativo) detrás del contenido */
+
+  --fg:        #101418;
+  --muted:     #616c76;
+  --muted-hi:  #2e363d;
+  --border:    #dfe3e6;
+  --border-hi: #edeff1;
+
+  --surface:   #ffffff;
+  --surface-2: #fbfbfc;
+  --surface-glass: rgba(255, 255, 255, 0.9);
+
+  --bg:         transparent;
+  --bg-soft:    transparent;
+  --bg-section: transparent;
+  --bg-elevated: var(--surface);
+  --accent:     #0d6ef2;
+  --accent-dim: rgba(13, 110, 242, 0.08);
+  --accent-on:  #ffffff;
+  --glass-bg:     var(--surface);
+  --glass-border: var(--border);
+  background: transparent;
+  color: var(--fg);
+}
+
+/* El lienzo del universo: fijo, detrás de todo, sin capturar clics. */
+.v3-universe {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* Un velo mínimo, solo para suavizar el conjunto. El cielo ya es blanco:
+   la presencia la dan las estrellas, que se oscurecen con el scroll. */
+.v3-universe-veil {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.v3-theme ::selection { background: var(--accent); color: #fff; }
+
+/* botones — rectos, sin rebotes */
+.v3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--fg);
+  background: var(--fg);
+  color: color-mix(in srgb, #0b1020 calc(var(--ink) * 100%), #ffffff);
+  border-radius: 6px;
+  padding: 0.85rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s cubic-bezier(0.33, 1, 0.68, 1), border-color 0.2s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.v3-btn:hover { background: #2b3238; border-color: #2b3238; }
+.v3-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.v3-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--fg);
+  background: transparent;
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 0.85rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s cubic-bezier(0.33, 1, 0.68, 1), color 0.2s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.v3-btn-ghost:hover { background: var(--fg); color: var(--bg); }
+.v3-btn-ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* regla de medición: separador con marcas de tick, la firma visual de la página */
+.v3-ruler {
+  height: 9px;
+  border-bottom: 1px solid var(--border);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--border) 0,
+    var(--border) 1px,
+    transparent 1px,
+    transparent 28px
+  );
+  background-size: 28px 6px;
+  background-position: 0 bottom;
+  background-repeat: repeat-x;
+}
+
+/* subrayado tipo marcador para la garantía (multi-línea seguro) */
+.v3-mark {
+  background-image: linear-gradient(
+    to top,
+    rgba(13, 110, 242, 0.22) 0,
+    rgba(13, 110, 242, 0.22) 34%,
+    transparent 34%
+  );
+  padding: 0 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* logo con fondo oscuro integrado: chip para tema claro */
+.v3-logochip {
+  display: inline-flex;
+  align-items: center;
+  background: #0b0f10;
+  border-radius: 8px;
+  padding: 3px 10px;
+}
+/* El logotipo lleva transparencia propia: se muestra sin fusión ni fondo. */
+.v3-theme header img,
+.v3-theme footer img { mix-blend-mode: normal !important; }
+
+/* sliders de la calculadora */
+.v3-theme input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 0;
+  background: linear-gradient(
+    to right,
+    var(--fg) 0%,
+    var(--fg) var(--pct, 50%),
+    var(--border) var(--pct, 50%),
+    var(--border) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+.v3-theme input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: none;
+}
+.v3-theme input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: none;
+}
+.v3-theme input[type="range"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* Pasos del panel de ejemplo: navegables con un clic */
+.v3-step:hover { color: var(--fg) !important; }
+.v3-step:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+/* Titular del hero: cada frase en una sola línea a partir de tableta */
+@media (min-width: 768px) {
+  .v3-h1-line { white-space: nowrap; }
+}
+
+/* ── Detalles tomados de attio.com ──────────────────────────────
+   Su lenguaje: transiciones de 0.2 s con easeOutCubic, elevación
+   sutil al pasar por encima y un latido lento en el elemento
+   protagonista (ellos lo usan en el radar del hero). */
+.v3-hover {
+  transition:
+    transform 0.2s cubic-bezier(0.33, 1, 0.68, 1),
+    border-color 0.2s cubic-bezier(0.33, 1, 0.68, 1),
+    box-shadow 0.2s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.v3-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--hover-border, rgba(13, 110, 242, 0.4));
+  box-shadow: 0 14px 26px -12px rgba(16, 20, 24, 0.26), 0 3px 6px -3px rgba(16, 20, 24, 0.1);
+}
+
+/* latido del nodo protagonista */
+@keyframes v3-pulse {
+  0%   { transform: scale(1);    opacity: 0.45; }
+  70%  { transform: scale(1.05); opacity: 0; }
+  100% { transform: scale(1.05); opacity: 0; }
+}
+.v3-pulse {
+  position: absolute;
+  inset: -5px;
+  border-radius: 16px;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+  animation: v3-pulse 3.6s cubic-bezier(0.33, 1, 0.68, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-hover:hover { transform: none; }
+  .v3-pulse { animation: none; opacity: 0; }
+}
+
+/* ── Píldora con borde animado (recurso del hero de attio) ──────────
+   El pseudo-elemento gira un degradado cónico por detrás; el cuerpo
+   blanco tapa el centro y deja solo 1 px de anillo a la vista. */
+.v3-pill {
+  position: relative;
+  display: inline-block;
+  border-radius: 999px;
+  padding: 1px;
+  overflow: hidden;
+  text-decoration: none;
+  line-height: 0;
+}
+.v3-pill::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 420px;
+  height: 420px;
+  margin: -210px 0 0 -210px;
+  background: conic-gradient(
+    from 0deg,
+    var(--border) 0deg,
+    var(--border) 232deg,
+    rgba(137, 206, 255, 0.9) 285deg,
+    var(--accent) 305deg,
+    rgba(137, 206, 255, 0.9) 325deg,
+    var(--border) 360deg
+  );
+  animation: v3-pill-spin 5s linear infinite;
+}
+@keyframes v3-pill-spin {
+  to { transform: rotate(1turn); }
+}
+.v3-pill-body {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 0.5rem 0.95rem 0.5rem 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  color: var(--muted-hi);
+  transition: color 0.2s cubic-bezier(0.33, 1, 0.68, 1), background 0.2s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.v3-pill:hover .v3-pill-body { color: var(--fg); background: var(--surface-2); }
+.v3-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.v3-pill-chevron { flex-shrink: 0; color: var(--muted); transition: transform 0.2s cubic-bezier(0.33, 1, 0.68, 1); }
+.v3-pill:hover .v3-pill-chevron { transform: translateX(2px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-pill::before { animation: none; }
+  .v3-pill:hover .v3-pill-chevron { transform: none; }
+}
+
+/* ── Entrada del hero al cargar (sin scroll) ────────────────────────
+   Cada pieza declara de dónde viene con --dx/--dy/--rot. */
+@keyframes v3-enter {
+  from {
+    opacity: 0;
+    transform: translate(var(--dx, 0px), var(--dy, 14px)) rotate(var(--rot, 0deg)) scale(var(--sc, 1));
+  }
+  to { opacity: 1; transform: none; }
+}
+.v3-enter {
+  opacity: 0;
+  animation: v3-enter 0.85s cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: var(--delay, 0s);
+}
+
+/* El hero ocupa la primera pantalla: descontamos cabecera y marquesina. */
+.v3-hero-vh {
+  min-height: calc(100vh - 64px - 34px);
+  min-height: calc(100dvh - 64px - 34px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-enter { opacity: 1; animation: none; }
+}
+
+/* La marquesina puede arrastrarse, pero sin barra a la vista. */
+.v3-noscrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.v3-noscrollbar::-webkit-scrollbar { display: none; }
+
+/* Recorrido entre las tarjetas del hero: cada tramo se traza al llegar su ficha. */
+@keyframes v3-link-draw { to { stroke-dashoffset: 0; } }
+@keyframes v3-link-tip { to { opacity: 0.55; } }
+.v3-link {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: v3-link-draw 0.62s cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+.v3-link-tip {
+  opacity: 0;
+  animation: v3-link-tip 0.3s ease-out both;
+  animation-delay: calc(var(--delay, 0ms) + 0.48s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3-link { stroke-dashoffset: 0; animation: none; }
+  .v3-link-tip { opacity: 0.55; animation: none; }
+}
+
+/* Un punto de luz recorre el contorno, de la entrada de la flecha a la
+   salida de la siguiente. Se apaga justo al llegar, cuando nace la flecha. */
+/* El trazo mide 0.28 del contorno. Para que lo recorra entero, el desfase
+   va de +0.28 (el trazo aún no ha entrado) a -0.72 (ya ha llegado al final,
+   justo donde nace la flecha siguiente). */
+@keyframes v3-trace-run {
+  0%   { stroke-dashoffset: 0.28;  opacity: 0; }
+  10%  { opacity: 0.8; }
+  86%  { opacity: 0.8; }
+  100% { stroke-dashoffset: -0.72; opacity: 0; }
+}
+.v3-trace {
+  stroke-dasharray: 0.28 0.72;
+  stroke-dashoffset: 0.28;
+  opacity: 0;
+  animation: v3-trace-run 1.05s cubic-bezier(0.4, 0, 0.3, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3-trace { animation: none; opacity: 0; }
+}

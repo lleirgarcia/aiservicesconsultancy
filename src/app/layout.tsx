@@ -9,6 +9,10 @@ import {
   Plus_Jakarta_Sans,
   Outfit,
   Sora,
+  Newsreader,
+  Roboto,
+  Anton,
+  JetBrains_Mono,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
@@ -65,6 +69,31 @@ const sora = Sora({
   variable: "--font-sora",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
+
+const anton = Anton({
+  variable: "--font-anton",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 
@@ -152,7 +181,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${inter.variable} ${dmSans.variable} ${manrope.variable} ${plusJakartaSans.variable} ${outfit.variable} ${sora.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${inter.variable} ${dmSans.variable} ${manrope.variable} ${plusJakartaSans.variable} ${outfit.variable} ${sora.variable} ${newsreader.variable} ${roboto.variable} ${anton.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen">
         <script
