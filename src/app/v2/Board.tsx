@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/i18n/LocaleContext";
-import { useScrollProgress, seg, easeOut } from "./scrollProgress";
+import { seg, easeOut } from "./scrollProgress";
 
 const GROTESK = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif";
 const JMONO = "var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace";
@@ -156,11 +156,10 @@ function CardItem({ k, color }: { k: string; color: string }) {
   );
 }
 
-export default function Board() {
+export default function Board({ progress }: { progress: number }) {
   const { t } = useI18n();
-  const { ref, progress } = useScrollProgress<HTMLDivElement>();
   return (
-    <div ref={ref}>
+    <div>
       {/* Entradilla a dos tonos */}
       <p
         style={{

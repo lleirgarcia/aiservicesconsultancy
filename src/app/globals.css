@@ -21,6 +21,12 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+/* Evita que el navegador "compense" scroll solo por su cuenta cuando algo por
+   encima del viewport cambia de tamaño (p. ej. un canvas WebGL que se monta).
+   Sin esto, ese ajuste automático puede sumarse al scroll real del usuario y
+   hacer que el progreso de una sección fijada salte de golpe mucho más de lo
+   que se ha desplazado de verdad. */
+html, body { overflow-anchor: none; }
 
 body {
   background: var(--bg);
@@ -877,6 +883,15 @@ html.collapse-intro-armed.sections-expanded [data-collapsible] {
 /* Titular del hero: cada frase en una sola línea a partir de tableta */
 @media (min-width: 768px) {
   .v3-h1-line { white-space: nowrap; }
+}
+
+/* Escenas de "Soluciones": en móvil (sin fijado) se apilan siempre visibles;
+   a partir de escritorio usan la opacidad calculada por scroll para que solo
+   se vea una a la vez. */
+.v3-scene { opacity: 1; margin-bottom: clamp(2.5rem, 6vh, 3.5rem); }
+.v3-scene:last-child { margin-bottom: 0; }
+@media (min-width: 768px) {
+  .v3-scene { opacity: var(--scene-opacity, 1); margin-bottom: 0; }
 }
 
 /* ── Detalles tomados de attio.com ──────────────────────────────
