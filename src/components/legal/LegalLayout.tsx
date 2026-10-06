@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import Logo from "@/components/ui/Logo";
+import BrandLogo from "@/app/_landing/BrandLogo";
 import Footer from "@/components/sections/Footer";
 import { EMPRESA } from "@/data/empresa";
+
+const GROTESK = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif";
 
 type LegalLayoutProps = {
   title: string;
@@ -12,6 +14,10 @@ type LegalLayoutProps = {
 
 export default function LegalLayout({ title, intro, children }: LegalLayoutProps) {
   return (
+    <div
+      className="v3-theme"
+      style={{ minHeight: "100vh", background: "var(--surface)", color: "var(--fg)", fontFamily: GROTESK }}
+    >
     <div
       className="max-w-5xl mx-auto"
       style={{
@@ -30,7 +36,7 @@ export default function LegalLayout({ title, intro, children }: LegalLayoutProps
           aria-label={`${EMPRESA.webDominio} — Inicio`}
           className="inline-flex shrink-0"
         >
-          <Logo />
+          <BrandLogo height={38} ratio={3.42} />
         </Link>
         <Link
           href="/"
@@ -46,7 +52,7 @@ export default function LegalLayout({ title, intro, children }: LegalLayoutProps
         className="px-5 sm:px-8 py-10 sm:py-14 section-accent-left"
         style={{
           borderBottom: "1px solid var(--border)",
-          background: "var(--bg-section)",
+          background: "var(--surface-2)",
         }}
       >
         <p
@@ -79,7 +85,8 @@ export default function LegalLayout({ title, intro, children }: LegalLayoutProps
         {children}
       </article>
 
-      <Footer />
+      <Footer logoNode={<BrandLogo height={88} ratio={3.42} />} />
+    </div>
     </div>
   );
 }

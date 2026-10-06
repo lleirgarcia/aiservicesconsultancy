@@ -29,7 +29,6 @@ function Tag({ text, tone, critical }: { text: string; tone: "problem" | "cause"
         border: `1px ${tone === "cause" ? "dashed" : "solid"} ${border}`,
         borderRadius: 6,
         padding: "0.2rem 0.5rem",
-        whiteSpace: "nowrap",
         transition: "color 0.2s ease, border-color 0.2s ease, background 0.2s ease",
       }}
     >
@@ -121,7 +120,7 @@ export default function ProcessSheet({ progress, fill = false }: { progress: num
                 </span>
               </span>
 
-              <span className="flex items-center" style={{ gap: "0.45rem" }}>
+              <span className="flex items-center" style={{ gap: "0.45rem", flexWrap: "wrap", minWidth: 0 }}>
                 <Tag text={t(`v3.demo.proc${n}Problem`)} tone="problem" critical={isCritical} />
                 <span style={{ fontFamily: JMONO, fontSize: "0.8rem", fontWeight: 700, color: "var(--muted)" }}>+</span>
                 <Tag text={t(`v3.demo.proc${n}Cause`)} tone="cause" critical={isCritical} />

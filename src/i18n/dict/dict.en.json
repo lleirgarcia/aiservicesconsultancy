@@ -457,6 +457,42 @@
       "c5save": "22 h/month",
       "c5annual": "≈ €5,800/year"
     },
+    "proyectos": {
+      "eyebrow": "Real cases",
+      "heading": "Projects we've delivered",
+      "sub": "Automations already running, in real businesses.",
+      "problemLabel": "The problem",
+      "solutionLabel": "The solution",
+      "p1sector": "Drone filming company",
+      "p1problem": "Stitching together drone footage with first-person action-cam footage ate hours of post-production on every job. And the more clients they had, the more time it took — it didn't scale.",
+      "p1solution": "We built an autonomous editing system: depending on the type of footage, an AI agent preps the video against a set of specific criteria and a human just validates it. Instead of editing by hand, they review a 5-minute video and polish the last details in a short window.",
+      "p1statValue": "20 h",
+      "p1statLabel": "of manual editing saved every week, and it scales with every new order",
+      "p2sector": "TV set-decoration carpentry shop",
+      "p2problem": "Material prices were scattered across several documents, so checking them cost minutes on every single quote. And only two people had the know-how to put a quote together — if they weren't available, the quote didn't happen.",
+      "p2solution": "We extracted the know-how from those two people. Using computer vision, the system reads the client's need, identifies the materials required, and generates a draft ready to review, adjust and send.",
+      "p2statValue": "5-10 h",
+      "p2statLabel": "of quoting saved every week"
+    },
+    "callCta": {
+      "badge": "No commitment",
+      "heading": "Something here catch your eye?",
+      "sub": "Call Lleir and tell him about your case.",
+      "button": "Call now"
+    },
+    "about": {
+      "eyebrow": "About us",
+      "heading": "Software engineers, first and foremost",
+      "body": "Over 15 years building software in industries where a mistake gets expensive: healthcare, finance, banking and insurance. That's where we learned to design products around real needs. We bring that same standard to your business now.",
+      "iSalud": "Healthcare",
+      "iFinanzas": "Finance",
+      "iBanca": "Banking",
+      "iSeguros": "Insurance",
+      "statValue": "15+ years",
+      "statLabel": "of software development experience",
+      "positioning": "We don't automate simple processes just to automate them: we're a business consultancy focused on bringing in software and AI that genuinely cut costs for your company.",
+      "why": "We created Kroomix because we wanted to help SMEs save time and money — and today, with AI, it's much easier to build and apply that kind of solution."
+    },
     "metodo": {
       "eyebrow": "How we work",
       "heading": "We measure before, we measure after",
@@ -506,6 +542,7 @@
     },
     "madeBy": "Made by",
     "demo": {
+      "scrollHint": "Keep scrolling",
       "heading": "One example, start to finish",
       "s1": "1. A task in your company",
       "task": "Preparing and sending the week's delivery notes",

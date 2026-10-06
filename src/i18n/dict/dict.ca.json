@@ -457,6 +457,42 @@
       "c5save": "22 h/mes",
       "c5annual": "≈ 5.800 €/any"
     },
+    "proyectos": {
+      "eyebrow": "Casos reals",
+      "heading": "Projectes realitzats",
+      "sub": "Automatitzacions ja en marxa, en negocis reals.",
+      "problemLabel": "El problema",
+      "solutionLabel": "La solució",
+      "p1sector": "Empresa de gravació amb drons",
+      "p1problem": "Ajuntar el material gravat amb dron i amb càmeres d'acció en primera persona es menjava hores de postproducció en cada encàrrec. I com més clients tenien, més temps calia dedicar-hi: no escalava.",
+      "p1solution": "Vam muntar un sistema d'edició autònoma: segons el tipus de gravació, un agent d'IA prepara el vídeo amb uns criteris concrets i una persona només el valida. De editar a mà, a repassar un vídeo de 5 minuts i enllestir els últims detalls en poc temps.",
+      "p1statValue": "20 h",
+      "p1statLabel": "d'edició manual estalviades cada setmana, i que escala amb cada comanda nova",
+      "p2sector": "Fusteria de decorats per a TV",
+      "p2problem": "El preu dels materials estava repartit en diversos documents, així que revisar-lo portava minuts en cada pressupost. I només dues persones tenien el coneixement per fer-los: si no hi eren, el pressupost no sortia.",
+      "p2solution": "Vam extreure el criteri d'aquestes dues persones. Amb visió per computador, el sistema llegeix la necessitat del client, identifica els materials que calen i genera un esborrany llest per repassar, ajustar i enviar.",
+      "p2statValue": "5-10 h",
+      "p2statLabel": "de pressupostos estalviades cada setmana"
+    },
+    "callCta": {
+      "badge": "Sense compromís",
+      "heading": "T'ha interessat alguna cosa del que has llegit?",
+      "sub": "Truca a en Lleir i explica-li el teu cas.",
+      "button": "Truca ara"
+    },
+    "about": {
+      "eyebrow": "Qui som",
+      "heading": "Enginyers de software, abans que res",
+      "body": "Més de 15 anys construint software en sectors on un error surt car: salut, finances, banca i assegurances. Allà vam aprendre a dissenyar productes a partir de necessitats reals. Apliquem ara aquest mateix criteri al teu negoci.",
+      "iSalud": "Salut",
+      "iFinanzas": "Finances",
+      "iBanca": "Banca",
+      "iSeguros": "Assegurances",
+      "statValue": "15+ anys",
+      "statLabel": "d'experiència desenvolupant software",
+      "positioning": "No ens dediquem a automatitzar processos simples per automatitzar: som una consultora de negoci centrada a incorporar software i intel·ligència artificial que impactin de debò en l'estalvi de costos de la teva empresa.",
+      "why": "Vam crear Kroomix perquè volíem ajudar les pimes a estalviar temps i diners — i avui, amb la IA, és molt més senzill construir i aplicar aquest tipus de solucions."
+    },
     "metodo": {
       "eyebrow": "Com treballem",
       "heading": "Mesurem abans, mesurem després",
@@ -506,6 +542,7 @@
     },
     "madeBy": "Fet per",
     "demo": {
+      "scrollHint": "Continua fent scroll",
       "heading": "Un exemple, de principi a fi",
       "s1": "1. Una tasca de la teva empresa",
       "task": "Preparar i enviar els albarans de la setmana",

@@ -28,11 +28,11 @@ const SCENES = [
  * de la escena (nunca se sale de él), para que dos escenas consecutivas no
  * lleguen a estar visibles a la vez y su texto se solape.
  */
-function sceneState(progress: number, start: number, end: number) {
+function sceneState(progress: number, start: number, end: number, noFadeOut = false) {
   const fade = Math.min(0.02, (end - start) / 3);
   let opacity = 0;
   if (progress >= start && progress <= end) {
-    opacity = Math.min(1, (progress - start) / fade, (end - progress) / fade);
+    opacity = noFadeOut ? Math.min(1, (progress - start) / fade) : Math.min(1, (progress - start) / fade, (end - progress) / fade);
   }
   return { opacity, local: seg(progress, start, end), active: opacity > 0.3 };
 }
@@ -102,6 +102,7 @@ function Scene({
   sub,
   opacity,
   footer,
+  bleed,
   children,
 }: {
   icon: string;
@@ -111,6 +112,8 @@ function Scene({
   opacity: number;
   /** Franja a ancho completo pegada abajo del todo (ignora el padding de la tarjeta). */
   footer?: React.ReactNode;
+  /** El contenido ocupa toda la tarjeta de borde a borde; el título flota como badge encima. */
+  bleed?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -125,7 +128,7 @@ function Scene({
       }
     >
       <div
-        className="flex flex-col"
+        className="flex flex-col relative"
         style={{
           width: "100%",
           maxWidth: SCENE_WIDTH,
@@ -137,19 +140,48 @@ function Scene({
           overflow: "hidden",
         }}
       >
-        <div style={{ padding: "1.6rem 1.85rem 0" }}>
-          <div className="flex items-center gap-3" style={{ marginBottom: "1.1rem" }}>
-            <HeaderIcon name={icon} color={color} />
-            <div>
-              <h3 style={{ fontFamily: GROTESK, fontSize: "1.05rem", fontWeight: 700, color: "var(--fg)", margin: 0 }}>{title}</h3>
-              {sub && <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0.15rem 0 0" }}>{sub}</p>}
+        {bleed ? (
+          <>
+            <div
+              className="absolute flex items-center gap-2.5"
+              style={{
+                top: "1.1rem",
+                left: "1.1rem",
+                zIndex: 2,
+                background: "color-mix(in srgb, var(--surface) 88%, transparent)",
+                backdropFilter: "blur(2px)",
+                borderRadius: 999,
+                padding: "0.35rem 0.9rem 0.35rem 0.35rem",
+                boxShadow: "0 2px 10px rgba(16,20,24,0.14)",
+              }}
+            >
+              <HeaderIcon name={icon} color={color} />
+              <h3 style={{ fontFamily: GROTESK, fontSize: "0.95rem", fontWeight: 700, color: "var(--fg)", margin: 0 }}>{title}</h3>
             </div>
-          </div>
-        </div>
-        <div className="flex-1 flex items-center justify-center" style={{ padding: `0 1.85rem ${footer ? 0 : "1.9rem"}` }}>
-          {children}
-        </div>
-        {footer}
+            <div
+              className="relative md:absolute md:inset-0 flex items-center justify-center"
+              style={{ width: "100%", aspectRatio: "3 / 2" }}
+            >
+              {children}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ padding: "1.6rem 1.85rem 0" }}>
+              <div className="flex items-center gap-3" style={{ marginBottom: "1.1rem" }}>
+                <HeaderIcon name={icon} color={color} />
+                <div>
+                  <h3 style={{ fontFamily: GROTESK, fontSize: "1.05rem", fontWeight: 700, color: "var(--fg)", margin: 0 }}>{title}</h3>
+                  {sub && <p style={{ fontSize: "0.82rem", color: "var(--muted)", margin: "0.15rem 0 0" }}>{sub}</p>}
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 flex items-center justify-center" style={{ padding: `0 1.85rem ${footer ? 0 : "1.9rem"}` }}>
+              {children}
+            </div>
+            {footer}
+          </>
+        )}
       </div>
     </div>
   );
@@ -266,14 +298,12 @@ function ProposeScene({ opacity, local }: { opacity: number; local: number }) {
   );
 }
 
-/** Escena 3 — "Acordamos un prototipo": el cohete se ensambla pieza a pieza a medida que haces scroll. */
+/** Escena 3 — "Acordamos un prototipo": el cohete se dibuja a medida que haces scroll. */
 function PrototypeScene({ opacity, local }: { opacity: number; local: number }) {
   const { t } = useI18n();
   return (
-    <Scene icon="handshake" color={GREEN} title={t("v3.demo.sol3t")} opacity={opacity}>
-      <div style={{ width: "100%", height: 340 }}>
-        <RocketScene local={local} />
-      </div>
+    <Scene icon="handshake" color={GREEN} title={t("v3.demo.sol3t")} opacity={opacity} bleed>
+      <RocketScene local={local} />
     </Scene>
   );
 }
@@ -288,27 +318,29 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
         @keyframes solLoopSpin { to { stroke-dashoffset: -88; } }
         @keyframes solLoopWord { 0%, 27% { opacity: 1; transform: translateY(0); } 33%, 94% { opacity: 0; transform: translateY(-6px); } 100% { opacity: 0; } }
       `}</style>
-      <div className="flex items-center justify-center" style={{ gap: "2.5rem", padding: "1rem 0" }}>
+      <div className="flex items-center justify-center gap-2 sm:gap-6 md:gap-10" style={{ padding: "1rem 0" }}>
         <div
+          className="w-[92px] sm:w-[132px] md:w-[168px] text-[0.72rem] sm:text-[0.92rem] md:text-[1.05rem]"
           style={{
-            width: 168,
             textAlign: "center" as const,
             background: "var(--surface)",
             border: `2px solid ${BLUE}`,
             borderRadius: 14,
             boxShadow: "0 1px 3px rgba(16,20,24,0.07)",
-            padding: "1.5rem 0.75rem",
+            padding: "1.5rem 0.4rem",
             fontFamily: GROTESK,
             fontWeight: 700,
-            fontSize: "1.05rem",
             color: "var(--fg)",
           }}
         >
           {t("v3.demo.loopUs")}
         </div>
 
-        <div className="relative flex flex-col items-center justify-center" style={{ width: 140, height: 104 }}>
-          <svg width="140" height="104" viewBox="0 0 140 104" fill="none" aria-hidden>
+        <div
+          className="relative flex flex-col items-center justify-center shrink-0 w-[76px] sm:w-[112px] md:w-[140px]"
+          style={{ aspectRatio: "140 / 104" }}
+        >
+          <svg width="100%" height="100%" viewBox="0 0 140 104" fill="none" aria-hidden>
             <path
               d="M8 34 Q70 -6 132 34"
               stroke={BLUE}
@@ -328,16 +360,17 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
             />
             <path d="M17 79 L8 70 L19 64" stroke={SLATE} strokeWidth={2.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <div className="relative" style={{ height: "1.6rem", width: 160, marginTop: "0.4rem" }}>
+          <div className="relative" style={{ height: "1.6rem", width: "100%", marginTop: "0.4rem" }}>
             {words.map((w, i) => (
               <span
                 key={w}
+                className="text-[0.62rem] sm:text-[0.78rem] md:text-[0.86rem]"
                 style={{
                   position: "absolute",
                   inset: 0,
                   textAlign: "center",
+                  whiteSpace: "nowrap",
                   fontFamily: JMONO,
-                  fontSize: "0.86rem",
                   fontWeight: 700,
                   color: BLUE,
                   opacity: 0,
@@ -351,17 +384,16 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
         </div>
 
         <div
+          className="w-[92px] sm:w-[132px] md:w-[168px] text-[0.72rem] sm:text-[0.92rem] md:text-[1.05rem]"
           style={{
-            width: 168,
             textAlign: "center" as const,
             background: "var(--surface)",
             border: `2px solid ${SLATE}`,
             borderRadius: 14,
             boxShadow: "0 1px 3px rgba(16,20,24,0.07)",
-            padding: "1.5rem 0.75rem",
+            padding: "1.5rem 0.4rem",
             fontFamily: GROTESK,
             fontWeight: 700,
-            fontSize: "1.05rem",
             color: "var(--fg)",
           }}
         >
@@ -413,7 +445,7 @@ function DeliverScene({ opacity, local }: { opacity: number; local: number }) {
       }
     >
       <div className="flex flex-col items-center" style={{ gap: "1.1rem", padding: "0.5rem 0" }}>
-        <div className="flex items-center justify-between" style={{ width: barWidth }}>
+        <div className="flex items-center justify-between" style={{ width: "100%", maxWidth: barWidth }}>
           <span style={{ fontFamily: JMONO, fontSize: "0.85rem", fontWeight: 700, color: "var(--muted)" }}>
             {t("v3.demo.loopUs")}
           </span>
@@ -429,7 +461,7 @@ function DeliverScene({ opacity, local }: { opacity: number; local: number }) {
           </span>
         </div>
 
-        <div className="relative" style={{ width: barWidth, height: 52 }}>
+        <div className="relative" style={{ width: "100%", maxWidth: barWidth, height: 52 }}>
           <span
             aria-hidden
             style={{
@@ -503,7 +535,7 @@ export default function SolutionsFlow({ progress }: { progress: number }) {
   const propose = sceneState(progress, SCENES[1].start, SCENES[1].end);
   const prototype = sceneState(progress, SCENES[2].start, SCENES[2].end);
   const loop = sceneState(progress, SCENES[3].start, SCENES[3].end);
-  const deliver = sceneState(progress, SCENES[4].start, SCENES[4].end);
+  const deliver = sceneState(progress, SCENES[4].start, SCENES[4].end, true);
 
   return (
     <div className="relative flex flex-col h-full">

@@ -678,6 +678,15 @@ html.collapse-intro-armed.sections-expanded [data-collapsible] {
   margin: 0 0 1.5rem 0;
   font-size: 13.5px;
 }
+@media (max-width: 640px) {
+  /* En pantallas estrechas, las tablas con varias columnas no caben: se
+     vuelven scrolleables en horizontal en vez de desbordar la página entera. */
+  .legal-prose table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 .legal-prose th,
 .legal-prose td {
   text-align: left;

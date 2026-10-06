@@ -11,7 +11,7 @@ export default function PoliticaDeCookiesPage() {
   return (
     <LegalLayout
       title="Política de cookies"
-      intro={`En ${EMPRESA.webDominio} utilizamos cookies y tecnologías similares para garantizar el correcto funcionamiento del sitio, recordar tus preferencias y, con tu consentimiento, analizar el uso del sitio para mejorarlo. Esta política explica qué son las cookies, qué tipos utilizamos y cómo puedes gestionarlas.`}
+      intro={`En ${EMPRESA.webDominio} utilizamos únicamente cookies y almacenamiento técnico necesarios para el funcionamiento del sitio y para prestar los servicios que pides, como recordar tu idioma o limitar el uso del asistente virtual. No utilizamos cookies de publicidad ni de seguimiento. Esta política explica qué son las cookies, cuáles utilizamos y cómo puedes gestionarlas.`}
     >
       <h2>1. ¿Qué son las cookies?</h2>
       <p>
@@ -88,61 +88,57 @@ export default function PoliticaDeCookiesPage() {
         </thead>
         <tbody>
           <tr>
-            <td>kroomix:scroll-intro-shown</td>
+            <td>fto_chat_used</td>
             <td>{EMPRESA.marca}</td>
             <td>
-              Recordar que ya hemos mostrado el modal inicial de bienvenida
-              (almacenamiento de sesión).
+              Cookie técnica. Limita el número de reinicios gratuitos de la
+              conversación con el asistente virtual Kromi, para evitar un uso
+              abusivo.
             </td>
-            <td>Sesión</td>
+            <td>7 días</td>
           </tr>
           <tr>
-            <td>kroomix:lang</td>
+            <td>kroomix-locale <em>(localStorage, no es una cookie)</em></td>
             <td>{EMPRESA.marca}</td>
-            <td>Recordar el idioma seleccionado por el usuario.</td>
-            <td>1 año</td>
+            <td>Recordar el idioma que has elegido en el sitio.</td>
+            <td>Hasta que borres los datos del navegador</td>
           </tr>
           <tr>
-            <td>kroomix:consent</td>
+            <td>kroomix:scroll-intro-shown <em>(sessionStorage, no es una cookie)</em></td>
             <td>{EMPRESA.marca}</td>
             <td>
-              Almacenar la decisión del usuario sobre el banner de cookies.
+              No repetirte el mensaje de bienvenida durante la misma visita.
             </td>
-            <td>6 meses</td>
+            <td>Sesión (se borra al cerrar el navegador)</td>
           </tr>
           <tr>
-            <td>_ga, _ga_*</td>
-            <td>Google Ireland Limited</td>
+            <td>—</td>
+            <td>Vercel Inc.</td>
             <td>
-              Cookies analíticas de Google Analytics 4 que permiten distinguir
-              usuarios de forma anonimizada.
+              Analítica de visitas (Vercel Analytics). Es una analítica sin
+              cookies: no identifica a usuarios individuales ni almacena datos
+              personales.
             </td>
-            <td>Hasta 2 años</td>
-          </tr>
-          <tr>
-            <td>YSC, VISITOR_INFO1_LIVE</td>
-            <td>YouTube (Google)</td>
-            <td>
-              Se instalan únicamente al reproducir un vídeo embebido. Permiten a
-              YouTube medir el rendimiento del vídeo.
-            </td>
-            <td>Sesión / 6 meses</td>
+            <td>No aplica</td>
           </tr>
         </tbody>
       </table>
       <p>
-        El contenido concreto de esta tabla puede variar a medida que
-        evolucione el Sitio Web. Mantendremos la información actualizada en esta
-        misma página.
+        No utilizamos cookies de publicidad, de seguimiento entre sitios ni de
+        terceros incrustados (como vídeos de YouTube). El contenido concreto de
+        esta tabla puede variar a medida que evolucione el Sitio Web.
+        Mantendremos la información actualizada en esta misma página.
       </p>
 
-      <h2>4. Gestión y revocación del consentimiento</h2>
+      <h2>4. Gestión de las cookies</h2>
       <p>
-        Al acceder al Sitio Web por primera vez te mostramos un banner que te
-        permite aceptar, rechazar o configurar las cookies no esenciales. Puedes
-        modificar tu decisión en cualquier momento desde el enlace de
-        configuración disponible en el pie de página o eliminando las cookies
-        almacenadas en tu navegador.
+        Todas las cookies y el almacenamiento técnico que utilizamos son
+        necesarios para el funcionamiento del sitio o para prestar el servicio
+        que solicitas (como el asistente virtual), por lo que, conforme al
+        artículo 22.2 de la LSSI-CE, no requieren tu consentimiento previo y no
+        mostramos un banner de aceptación. Aun así, puedes eliminarlas cuando
+        quieras borrando las cookies y los datos de navegación almacenados por
+        tu navegador.
       </p>
       <p>
         La mayoría de los navegadores permiten también gestionar las

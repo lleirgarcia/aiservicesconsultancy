@@ -175,13 +175,13 @@ export default function Board({ progress }: { progress: number }) {
       </p>
 
       {/* Tablero: se desplaza en horizontal, la última columna asoma */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-stretch">
         {COLUMNS.map(({ key, color, cards }, ci) => {
           const kc = easeOut(seg(progress, 0.02 + ci * 0.1, 0.4 + ci * 0.1));
           return (
           <section
             key={key}
-            className="min-w-0"
+            className="min-w-0 flex flex-col"
             style={{
               opacity: kc,
               transform: `translateY(${(1 - kc) * 16}px)`,
@@ -190,6 +190,7 @@ export default function Board({ progress }: { progress: number }) {
               border: "1px solid var(--border)",
               borderRadius: 12,
               padding: "0.7rem",
+              height: "100%",
             }}
           >
             <header className="flex items-center gap-2" style={{ marginBottom: "0.85rem" }}>
@@ -206,7 +207,7 @@ export default function Board({ progress }: { progress: number }) {
                   margin: 0,
                 }}
               >
-                {t(`v3.board.${key}`)}
+                {t("v3.demo.processWord")} {ci + 1}
               </h3>
               <span
                 style={{

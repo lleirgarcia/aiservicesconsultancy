@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/LocaleContext";
-import type { Locale } from "@/i18n/dict";
 import Board from "./Board";
 import IdentifyFlow from "./IdentifyFlow";
 import ProcessSheet from "./ProcessSheet";
 import SolutionsFlow from "./SolutionsFlow";
 import SystemDiagram from "./SystemDiagram";
 import PinnedStep from "./PinnedStep";
+import ScrollHint from "./ScrollHint";
 import { seg, easeOut } from "./scrollProgress";
 
 const GROTESK = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif";
@@ -18,8 +18,6 @@ const BLUE = "#0d6ef2";
 const AMBER = "#f59e0b";
 const SLATE = "#94a3b8";
 const GREEN = "#16a34a";
-
-const NUM_LOCALE: Record<Locale, string> = { es: "es-ES", ca: "ca-ES", en: "en-GB" };
 
 /* ── Horas semanales de la tarea, repartidas por proceso ───────────────
    Los tres primeros meses son manuales; el sistema entra en el cuarto. */
@@ -32,10 +30,6 @@ const HOURS_BY_MONTH: readonly (readonly [number, number, number])[] = [
   [0.3, 0.2, 0.5],
 ];
 const SYSTEM_LIVE_AT = 3; // índice del primer mes con sistema
-
-/* Coste acumulado del primer año: 6.800 €/año manual vs 850 €/año con sistema */
-const COST_NO_SYSTEM_YEAR = 6800;
-const COST_WITH_SYSTEM_YEAR = 850;
 
 /** Tarjeta blanca del dashboard. */
 function Card({
@@ -247,184 +241,32 @@ function HoursChart({ progress }: { progress: number }) {
   );
 }
 
-/** Líneas de coste acumulado: sin sistema vs con sistema, con el hueco del ahorro. */
-function CostChart({ progress }: { progress: number }) {
-  const { t, locale } = useI18n();
-  const nf = useMemo(
-    () => new Intl.NumberFormat(NUM_LOCALE[locale], { maximumFractionDigits: 0 }),
-    [locale]
-  );
-
-  const W = 600;
-  const H = 236;
-  const X0 = 58;
-  const X1 = 566;
-  const Y0 = 22;
-  const Y1 = 186;
-  const MAX = 7000;
-
-  const x = (m: number) => X0 + (m / 12) * (X1 - X0);
-  const y = (v: number) => Y1 - (v / MAX) * (Y1 - Y0);
-
-  const months = Array.from({ length: 13 }, (_, m) => m);
-  const noSys = months.map((m) => (COST_NO_SYSTEM_YEAR / 12) * m);
-  const withSys = months.map((m) => (COST_WITH_SYSTEM_YEAR / 12) * m);
-
-  const line = (vals: number[]) => vals.map((v, m) => `${m === 0 ? "M" : "L"}${x(m)} ${y(v)}`).join(" ");
-  const area = (vals: number[]) => `${line(vals)} L${x(12)} ${Y1} L${x(0)} ${Y1} Z`;
-
-  const gapTop = y(noSys[12]);
-  const gapBottom = y(withSys[12]);
-
-  const drawNo = easeOut(seg(progress, 0.05, 0.45));
-  const drawYes = easeOut(seg(progress, 0.16, 0.58));
-  const areaIn = seg(progress, 0.35, 0.7);
-  const gapIn = seg(progress, 0.55, 0.78);
-
-  return (
-    <div>
-      <Legend
-        items={[
-          { color: SLATE, label: t("v3.demo.lgNo"), dashed: true },
-          { color: BLUE, label: t("v3.demo.lgYes") },
-        ]}
-      />
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        width="100%"
-        role="img"
-        aria-label={`${t("v3.demo.ch2t")} — ${t("v3.demo.ch2s")}`}
-        style={{ display: "block", height: "auto", marginTop: "1rem", overflow: "visible" }}
-      >
-        {[0, 3500, 7000].map((v) => (
-          <g key={v}>
-            <line
-              x1={X0}
-              x2={X1}
-              y1={y(v)}
-              y2={y(v)}
-              stroke="var(--border)"
-              strokeWidth={1}
-              strokeDasharray={v === 0 ? undefined : "3 4"}
-            />
-            <text x={X0 - 10} y={y(v) + 4} textAnchor="end" style={{ fontFamily: JMONO, fontSize: 11, fill: "var(--muted)" }}>
-              {nf.format(v)}
-            </text>
-          </g>
-        ))}
-        <text x={X0 - 10} y={Y0 - 8} textAnchor="end" style={{ fontFamily: JMONO, fontSize: 10, fill: "var(--muted)" }}>
-          €
-        </text>
-
-        {/* La unidad va en la última marca, no suelta fuera del gráfico. */}
-        {[3, 6, 9, 12].map((m) => (
-          <text
-            key={m}
-            x={m === 12 ? x(m) + 8 : x(m)}
-            y={Y1 + 20}
-            textAnchor={m === 12 ? "end" : "middle"}
-            style={{ fontFamily: JMONO, fontSize: 11, fill: "var(--muted)" }}
-          >
-            {m === 12 ? `${m} ${t("v3.demo.xUnit")}` : m}
-          </text>
-        ))}
-
-        {/* el recorte avanza de izquierda a derecha con el scroll */}
-        <clipPath id="clip-no">
-          <rect x={X0 - 4} y={0} width={(X1 - X0 + 8) * drawNo} height={H} />
-        </clipPath>
-        <clipPath id="clip-yes">
-          <rect x={X0 - 4} y={0} width={(X1 - X0 + 8) * drawYes} height={H} />
-        </clipPath>
-        <g clipPath="url(#clip-no)">
-          <path d={area(noSys)} fill={SLATE} opacity={0.1 * areaIn} />
-          <path d={line(noSys)} fill="none" stroke={SLATE} strokeWidth={2} strokeDasharray="5 4" />
-        </g>
-        <g clipPath="url(#clip-yes)">
-          <path d={area(withSys)} fill={BLUE} opacity={0.12 * areaIn} />
-          <path d={line(withSys)} fill="none" stroke={BLUE} strokeWidth={2.5} />
-        </g>
-        <circle cx={x(12)} cy={gapTop} r={3.5} fill={SLATE} opacity={drawNo} />
-        <circle cx={x(12)} cy={gapBottom} r={3.5} fill={BLUE} opacity={drawYes} />
-
-        {/* corchete del ahorro */}
-        <g opacity={gapIn}>
-          <line x1={X1 + 14} x2={X1 + 14} y1={gapTop} y2={gapBottom} stroke={GREEN} strokeWidth={1.5} />
-          <line x1={X1 + 9} x2={X1 + 19} y1={gapTop} y2={gapTop} stroke={GREEN} strokeWidth={1.5} />
-          <line x1={X1 + 9} x2={X1 + 19} y1={gapBottom} y2={gapBottom} stroke={GREEN} strokeWidth={1.5} />
-          <text
-            x={X1 + 8}
-            y={(gapTop + gapBottom) / 2 - 6}
-            textAnchor="end"
-            style={{ fontFamily: JMONO, fontSize: 12, fontWeight: 700, fill: GREEN }}
-          >
-            {t("v3.demo.gap")}
-          </text>
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-
-
-const STEPS = ["stI", "st0", "st1", "st2", "stSistema", "stSeg", "st3"] as const;
+const STEPS = ["stI", "st0", "st2", "stSistema", "stSeg", "st3"] as const;
 
 const HEADER_OFFSET_PX = 76;
-const SCROLL_MS = 420;
-
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
 
 /**
- * Al hacer clic en el nav: salta al instante al principio de esa sección (sin
- * recorrer en scroll las secciones intermedias) y, desde ahí, anima solo su
- * recorrido fijado hasta el final, donde su animación interna llega a 1 y
- * suelta el scroll a la siguiente. Recalcula el final en cada frame (en vez
- * de fijarlo una sola vez al principio) para que cualquier pequeño reajuste
- * de layout durante la animación no produzca un salto o un frenazo a medio
- * camino. Fuerza `behavior: "instant"` en cada paso: el CSS global tiene
- * `scroll-behavior: smooth`, y si no se anula aquí compite con nuestro propio
- * easing. Avanza por tiempo delta CAPADO por frame (no por tiempo absoluto
- * transcurrido): si una escena hace un trabajo pesado en el hilo principal
- * (p. ej. el cohete 3D) y un frame tarda mucho más de lo normal, el progreso
- * de esta animación solo avanza lo que le corresponde a ese frame capado, en
- * vez de saltar de golpe al intentar "recuperar" todo el tiempo perdido.
+ * Al hacer clic en el nav: salta directamente al principio de esa sección
+ * (sin recorrer en scroll las secciones intermedias) y la deja ahí — el
+ * usuario sigue el recorrido interno a su ritmo, con su propio scroll, en
+ * vez de verlo reproducirse solo hasta el final. `behavior: "instant"`
+ * evita el salto: el CSS global tiene `scroll-behavior: smooth`, y un
+ * scroll programático con esa animación en curso compite con el scroll real
+ * del usuario si este sigue moviendo la rueda justo después (el salto se ve
+ * entonces a tirones, o algún elemento que depende de la posición de scroll
+ * -como el aviso de "sigue haciendo scroll"- parpadea a medio camino).
  */
 function playSection(el: HTMLElement) {
-  const vh = window.innerHeight || 1;
-  const rect0 = el.getBoundingClientRect();
-  const yStart = rect0.top + window.scrollY - HEADER_OFFSET_PX;
-  const pinnedRangeNow = () => Math.max(0, el.getBoundingClientRect().height - vh);
-  const estPinnedRange = pinnedRangeNow();
-
+  const yStart = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET_PX;
   window.scrollTo({ top: yStart, behavior: "instant" });
-  if (estPinnedRange < 1) return;
-
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    window.scrollTo({ top: yStart + pinnedRangeNow(), behavior: "instant" });
-    return;
-  }
-
-  const durationMs = Math.min(2600, Math.max(SCROLL_MS, estPinnedRange * 0.9));
-  const MAX_FRAME_MS = 80;
-  let u = 0;
-  let last = performance.now();
-  const tick = (now: number) => {
-    const dt = Math.min(now - last, MAX_FRAME_MS);
-    last = now;
-    u = Math.min(1, u + dt / durationMs);
-    window.scrollTo({ top: yStart + easeInOutCubic(u) * pinnedRangeNow(), behavior: "instant" });
-    if (u < 1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
 }
 
 export default function DemoDashboard() {
   const { t } = useI18n();
   const [active, setActive] = useState(0);
+  const [inDashboard, setInDashboard] = useState(false);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const els = refs.current.filter(Boolean) as HTMLDivElement[];
@@ -445,8 +287,50 @@ export default function DemoDashboard() {
     return () => io.disconnect();
   }, []);
 
+  // Aviso "sigue haciendo scroll": visible mientras cualquier parte del stepper
+  // (de Identificamos a Resultado) esté en pantalla, en cualquier dirección.
+  // Cada vez que ENTRA (pasa de fuera a dentro) cuenta como un pase; a partir
+  // del segundo pase se muestra en su versión reducida, para que estorbe menos
+  // una vez que el usuario ya sabe de qué va.
+  const passesRef = useRef(0);
+  const wasInDashboardRef = useRef(false);
+  const [passCount, setPassCount] = useState(0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const now = entry.isIntersecting;
+        if (now && !wasInDashboardRef.current) {
+          passesRef.current += 1;
+          setPassCount(passesRef.current);
+        }
+        wasInDashboardRef.current = now;
+        setInDashboard(now);
+      },
+      { threshold: 0 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // En su versión compacta, el aviso se alinea con el borde izquierdo de la
+  // columna del nav (mismo eje que "Identificamos"/"Proponemos"...), no con
+  // el borde de la ventana — para que parezca parte del mismo bloque, no un
+  // intruso.
+  const [navLeft, setNavLeft] = useState<number | null>(null);
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current) setNavLeft(containerRef.current.getBoundingClientRect().left);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[190px_minmax(0,1fr)] gap-x-10 gap-y-6">
+    <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-[190px_minmax(0,1fr)] gap-x-10 gap-y-6">
+      <ScrollHint visible={inDashboard} compact={passCount >= 2} compactLeft={navLeft} />
       {/* Navegación de pasos */}
       <nav className="hidden md:block">
         <ol className="sticky flex flex-col gap-4" style={{ top: 96, margin: 0, padding: 0, listStyle: "none" }}>
@@ -515,7 +399,23 @@ export default function DemoDashboard() {
           )}
         </PinnedStep>
 
-        <PinnedStep registerRef={(el) => { refs.current[2] = el; }}>
+        {/* "Soluciones": cómo trabajamos, de principio a fin — 5 escenas secuenciales */}
+        <PinnedStep registerRef={(el) => { refs.current[2] = el; }} fill tall>
+          {(progress) => <SolutionsFlow progress={progress} />}
+        </PinnedStep>
+
+        {/* "Sistema": todo converge en una única aplicación */}
+        <PinnedStep registerRef={(el) => { refs.current[3] = el; }}>
+          {(progress) => <SystemDiagram progress={progress} />}
+        </PinnedStep>
+
+        {/* "Seguimiento": el tablero de ejemplos, ahora como panel de evidencia */}
+        <PinnedStep registerRef={(el) => { refs.current[4] = el; }}>
+          {(progress) => <Board progress={progress} />}
+        </PinnedStep>
+
+        {/* "Resultado": el ejemplo detallado, de principio a fin */}
+        <PinnedStep registerRef={(el) => { refs.current[5] = el; }}>
           {(progress) => (
             <div>
               {/* Entradilla del ejemplo detallado */}
@@ -535,48 +435,6 @@ export default function DemoDashboard() {
                 <HoursChart progress={progress} />
               </Card>
             </div>
-          )}
-        </PinnedStep>
-
-        {/* "Soluciones": cómo trabajamos, de principio a fin — 5 escenas secuenciales */}
-        <PinnedStep registerRef={(el) => { refs.current[3] = el; }} fill tall>
-          {(progress) => <SolutionsFlow progress={progress} />}
-        </PinnedStep>
-
-        {/* "Sistema": todo converge en una única aplicación */}
-        <PinnedStep registerRef={(el) => { refs.current[4] = el; }}>
-          {(progress) => <SystemDiagram progress={progress} />}
-        </PinnedStep>
-
-        {/* "Seguimiento": el tablero de ejemplos, ahora como panel de evidencia */}
-        <PinnedStep registerRef={(el) => { refs.current[5] = el; }}>
-          {(progress) => <Board progress={progress} />}
-        </PinnedStep>
-
-        <PinnedStep registerRef={(el) => { refs.current[6] = el; }}>
-          {(progress) => (
-            <Card title={t("v3.demo.ch2t")} subtitle={t("v3.demo.ch2s")} hint={t("v3.demo.hint2")}>
-              <CostChart progress={progress} />
-              <div className="flex flex-wrap gap-2" style={{ marginTop: "1.5rem" }}>
-                {(["d1", "d2", "d3"] as const).map((d) => (
-                  <span
-                    key={d}
-                    style={{
-                      fontFamily: JMONO,
-                      fontSize: "0.78rem",
-                      fontWeight: 700,
-                      color: BLUE,
-                      background: "rgba(13, 110, 242, 0.08)",
-                      border: "1px solid rgba(13, 110, 242, 0.28)",
-                      borderRadius: 999,
-                      padding: "0.32rem 0.7rem",
-                    }}
-                  >
-                    {t(`v3.demo.${d}`)}
-                  </span>
-                ))}
-              </div>
-            </Card>
           )}
         </PinnedStep>
       </div>

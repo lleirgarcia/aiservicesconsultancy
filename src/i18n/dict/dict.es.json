@@ -457,6 +457,42 @@
       "c5save": "22 h/mes",
       "c5annual": "≈ 5.800 €/año"
     },
+    "proyectos": {
+      "eyebrow": "Casos reales",
+      "heading": "Proyectos realizados",
+      "sub": "Automatizaciones ya en marcha, en negocios reales.",
+      "problemLabel": "El problema",
+      "solutionLabel": "La solución",
+      "p1sector": "Empresa de grabación con drones",
+      "p1problem": "Juntar el material grabado con dron y con cámaras de acción en primera persona se comía horas de post-producción en cada encargo. Y cuantos más clientes tenían, más tiempo había que meter: no escalaba.",
+      "p1solution": "Montamos un sistema de edición autónoma: según el tipo de grabación, un agente de IA prepara el vídeo con unos criterios concretos y un humano solo lo valida. De editar a mano, a repasar un vídeo de 5 minutos y rematar los últimos detalles en poco tiempo.",
+      "p1statValue": "20 h",
+      "p1statLabel": "de edición manual ahorradas cada semana, y que escala con cada pedido nuevo",
+      "p2sector": "Carpintería de decorados para TV",
+      "p2problem": "El precio de los materiales estaba repartido en varios documentos, así que revisarlo llevaba minutos en cada presupuesto. Y solo dos personas tenían el conocimiento para hacerlos: si no estaban disponibles, el presupuesto no salía.",
+      "p2solution": "Extrajimos el criterio de esas dos personas. Con visión por ordenador, el sistema lee la necesidad del cliente, identifica los materiales que hacen falta y genera un borrador listo para repasar, ajustar y enviar.",
+      "p2statValue": "5-10 h",
+      "p2statLabel": "de presupuestos ahorradas cada semana"
+    },
+    "callCta": {
+      "badge": "Sin compromiso",
+      "heading": "¿Algo de lo que has leído te interesa?",
+      "sub": "Llama a Lleir y explícale tu caso.",
+      "button": "Llamar ahora"
+    },
+    "about": {
+      "eyebrow": "Quiénes somos",
+      "heading": "Ingenieros de software, antes que nada",
+      "body": "Más de 15 años construyendo software en sectores donde un fallo sale caro: salud, finanzas, banca y seguros. Ahí aprendimos a diseñar productos a partir de necesidades reales. Ese mismo criterio es el que aplicamos ahora a tu negocio.",
+      "iSalud": "Salud",
+      "iFinanzas": "Finanzas",
+      "iBanca": "Banca",
+      "iSeguros": "Seguros",
+      "statValue": "15+ años",
+      "statLabel": "de experiencia desarrollando software",
+      "positioning": "No nos dedicamos a automatizar procesos simples por automatizar: somos una consultora de negocio centrada en incorporar software e inteligencia artificial que impacten de verdad en el ahorro de costes de tu empresa.",
+      "why": "Creamos Kroomix porque queríamos ayudar a las pymes a ahorrar tiempo y dinero — y hoy, con la IA, es mucho más sencillo construir y aplicar ese tipo de soluciones."
+    },
     "metodo": {
       "eyebrow": "Cómo trabajamos",
       "heading": "Medimos antes, medimos después",
@@ -506,6 +542,7 @@
     },
     "madeBy": "Hecho por",
     "demo": {
+      "scrollHint": "Sigue haciendo scroll",
       "heading": "Un ejemplo, de principio a fin",
       "s1": "1. Una tarea de tu empresa",
       "task": "Preparar y enviar los albaranes de la semana",
