@@ -289,24 +289,13 @@ export default function DemoDashboard() {
 
   // Aviso "sigue haciendo scroll": visible mientras cualquier parte del stepper
   // (de Identificamos a Resultado) esté en pantalla, en cualquier dirección.
-  // Cada vez que ENTRA (pasa de fuera a dentro) cuenta como un pase; a partir
-  // del segundo pase se muestra en su versión reducida, para que estorbe menos
-  // una vez que el usuario ya sabe de qué va.
-  const passesRef = useRef(0);
-  const wasInDashboardRef = useRef(false);
-  const [passCount, setPassCount] = useState(0);
+  // Siempre en su versión compacta, abajo a la izquierda alineado con el nav.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const io = new IntersectionObserver(
       ([entry]) => {
-        const now = entry.isIntersecting;
-        if (now && !wasInDashboardRef.current) {
-          passesRef.current += 1;
-          setPassCount(passesRef.current);
-        }
-        wasInDashboardRef.current = now;
-        setInDashboard(now);
+        setInDashboard(entry.isIntersecting);
       },
       { threshold: 0 }
     );
@@ -330,7 +319,7 @@ export default function DemoDashboard() {
 
   return (
     <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-[190px_minmax(0,1fr)] gap-x-10 gap-y-6">
-      <ScrollHint visible={inDashboard} compact={passCount >= 2} compactLeft={navLeft} />
+      <ScrollHint visible={inDashboard} compact compactLeft={navLeft} />
       {/* Navegación de pasos */}
       <nav className="hidden md:block">
         <ol className="sticky flex flex-col gap-4" style={{ top: 96, margin: 0, padding: 0, listStyle: "none" }}>

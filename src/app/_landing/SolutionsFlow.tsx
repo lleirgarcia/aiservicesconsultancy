@@ -193,31 +193,42 @@ function IdentifyScene({ opacity, local }: { opacity: number; local: number }) {
   const rows = Array.from({ length: 10 }, (_, i) => i + 1);
   return (
     <Scene icon="search" color={BLUE} title={t("v3.demo.sol1t")} opacity={opacity}>
-      <div className="grid grid-cols-2 gap-x-10 gap-y-3" style={{ width: "100%", maxWidth: 420 }}>
+      <ol style={{ width: "100%", margin: 0, padding: 0, listStyle: "none" }}>
         {rows.map((n, i) => {
           const r = easeOut(seg(local, i * 0.065, 0.12 + i * 0.065));
-          const fromLeft = i % 2 === 0;
           return (
-            <div
+            <li
               key={n}
               style={{
                 opacity: r,
-                transform: `translateX(${(1 - r) * (fromLeft ? -14 : 14)}px)`,
+                transform: `translateX(${(1 - r) * -14}px)`,
                 display: "flex",
-                alignItems: "baseline",
-                gap: "0.5rem",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "0.55rem 0.25rem",
+                borderBottom: i < rows.length - 1 ? "1px solid var(--border)" : "none",
               }}
             >
-              <span style={{ fontFamily: JMONO, fontSize: "0.75rem", fontWeight: 700, color: BLUE }}>
+              <span style={{ fontFamily: JMONO, fontSize: "0.85rem", fontWeight: 700, color: BLUE, width: "1.6rem" }}>
                 {String(n).padStart(2, "0")}
               </span>
-              <span style={{ fontFamily: GROTESK, fontSize: "0.9rem", fontWeight: 600, color: "var(--fg)" }}>
+              <span style={{ flex: 1, fontFamily: GROTESK, fontSize: "1.05rem", fontWeight: 600, color: "var(--fg)" }}>
                 {t("v3.demo.processWord")} {n}
               </span>
-            </div>
+              <span
+                aria-hidden
+                style={{
+                  height: 6,
+                  width: `${Math.round(r * (30 + ((n * 37) % 50)))}%`,
+                  maxWidth: 180,
+                  borderRadius: 999,
+                  background: `color-mix(in srgb, ${BLUE} 22%, var(--surface))`,
+                }}
+              />
+            </li>
           );
         })}
-      </div>
+      </ol>
     </Scene>
   );
 }
@@ -318,10 +329,15 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
         @keyframes solLoopSpin { to { stroke-dashoffset: -88; } }
         @keyframes solLoopWord { 0%, 27% { opacity: 1; transform: translateY(0); } 33%, 94% { opacity: 0; transform: translateY(-6px); } 100% { opacity: 0; } }
       `}</style>
-      <div className="flex items-center justify-center gap-2 sm:gap-6 md:gap-10" style={{ padding: "1rem 0" }}>
+      {/* Las tres piezas se reparten el ancho REAL disponible (flex-grow), no el
+          del viewport: en escritorio el nav lateral se come ~230px que un
+          breakpoint de media query no puede saber descontar. */}
+      <div className="flex items-center justify-center" style={{ gap: "clamp(0.5rem, 3vw, 2.5rem)", padding: "1rem 0", width: "100%" }}>
         <div
-          className="w-[92px] sm:w-[132px] md:w-[168px] text-[0.72rem] sm:text-[0.92rem] md:text-[1.05rem]"
           style={{
+            flex: "1 1 0%",
+            minWidth: 0,
+            maxWidth: 168,
             textAlign: "center" as const,
             background: "var(--surface)",
             border: `2px solid ${BLUE}`,
@@ -330,6 +346,7 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
             padding: "1.5rem 0.4rem",
             fontFamily: GROTESK,
             fontWeight: 700,
+            fontSize: "clamp(0.72rem, 2.3vw, 1.05rem)",
             color: "var(--fg)",
           }}
         >
@@ -337,8 +354,8 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
         </div>
 
         <div
-          className="relative flex flex-col items-center justify-center shrink-0 w-[76px] sm:w-[112px] md:w-[140px]"
-          style={{ aspectRatio: "140 / 104" }}
+          className="relative flex flex-col items-center justify-center"
+          style={{ flex: "0 1 140px", minWidth: 70, maxWidth: 140, aspectRatio: "140 / 104" }}
         >
           <svg width="100%" height="100%" viewBox="0 0 140 104" fill="none" aria-hidden>
             <path
@@ -364,13 +381,13 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
             {words.map((w, i) => (
               <span
                 key={w}
-                className="text-[0.62rem] sm:text-[0.78rem] md:text-[0.86rem]"
                 style={{
                   position: "absolute",
                   inset: 0,
                   textAlign: "center",
                   whiteSpace: "nowrap",
                   fontFamily: JMONO,
+                  fontSize: "clamp(0.6rem, 1.8vw, 0.86rem)",
                   fontWeight: 700,
                   color: BLUE,
                   opacity: 0,
@@ -384,8 +401,10 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
         </div>
 
         <div
-          className="w-[92px] sm:w-[132px] md:w-[168px] text-[0.72rem] sm:text-[0.92rem] md:text-[1.05rem]"
           style={{
+            flex: "1 1 0%",
+            minWidth: 0,
+            maxWidth: 168,
             textAlign: "center" as const,
             background: "var(--surface)",
             border: `2px solid ${SLATE}`,
@@ -394,6 +413,7 @@ function LoopScene({ opacity, active }: { opacity: number; active: boolean }) {
             padding: "1.5rem 0.4rem",
             fontFamily: GROTESK,
             fontWeight: 700,
+            fontSize: "clamp(0.72rem, 2.3vw, 1.05rem)",
             color: "var(--fg)",
           }}
         >
@@ -444,8 +464,8 @@ function DeliverScene({ opacity, local }: { opacity: number; local: number }) {
         </div>
       }
     >
-      <div className="flex flex-col items-center" style={{ gap: "1.1rem", padding: "0.5rem 0" }}>
-        <div className="flex items-center justify-between" style={{ width: "100%", maxWidth: barWidth }}>
+      <div className="flex flex-col items-center" style={{ gap: "1.1rem", padding: "0.5rem 0", width: "100%" }}>
+        <div className="flex items-center justify-between" style={{ width: "100%", maxWidth: barWidth, gap: "0.75rem" }}>
           <span style={{ fontFamily: JMONO, fontSize: "0.85rem", fontWeight: 700, color: "var(--muted)" }}>
             {t("v3.demo.loopUs")}
           </span>

@@ -542,7 +542,7 @@
     },
     "madeBy": "Hecho por",
     "demo": {
-      "scrollHint": "Sigue haciendo scroll",
+      "scrollHint": "Sigue deslizando hacia abajo",
       "heading": "Un ejemplo, de principio a fin",
       "s1": "1. Una tarea de tu empresa",
       "task": "Preparar y enviar los albaranes de la semana",
