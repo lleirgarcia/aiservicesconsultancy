@@ -360,7 +360,7 @@ export default function DemoDashboard() {
 
       {/* Paneles: cada paso se queda fijo en pantalla mientras su scroll interno anima su contenido */}
       <div className="flex flex-col min-w-0">
-        <PinnedStep registerRef={(el) => { refs.current[0] = el; }}>
+        <PinnedStep id="identificamos" registerRef={(el) => { refs.current[0] = el; }}>
           {(progress) => <IdentifyFlow progress={progress} />}
         </PinnedStep>
 

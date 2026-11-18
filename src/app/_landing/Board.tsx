@@ -122,24 +122,9 @@ function CardItem({ k, color }: { k: string; color: string }) {
       </div>
 
       <div
-        className="flex items-center justify-between gap-2"
+        className="flex items-center justify-end gap-2"
         style={{ marginTop: "0.85rem", paddingTop: "0.7rem", borderTop: `1px solid color-mix(in srgb, ${color} 22%, var(--surface))` }}
       >
-        {/* Sobre el fondo teñido, la etiqueta va en blanco para que destaque */}
-        <span
-          style={{
-            fontFamily: JMONO,
-            fontSize: "0.66rem",
-            fontWeight: 700,
-            color,
-            background: "var(--surface)",
-            border: `1px solid color-mix(in srgb, ${color} 40%, #fff)`,
-            borderRadius: 5,
-            padding: "0.12rem 0.4rem",
-          }}
-        >
-          {t("v3.board.tag")}
-        </span>
         <span
           className="inline-flex items-center gap-1"
           style={{ fontFamily: JMONO, fontSize: "0.7rem", color: "var(--muted)" }}
@@ -207,7 +192,7 @@ export default function Board({ progress }: { progress: number }) {
                   margin: 0,
                 }}
               >
-                {t("v3.demo.processWord")} {ci + 1}
+                {t(`v3.board.col${ci + 1}`)}
               </h3>
               <span
                 style={{

@@ -130,6 +130,7 @@ export default function CaseStudies() {
   const { t } = useI18n();
   return (
     <section
+      id="proyectos"
       className="px-6"
       style={{
         borderTop: "1px solid var(--border)",

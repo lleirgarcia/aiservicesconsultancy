@@ -63,7 +63,7 @@ function IndustryPill({ name, color, label }: { name: Industry; color: string; l
 export default function AboutUs() {
   const { t } = useI18n();
   return (
-    <section className="px-6" style={{ paddingTop: 0, paddingBottom: "clamp(3.5rem, 8vh, 5.5rem)" }}>
+    <section id="quienes-somos" className="px-6" style={{ paddingTop: 0, paddingBottom: "clamp(3.5rem, 8vh, 5.5rem)" }}>
       <div
         className="max-w-[1120px] mx-auto flex flex-col items-center text-center"
         style={{

@@ -1,9 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Blog desactivado: Google lo tenía indexado y fallaba. Devolvemos 410 (Gone)
+// para que lo retire del índice. Para reactivarlo, poner a false.
+const BLOG_DISABLED = true;
+
 // Protege la demo de asesoría (páginas y API) con Basic Auth.
 // Si DEMO_PASSWORD no está definida, no se protege nada (desarrollo local).
 export function proxy(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  if (path === "/blog" || path.startsWith("/blog/") || path.startsWith("/api/blog")) {
+    if (BLOG_DISABLED) {
+      return new NextResponse("Esta página ya no existe.", {
+        status: 410,
+        headers: { "X-Robots-Tag": "noindex", "Content-Type": "text/plain; charset=utf-8" },
+      });
+    }
+    return NextResponse.next();
+  }
+
   const user = process.env.DEMO_USER ?? "";
   const pass = process.env.DEMO_PASSWORD ?? "";
   if (!pass) return NextResponse.next();
@@ -29,6 +44,9 @@ export function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/blog",
+    "/blog/:path*",
+    "/api/blog/:path*",
     "/demos/asesoria-emails/:path*",
     "/api/demos/asesoria-emails/:path*",
   ],

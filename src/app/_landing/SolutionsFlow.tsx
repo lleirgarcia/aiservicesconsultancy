@@ -15,8 +15,8 @@ const SLATE = "#475569";
 
 /** Los 5 tramos de scroll en los que se reparte la sección: cada uno es una escena a pantalla completa. */
 const SCENES = [
-  { key: "identify", start: 0, end: 0.14 },
-  { key: "propose", start: 0.14, end: 0.42 },
+  { key: "identify", start: 0, end: 0.2 },
+  { key: "propose", start: 0.2, end: 0.42 },
   { key: "prototype", start: 0.42, end: 0.56 },
   { key: "loop", start: 0.56, end: 0.82 },
   { key: "deliver", start: 0.82, end: 1 },
@@ -191,38 +191,77 @@ function Scene({
 function IdentifyScene({ opacity, local }: { opacity: number; local: number }) {
   const { t } = useI18n();
   const rows = Array.from({ length: 10 }, (_, i) => i + 1);
+  // Al final del tramo se destaca el proceso 1 ("Facturación mensual"): es el
+  // que la escena siguiente convierte en ficha de solución.
+  const hl = easeOut(seg(local, 0.55, 0.66));
   return (
-    <Scene icon="search" color={BLUE} title={t("v3.demo.sol1t")} opacity={opacity}>
+    <Scene icon="search" color={BLUE} title={t("v3.demo.sol1t")} sub={t("v3.demo.sol1Sub")} opacity={opacity}>
       <ol style={{ width: "100%", margin: 0, padding: 0, listStyle: "none" }}>
         {rows.map((n, i) => {
-          const r = easeOut(seg(local, i * 0.065, 0.12 + i * 0.065));
+          const r = easeOut(seg(local, i * 0.045, 0.1 + i * 0.045));
+          const picked = n === 1;
           return (
             <li
               key={n}
               style={{
-                opacity: r,
-                transform: `translateX(${(1 - r) * -14}px)`,
+                opacity: picked ? r : r * (1 - 0.6 * hl),
+                transform: `translateX(${(1 - r) * -14}px) scale(${picked ? 1 + 0.03 * hl : 1})`,
+                transformOrigin: "left center",
                 display: "flex",
                 alignItems: "center",
                 gap: "1rem",
-                padding: "0.55rem 0.25rem",
+                padding: "0.55rem 0.6rem",
+                borderRadius: 10,
+                background: picked ? `color-mix(in srgb, ${BLUE} ${Math.round(10 * hl)}%, transparent)` : "transparent",
+                boxShadow: picked ? `inset 0 0 0 ${1.5 * hl}px color-mix(in srgb, ${BLUE} 45%, transparent)` : "none",
                 borderBottom: i < rows.length - 1 ? "1px solid var(--border)" : "none",
+                position: "relative",
+                zIndex: picked ? 1 : 0,
               }}
             >
               <span style={{ fontFamily: JMONO, fontSize: "0.85rem", fontWeight: 700, color: BLUE, width: "1.6rem" }}>
                 {String(n).padStart(2, "0")}
               </span>
-              <span style={{ flex: 1, fontFamily: GROTESK, fontSize: "1.05rem", fontWeight: 600, color: "var(--fg)" }}>
-                {t("v3.demo.processWord")} {n}
+              <span
+                style={{
+                  flex: 1,
+                  fontFamily: GROTESK,
+                  fontSize: "1.05rem",
+                  fontWeight: picked && hl > 0.5 ? 700 : 600,
+                  color: picked && hl > 0.5 ? BLUE : "var(--fg)",
+                }}
+              >
+                {t(`v3.demo.proc${n}`)}
               </span>
+              {picked && (
+                <span
+                  style={{
+                    opacity: hl,
+                    fontFamily: JMONO,
+                    fontSize: "0.68rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase" as const,
+                    color: "#fff",
+                    background: BLUE,
+                    borderRadius: 999,
+                    padding: "0.2rem 0.6rem",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {t("v3.demo.identPick")}
+                </span>
+              )}
               <span
                 aria-hidden
                 style={{
                   height: 6,
-                  width: `${Math.round(r * (30 + ((n * 37) % 50)))}%`,
-                  maxWidth: 180,
+                  // Largo distinto por proceso (peso orientativo), siempre visible.
+                  width: Math.round(r * (50 + ((n * 53) % 130))),
                   borderRadius: 999,
-                  background: `color-mix(in srgb, ${BLUE} 22%, var(--surface))`,
+                  background: picked
+                    ? `color-mix(in srgb, ${BLUE} ${Math.round(22 + 78 * hl)}%, var(--surface))`
+                    : `color-mix(in srgb, ${BLUE} 22%, var(--surface))`,
                 }}
               />
             </li>
@@ -234,33 +273,26 @@ function IdentifyScene({ opacity, local }: { opacity: number; local: number }) {
 }
 
 const DOC_FIELDS = [
-  { labelKey: "v3.demo.docF1", color: BLUE, dots: 40 },
-  { labelKey: "v3.demo.docF2", color: RED, dots: 24 },
-  { labelKey: "v3.demo.docF3", color: AMBER, dots: 52 },
-  { labelKey: "v3.demo.docF4", color: GREEN, dots: 17 },
+  { labelKey: "v3.demo.docF1", valueKey: "v3.demo.docV1", color: BLUE },
+  { labelKey: "v3.demo.docF2", valueKey: "v3.demo.docV2", color: RED },
+  { labelKey: "v3.demo.docF3", valueKey: "v3.demo.docV3", color: AMBER },
+  { labelKey: "v3.demo.docF4", valueKey: "v3.demo.docV4", color: GREEN },
 ];
 
-/** Línea de puntos negra (no en negrita) que "se escribe" para no dejar el campo vacío; cada campo tiene un largo distinto. */
-function DottedLine({ dots, reveal }: { dots: number; reveal: number }) {
+/** Texto del campo que "se escribe" de izquierda a derecha según el scroll. */
+function TypedLine({ text, reveal }: { text: string; reveal: number }) {
   return (
     <span
-      aria-hidden
       style={{
         display: "block",
-        overflow: "hidden",
-        fontFamily: JMONO,
-        fontWeight: 400,
+        fontFamily: GROTESK,
         fontSize: "0.95rem",
-        letterSpacing: "0.12em",
+        lineHeight: 1.45,
         color: "var(--fg)",
-        opacity: 0.55,
-        whiteSpace: "nowrap",
-        transform: `scaleX(${reveal})`,
-        transformOrigin: "left",
-        willChange: "transform",
+        clipPath: `inset(0 ${(1 - reveal) * 100}% 0 0)`,
       }}
     >
-      {"·".repeat(dots)}
+      {text}
     </span>
   );
 }
@@ -299,7 +331,7 @@ function ProposeScene({ opacity, local }: { opacity: number; local: number }) {
                 >
                   {t(f.labelKey)}
                 </span>
-                <DottedLine dots={f.dots} reveal={lineReveal} />
+                <TypedLine text={t(f.valueKey)} reveal={lineReveal} />
               </div>
             );
           })}

@@ -16,6 +16,7 @@ const STICKY_TOP_PX = 96;
  */
 export default function PinnedStep({
   registerRef,
+  id,
   /** Si el contenido debe ocupar todo el alto fijado (p. ej. un gráfico que se estira) en vez de centrarse por su alto natural. */
   fill = false,
   /** Más alto extra de lo normal: para pasos con varias escenas secuenciales que necesitan más recorrido de scroll. */
@@ -23,6 +24,8 @@ export default function PinnedStep({
   children,
 }: {
   registerRef: (el: HTMLDivElement | null) => void;
+  /** Ancla para enlazar al paso desde fuera (p. ej. el menú del header). */
+  id?: string;
   fill?: boolean;
   tall?: boolean;
   children: (progress: number) => ReactNode;
@@ -31,6 +34,7 @@ export default function PinnedStep({
 
   return (
     <div
+      id={id}
       ref={(el) => {
         ref.current = el;
         registerRef(el);

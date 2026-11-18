@@ -13,6 +13,7 @@ import Rising from "./_landing/Rising";
 import ScrollProgressBar from "./_landing/ScrollProgressBar";
 import UniverseBackground from "./_landing/UniverseBackground";
 import BrandLogo from "./_landing/BrandLogo";
+import SectionNav from "./_landing/SectionNav";
 
 /* Sistema tipográfico estilo lateralbuilder: Anton para titulares,
    Space Grotesk para texto, JetBrains Mono para datos. */
@@ -20,6 +21,7 @@ const ANTON = "var(--font-anton), 'Anton', 'Arial Narrow', sans-serif";
 const GROTESK = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif";
 
 const WHATSAPP_URL = "https://wa.me/34626572151";
+const PHONE_TEL = "+34626572151";
 /* Cambiar por la URL del vídeo concreto cuando exista. */
 const VIDEO_URL = "https://www.youtube.com/@kroomixcom";
 
@@ -49,6 +51,7 @@ export default function HomeV2() {
             <BrandLogo height={44} ratio={3.42} />
           </a>
           <div className="flex items-center gap-3 sm:gap-4">
+            <SectionNav />
             <ContactTrigger />
             <LanguageSwitcher />
           </div>
@@ -111,6 +114,8 @@ export default function HomeV2() {
           </span>
         </h1>
 
+        {/* La garantía y el contacto, a la vista sin hacer scroll: es lo que
+            decide a un empresario con prisa. */}
         <p
           className="v3-enter"
           style={
@@ -119,15 +124,91 @@ export default function HomeV2() {
               fontSize: "clamp(1rem, 1.5vw, 1.3rem)",
               fontWeight: 500,
               lineHeight: 1.5,
-              color: "var(--muted)",
+              color: "var(--fg)",
               margin: 0,
-              marginBottom: "clamp(2.75rem, 7vh, 5rem)",
-              "--delay": "200ms",
+              marginBottom: "clamp(1.5rem, 3.5vh, 2.25rem)",
+              "--delay": "260ms",
             } as React.CSSProperties
           }
         >
-          {t("v3.hero.sub")}
+          {t("v3.hero.promise")}
         </p>
+
+        <div
+          className="v3-enter flex flex-wrap items-center justify-center gap-3"
+          style={{ marginBottom: "1rem", "--delay": "320ms" } as React.CSSProperties}
+        >
+          <a
+            href={`tel:${PHONE_TEL}`}
+            className="inline-flex items-center gap-2.5 transition-opacity hover:opacity-85"
+            style={{
+              background: "var(--accent)",
+              color: "var(--accent-on)",
+              borderRadius: 999,
+              padding: "0.85rem 1.5rem",
+              fontFamily: GROTESK,
+              fontWeight: 700,
+              fontSize: "1rem",
+              textDecoration: "none",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.906.339 1.849.573 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+            {t("v3.hero.ctaCall")}
+          </a>
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 transition-colors"
+            style={{
+              background: "var(--surface)",
+              color: "var(--fg)",
+              border: "1.5px solid var(--border)",
+              borderRadius: 999,
+              padding: "0.8rem 1.4rem",
+              fontFamily: GROTESK,
+              fontWeight: 700,
+              fontSize: "1rem",
+              textDecoration: "none",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" aria-hidden>
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z" />
+            </svg>
+            {t("v3.hero.ctaWa")}
+          </a>
+        </div>
+
+        {/* Lo que un empresario con prisa pregunta antes de llamar. */}
+        <ul
+          className="v3-enter flex flex-wrap items-center justify-center"
+          style={
+            {
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              marginBottom: "clamp(3rem, 9vh, 6rem)",
+              columnGap: "1.25rem",
+              rowGap: "0.35rem",
+              fontFamily: GROTESK,
+              fontSize: "0.9rem",
+              fontWeight: 500,
+              color: "var(--muted)",
+              "--delay": "380ms",
+            } as React.CSSProperties
+          }
+        >
+          {(["fact1", "fact2"] as const).map((k) => (
+            <li key={k} className="inline-flex items-center gap-1.5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              {t(`v3.hero.${k}`)}
+            </li>
+          ))}
+        </ul>
 
         <div className="w-full max-w-[1180px]">
           <Humano />
@@ -135,8 +216,13 @@ export default function HomeV2() {
 
       </section>
 
+      {/* ── Prueba primero: casos reales y llamada, antes del recorrido largo ── */}
+      <CaseStudies />
+      <CallCta ns="callCtaEarly" />
+
       {/* ── Ver lo que hacemos (tablero + ejemplo detallado) ── */}
       <section
+        id="como-trabajamos"
         className="px-6 overflow-clip"
         style={{
           borderTop: "1px solid var(--border)",
@@ -168,10 +254,8 @@ export default function HomeV2() {
         </div>
       </section>
 
-      {/* ── Proyectos realizados y testimonios (fuera del recorrido fijado) ── */}
-      <CaseStudies />
-      <CallCta />
       <AboutUs />
+      <CallCta />
 
       {/* ── Footer ─────────────────────────────────────── */}
       <div style={{ borderTop: "1px solid var(--border)" }}>
