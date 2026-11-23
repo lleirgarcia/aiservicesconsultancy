@@ -24,6 +24,8 @@ const WHATSAPP_URL = "https://wa.me/34626572151";
 const PHONE_TEL = "+34626572151";
 /* Cambiar por la URL del vídeo concreto cuando exista. */
 const VIDEO_URL = "https://www.youtube.com/@kroomixcom";
+// Oculta de momento la pastilla "¿Qué es Kroomix? explicado por Lleïr".
+const SHOW_VIDEO_PILL = false;
 
 export default function HomeV2() {
   const { t } = useI18n();
@@ -64,6 +66,7 @@ export default function HomeV2() {
         style={{ paddingTop: "clamp(1.5rem, 4vh, 3rem)", paddingBottom: "clamp(1.5rem, 4vh, 3rem)" }}
       >
         {/* Enlace al vídeo, con el borde girando (recurso de attio) */}
+        {SHOW_VIDEO_PILL && (
         <a
           className="v3-pill v3-enter"
           href={VIDEO_URL}
@@ -89,6 +92,7 @@ export default function HomeV2() {
             </svg>
           </span>
         </a>
+        )}
 
         {/* Una frase y una subfrase. El remate en azul, que es lo que compra el cliente. */}
         <h1
