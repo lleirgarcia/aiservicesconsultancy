@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useI18n } from "@/i18n/LocaleContext";
 
 /**
@@ -16,6 +16,9 @@ const ITEMS = [
   { key: "header.navHow", section: "como-trabajamos", target: "identificamos" },
   { key: "header.navAbout", section: "quienes-somos", target: "quienes-somos" },
 ] as const;
+
+/** Acceso a la demo de agentes (otra página, con login): va tras «Proyectos reales», que son las dos experiencias. */
+const DEMOS_HREF = "/demos/agentes";
 
 const HEADER_OFFSET_PX = 76;
 
@@ -77,10 +80,22 @@ export default function SectionNav() {
   return (
     <nav aria-label={t("header.navAria")} className="hidden lg:block">
       <ul className="flex items-center gap-6" style={{ margin: 0, padding: 0, listStyle: "none", marginRight: "0.5rem" }}>
-        {ITEMS.map((item) => {
+        {ITEMS.map((item, i) => {
           const on = active === item.section;
           return (
-            <li key={item.section}>
+            <Fragment key={item.section}>
+              {i === 1 && (
+                <li>
+                  <a
+                    href={DEMOS_HREF}
+                    className="text-xs font-medium uppercase tracking-widest transition-opacity hover:opacity-70"
+                    style={{ color: "var(--accent)", fontWeight: 700, textDecoration: "none", paddingBottom: 4, borderBottom: "2px solid transparent" }}
+                  >
+                    {t("header.navDemos")}
+                  </a>
+                </li>
+              )}
+            <li>
               <a
                 href={`#${item.target}`}
                 onClick={(e) => {
@@ -100,6 +115,7 @@ export default function SectionNav() {
                 {t(item.key)}
               </a>
             </li>
+            </Fragment>
           );
         })}
       </ul>
