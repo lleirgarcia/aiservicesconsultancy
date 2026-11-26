@@ -97,8 +97,10 @@ export default function SectionNav() {
               )}
             <li>
               <a
-                href={`#${item.target}`}
+                href={`/#${item.target}`}
                 onClick={(e) => {
+                  // En la landing salta a la sección; en otras páginas (demos) deja que el enlace redirija.
+                  if (!document.getElementById(item.target)) return;
                   e.preventDefault();
                   go(item.target);
                 }}
