@@ -1,6 +1,6 @@
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
-import type { EmailEntrada } from "@/app/demos/asesoria-emails/data";
+import type { EmailEntrada } from "@/app/_demos-archivadas/asesoria-emails/data";
 
 const DEMO_PREFIX = "[DEMO KROOMIX]";
 

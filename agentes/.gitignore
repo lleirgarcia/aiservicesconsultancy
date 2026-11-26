@@ -1,0 +1,24 @@
+# Entornos y dependencias
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Compilado
+frontend/dist/
+
+# Datos de demo: se regeneran con `uv run python -m app.seed.generate` (start.sh lo hace si faltan)
+backend/data/
+
+# Generado por port-allocator, depende de la ruta de cada equipo
+.envrc
+
+# Credenciales locales (bandeja de entrada)
+.env
+
+.DS_Store
+*.log
+
+# Documentos de prueba generados
+documentos-prueba/

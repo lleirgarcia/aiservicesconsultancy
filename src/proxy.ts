@@ -5,8 +5,7 @@ import type { NextRequest } from "next/server";
 // para que lo retire del índice. Para reactivarlo, poner a false.
 const BLOG_DISABLED = true;
 
-// Protege la demo de asesoría (páginas y API) con Basic Auth.
-// Si DEMO_PASSWORD no está definida, no se protege nada (desarrollo local).
+// Basic Auth (DEMO_USER/DEMO_PASSWORD) para rutas protegidas; hoy ninguna: las demos antiguas están archivadas.
 export function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
   if (path === "/blog" || path.startsWith("/blog/") || path.startsWith("/api/blog")) {
@@ -17,6 +16,18 @@ export function proxy(req: NextRequest) {
       });
     }
     return NextResponse.next();
+  }
+
+  // Demo de agentes: reenvía al backend (VPS) añadiendo la clave compartida. Ver agentes/README.md.
+  if (path.startsWith("/agentes-app/")) {
+    const destino = process.env.AGENTES_URL;
+    const clave = process.env.AGENTES_SECRET;
+    if (!destino) return NextResponse.next(); // local: lo resuelve el rewrite de next.config.ts
+    const headers = new Headers(req.headers);
+    if (clave) headers.set("x-agentes-key", clave);
+    return NextResponse.rewrite(new URL(path.slice("/agentes-app".length) + req.nextUrl.search, destino), {
+      request: { headers },
+    });
   }
 
   const user = process.env.DEMO_USER ?? "";
@@ -47,7 +58,6 @@ export const config = {
     "/blog",
     "/blog/:path*",
     "/api/blog/:path*",
-    "/demos/asesoria-emails/:path*",
-    "/api/demos/asesoria-emails/:path*",
+    "/agentes-app/:path*",
   ],
 };

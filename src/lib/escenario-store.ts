@@ -3,7 +3,7 @@ import {
   ESCENARIO_DEFECTO,
   esEscenarioValido,
   type Escenario,
-} from "@/app/demos/asesoria-emails/escenario";
+} from "@/app/_demos-archivadas/asesoria-emails/escenario";
 
 // Estado serializado de la bandeja procesada de un escenario. El shape lo
 // define el cliente (BandejaInteligente); aquí es JSON opaco.
