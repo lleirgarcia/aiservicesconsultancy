@@ -7,6 +7,8 @@ Base URL en desarrollo: `http://localhost:3003` (puerto configurado del dev serv
 
 ## Índice
 
+> Los endpoints `/api/demos/asesoria-emails/*` están **archivados** (código en `src/app/_demos-archivadas/api-asesoria-emails/`): ya no se sirven y devuelven 404.
+
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/blog/articles` | Lista artículos del blog (vista admin), con filtros por estado y texto |
@@ -29,7 +31,30 @@ Base URL en desarrollo: `http://localhost:3003` (puerto configurado del dev serv
 | GET | `/api/demos/asesoria-emails/escenarios` | Lista la biblioteca de escenarios guardados |
 | PATCH/DELETE | `/api/demos/asesoria-emails/escenarios/{id}` | Activa o elimina un escenario guardado |
 | PUT | `/api/demos/asesoria-emails/bandeja-estado` | Persiste la bandeja procesada del escenario activo |
+| POST | `/api/demos-login` | Inicia sesión en las demos (`/demos`, `/agentes-app`): comprueba usuario y contraseña y setea cookie de sesión |
 | POST | `/api/save-lead` | Extrae email del historial de chat y guarda un lead en Supabase |
+
+## POST /api/demos-login
+
+Inicia sesión en las demos privadas. Tras el login, el navegador puede abrir `/demos/*` y llamar a `/agentes-app/api/*`
+(la API del backend de agentes, reenviada por `src/proxy.ts`). Sin sesión: las páginas redirigen a `/demos/login?next=…` y
+`/agentes-app/*` responde `401` con `{"detail":{"code":"unauthorized","message":"Sesión no iniciada."}}` (sin diálogo del navegador).
+
+- **Auth/CORS:** público, mismo origen.
+- **Body (JSON):** `{"usuario": "kroomix", "contrasena": "…"}`.
+- **Respuesta 200:** `{"ok": true}` y `Set-Cookie: kroomix_demo=<exp>.<hmac>; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800` (+`Secure` en producción).
+- **Errores:** `401 {"error":"Usuario o contraseña incorrectos."}` (tarda ~0,8 s a propósito para frenar la fuerza bruta).
+- **Efectos colaterales:** solo la cookie. Es una firma HMAC-SHA256 con `DEMO_PASSWORD`: cambiarla invalida todas las sesiones.
+- **Variables de entorno:** `DEMO_USER`, `DEMO_PASSWORD`. Si `DEMO_PASSWORD` no está definida, las demos no piden sesión.
+- **Precondiciones:** ninguna. **Idempotencia:** seguro reintentar; cada llamada válida emite una cookie nueva (7 días).
+
+```bash
+curl -i -X POST https://www.kroomix.com/api/demos-login -H 'Content-Type: application/json' \
+  -d '{"usuario":"kroomix","contrasena":"<contraseña>"}'
+# HTTP/2 200
+# set-cookie: kroomix_demo=1796000000.3f9a…; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=lax
+# {"ok":true}
+```
 
 ---
 
@@ -857,5 +882,6 @@ curl -s -X POST http://localhost:3003/api/save-lead \
 | `BLOG_ADMIN_SESSION_SECRET` | blog auth + todos los endpoints admin del blog |
 | `ANTHROPIC_API_KEY` | chat, chat/summary, demos clasificar, demos escenario/chat |
 | `GMAIL_USER` / `GMAIL_APP_PASSWORD` | demos bandeja y limpiar (IMAP Gmail), demos enviar (SMTP Gmail) |
-| `DEMO_USER` / `DEMO_PASSWORD` | Basic Auth de toda la demo de asesoría (`src/proxy.ts`); sin `DEMO_PASSWORD`, abierta |
+| `DEMO_USER` / `DEMO_PASSWORD` | acceso a las demos: `/api/demos-login` y sesión en `src/proxy.ts` (`/demos/*`, `/agentes-app/*`); sin `DEMO_PASSWORD`, abierto |
+| `AGENTES_URL` / `AGENTES_SECRET` | proxy de `/agentes-app/*` al backend de agentes (VPS) y clave `x-agentes-key` que este exige |
 | `NODE_ENV` | flag `Secure` de la cookie admin |
