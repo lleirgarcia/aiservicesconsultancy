@@ -482,7 +482,8 @@
       "p2problem": "Material prices were scattered across several documents, so checking them cost minutes on every single quote. And only two people had the know-how to put a quote together — if they weren't available, the quote didn't happen.",
       "p2solution": "We extracted the know-how from those two people. Using computer vision, the system reads the client's need, identifies the materials required, and generates a draft ready to review, adjust and send.",
       "p2statValue": "5-10 h",
-      "p2statLabel": "of quoting saved every week"
+      "demosCta": "See demos",
+    "p2statLabel": "of quoting saved every week"
     },
     "callCta": {
       "badge": "Free 30 min · no commitment",

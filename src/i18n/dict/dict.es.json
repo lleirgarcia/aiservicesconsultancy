@@ -482,7 +482,8 @@
       "p2problem": "El precio de los materiales estaba repartido en varios documentos, así que revisarlo llevaba minutos en cada presupuesto. Y solo dos personas tenían el conocimiento para hacerlos: si no estaban disponibles, el presupuesto no salía.",
       "p2solution": "Extrajimos el criterio de esas dos personas. Con visión por ordenador, el sistema lee la necesidad del cliente, identifica los materiales que hacen falta y genera un borrador listo para repasar, ajustar y enviar.",
       "p2statValue": "5-10 h",
-      "p2statLabel": "de presupuestos ahorradas cada semana"
+      "demosCta": "Ver demostraciones",
+    "p2statLabel": "de presupuestos ahorradas cada semana"
     },
     "callCta": {
       "badge": "30 min gratis · sin compromiso",

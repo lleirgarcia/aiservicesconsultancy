@@ -192,6 +192,12 @@ export default function CaseStudies() {
             statLabel={t("v3.proyectos.p2statLabel")}
           />
         </div>
+
+        <div className="text-center" style={{ marginTop: "clamp(1.5rem, 4vh, 2.25rem)" }}>
+          <a href="/demos/agentes" className="v3-btn">
+            {t("v3.proyectos.demosCta")}
+          </a>
+        </div>
       </div>
     </section>
   );

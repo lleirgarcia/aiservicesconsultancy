@@ -482,7 +482,8 @@
       "p2problem": "El preu dels materials estava repartit en diversos documents, així que revisar-lo portava minuts en cada pressupost. I només dues persones tenien el coneixement per fer-los: si no hi eren, el pressupost no sortia.",
       "p2solution": "Vam extreure el criteri d'aquestes dues persones. Amb visió per computador, el sistema llegeix la necessitat del client, identifica els materials que calen i genera un esborrany llest per repassar, ajustar i enviar.",
       "p2statValue": "5-10 h",
-      "p2statLabel": "de pressupostos estalviades cada setmana"
+      "demosCta": "Veure demostracions",
+    "p2statLabel": "de pressupostos estalviades cada setmana"
     },
     "callCta": {
       "badge": "30 min gratis · sense compromís",
