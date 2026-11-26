@@ -97,6 +97,8 @@ export function LoginForm() {
             onChange={(e) => setUsuario(e.target.value)}
             autoComplete="username"
             autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             autoFocus
             required
           />
@@ -113,6 +115,9 @@ export function LoginForm() {
               value={contrasena}
               onChange={(e) => setContrasena(e.target.value)}
               autoComplete="current-password"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               required
             />
             <button

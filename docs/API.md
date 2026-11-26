@@ -41,7 +41,7 @@ Inicia sesión en las demos privadas. Tras el login, el navegador puede abrir `/
 `/agentes-app/*` responde `401` con `{"detail":{"code":"unauthorized","message":"Sesión no iniciada."}}` (sin diálogo del navegador).
 
 - **Auth/CORS:** público, mismo origen.
-- **Body (JSON):** `{"usuario": "kroomix", "contrasena": "…"}`.
+- **Body (JSON):** `{"usuario": "kroomix", "contrasena": "…"}`. Se ignoran espacios alrededor de ambos campos y las mayúsculas del usuario.
 - **Respuesta 200:** `{"ok": true}` y `Set-Cookie: kroomix_demo=<exp>.<hmac>; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800` (+`Secure` en producción).
 - **Errores:** `401 {"error":"Usuario o contraseña incorrectos."}` (tarda ~0,8 s a propósito para frenar la fuerza bruta).
 - **Efectos colaterales:** solo la cookie. Es una firma HMAC-SHA256 con `DEMO_PASSWORD`: cambiarla invalida todas las sesiones.

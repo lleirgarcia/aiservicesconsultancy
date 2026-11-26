@@ -36,5 +36,8 @@ export async function sesionValida(valor: string | undefined): Promise<boolean> 
 }
 
 export function credencialesValidas(usuario: string, contrasena: string) {
-  return igual(usuario, process.env.DEMO_USER ?? "") && igual(contrasena, process.env.DEMO_PASSWORD ?? "");
+  // Tolerante con lo que se cuela al copiar/pegar o con el teclado del móvil: espacios alrededor y mayúsculas en el usuario.
+  const u = usuario.trim().toLowerCase() === (process.env.DEMO_USER ?? "").trim().toLowerCase();
+  const c = igual(contrasena.trim(), (process.env.DEMO_PASSWORD ?? "").trim());
+  return u && c;
 }

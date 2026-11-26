@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const usuario = typeof cuerpo?.usuario === "string" ? cuerpo.usuario : "";
   const contrasena = typeof cuerpo?.contrasena === "string" ? cuerpo.contrasena : "";
 
-  if (!credencialesValidas(usuario.trim(), contrasena)) {
+  if (!credencialesValidas(usuario, contrasena)) {
     await new Promise((r) => setTimeout(r, 800)); // frena la fuerza bruta
     return NextResponse.json({ error: "Usuario o contraseña incorrectos." }, { status: 401 });
   }
