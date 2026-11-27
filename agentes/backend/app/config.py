@@ -46,6 +46,11 @@ class Settings:
 
     audit_manual_minutes: float = float(os.environ.get("KROOMIX_AUDIT_MANUAL_MINUTES", "60"))
     audit_review_minutes: float = float(os.environ.get("KROOMIX_AUDIT_REVIEW_MINUTES", "10"))
+    # Acceso con usuario y contraseña. Solo los tests lo desactivan (no hay variable de entorno a propósito).
+    auth_enabled: bool = True
+    session_ttl_h: int = int(os.environ.get("KROOMIX_SESSION_TTL_H", "12"))
+    login_max_failures: int = int(os.environ.get("KROOMIX_LOGIN_MAX_FAILURES", "5"))  # por usuario y 15 min
+    trust_proxy: bool = os.environ.get("KROOMIX_TRUST_PROXY", "") == "1"  # fiarse de X-Forwarded-For/-Proto (detrás de un proxy TLS)
     # Tipo de cambio fijo para mostrar el coste de IA en euros. Es una estimación, no una cotización.
     usd_eur: float = float(os.environ.get("KROOMIX_USD_EUR", "0.92"))
     data_dir: Path = DATA_DIR

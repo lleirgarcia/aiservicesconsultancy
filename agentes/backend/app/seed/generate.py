@@ -1,13 +1,15 @@
 """Genera la base de datos y los documentos de la demostración.
 
 Uso: uv run python -m app.seed.generate
-Es determinista: regenerar produce los mismos datos. Borra y recrea data/.
+Es determinista: regenerar produce los mismos datos. Borra y recrea data/ (conservando usuarios, sesiones y actividad de los clientes).
 """
 
 from __future__ import annotations
 
 import hashlib
 import shutil
+import sqlite3
+import tempfile
 from pathlib import Path
 
 from app.config import get_settings
@@ -44,10 +46,25 @@ def _kwh_series(history: list[dict], client_id: str, extra: float) -> list[tuple
 
 def main() -> None:
     s = get_settings()
+    # Usuarios, sesiones y actividad de los clientes NO son datos de demo: se conservan al regenerar.
+    kept = None
+    if s.db_path.exists():
+        kept = Path(tempfile.mkdtemp()) / "previa.db"
+        src, dst = sqlite3.connect(s.db_path), sqlite3.connect(kept)
+        src.backup(dst)
+        src.close(); dst.close()
     if s.data_dir.exists():
         shutil.rmtree(s.data_dir)
     files = s.files_dir
     db = Database(s.db_path)
+    if kept:
+        with db.conn() as c:
+            c.execute("ATTACH DATABASE ? AS previa", (str(kept),))
+            for t in ("users", "sessions", "activity"):
+                if c.execute("SELECT 1 FROM previa.sqlite_master WHERE name=?", (t,)).fetchone():
+                    c.execute(f"INSERT INTO main.{t} SELECT * FROM previa.{t}")
+            c.execute("DETACH DATABASE previa")
+        shutil.rmtree(kept.parent)
 
     with db.conn() as c:
         c.execute("INSERT INTO firm VALUES (?,?,?,?,?)", (FIRM["id"], FIRM["name"], FIRM["tax_id"], FIRM["city"], FIRM["email"]))

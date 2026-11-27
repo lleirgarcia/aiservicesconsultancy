@@ -1,5 +1,6 @@
-/* Acceso a las demos (/demos y /agentes-app): usuario y contraseña en DEMO_USER / DEMO_PASSWORD.
-   Sesión en una cookie HttpOnly firmada con HMAC (la propia contraseña es la clave: cambiarla cierra todas las sesiones).
+/* Acceso a las demos (/demos y /agentes-app). Los usuarios y contraseñas viven en el backend de agentes (ver api/demos-login);
+   aquí solo hay una cookie HttpOnly firmada con HMAC, con DEMO_PASSWORD como clave de firma (cambiarla cierra todas las sesiones).
+   Sin DEMO_PASSWORD (local) las demos quedan abiertas.
    Usa solo Web Crypto: sirve en el proxy y en las rutas. */
 
 export const COOKIE_DEMO = "kroomix_demo";
@@ -33,11 +34,4 @@ export async function sesionValida(valor: string | undefined): Promise<boolean> 
   const [exp, firma] = valor.split(".");
   if (!exp || !firma || Number(exp) < Date.now() / 1000) return false;
   return igual(firma, await firmar(exp));
-}
-
-export function credencialesValidas(usuario: string, contrasena: string) {
-  // Tolerante con lo que se cuela al copiar/pegar o con el teclado del móvil: espacios alrededor y mayúsculas en el usuario.
-  const u = usuario.trim().toLowerCase() === (process.env.DEMO_USER ?? "").trim().toLowerCase();
-  const c = igual(contrasena.trim(), (process.env.DEMO_PASSWORD ?? "").trim());
-  return u && c;
 }

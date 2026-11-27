@@ -17,7 +17,7 @@ import { Tour } from "@/components/demo/Tour"
 import { WorkColumn } from "@/components/demo/WorkColumn"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
-import { api } from "@/lib/api"
+import { api, track } from "@/lib/api"
 import { dateTime } from "@/lib/format"
 import type { Agent, InboxItem, Scenario } from "@/lib/types"
 import { useRunPlayer } from "@/state/useRunPlayer"
@@ -43,6 +43,7 @@ export default function App() {
     if (id !== agentId) setEmailId(null)
     setAgentId(id)
     setScreen("agent")
+    track("open_agent", `Abrió el agente «${id}»`, { agent_id: id })
     window.scrollTo({ top: 0 })
     if (withTour && id === "gestion-documental") setTourOpen(true) // la guía solo cuenta el agente documental
   }
@@ -86,6 +87,7 @@ export default function App() {
   }, [player])
 
   const reset = () => {
+    track("reset", "Reinició la demostración")
     player.reset()
     runAgentRef.current = null
     setRunAgentId(null)
@@ -107,8 +109,8 @@ export default function App() {
       <Header player={player}
         title={screen === "home" ? "Plataforma de agentes" : `Agente de ${(current?.name ?? "gestión documental").toLowerCase()}`}
         subtitle={screen === "home" ? "Pide lo que necesitas y el agente adecuado se pone a trabajar" : (current ? `${current.input_description.replace(/\.$/, "")} → ${current.output_description.replace(/\.$/, "").toLowerCase()}` : "")}
-        onBack={screen === "agent" ? () => setScreen("home") : undefined}
-        onStart={startFromButton} onReset={reset} onGuide={() => setTourOpen(true)} />
+        onBack={screen === "agent" ? () => { track("back_home", "Volvió a la lista de agentes"); setScreen("home") } : undefined}
+        onStart={startFromButton} onReset={reset} onGuide={() => { track("open_guide", "Abrió la guía"); setTourOpen(true) }} />
 
       {loadError && (
         <div className="mt-4 rounded-md border border-bad/30 bg-bad-soft px-4 py-3 text-[13px] text-bad">

@@ -5,7 +5,14 @@ fichero se actualiza en la misma operación.
 
 - **Base URL:** `http://127.0.0.1:${BASE_PORT}` (`BASE_PORT` lo asigna `port-allocator`; 15600 en este proyecto). El mismo
   servidor sirve el frontend compilado (`frontend/dist`) en `/` y la API en `/api/*`.
-- **Auth:** ninguna. Es una demo local: el servidor escucha solo en `127.0.0.1`.
+- **Auth:** sesión por cookie (`kroomix_session`, `HttpOnly`, `SameSite=Lax`, `Secure` si la petición llega por HTTPS). Todo
+  `/api/*` exige sesión salvo `POST /api/auth/login` y `GET /api/health` (sin sesión → `401 unauthenticated`). `/api/admin/*`
+  exige rol `admin` (`403 forbidden`). La bandeja de correo (`/api/inbox*`) solo funciona para `admin`: a un cliente le devuelve
+  vacía/`403`. El servidor escucha solo en `127.0.0.1`: para abrirlo a clientes hay que publicarlo detrás de un proxy con HTTPS
+  (y `KROOMIX_TRUST_PROXY=1`). **En producción** el único acceso es `www.kroomix.com`: `POST /api/demos-login` (Next) valida usuario y contraseña contra `POST /api/auth/login` de este backend y emite la cookie `kroomix_session`; `src/proxy.ts` reenvía `/agentes-app/*` añadiendo `x-agentes-key` (`AGENTES_SECRET`). Más abajo, «Acceso y trazabilidad».
+- **Trazabilidad:** cada petición a `/api/*` de un usuario con sesión se guarda en la tabla `activity` (usuario, hora, IP, ruta,
+  estado, duración, cuerpo de petición y —en POST/PUT— de respuesta, truncados a 4 KB, con campos `pass*`/`secret*`/`token*`
+  ocultados). No se registran `GET /api/health`, `GET /api/inbox` (sondeo) ni `/api/admin/*`.
 - **CORS:** no hay cabeceras CORS. Frontend y API comparten origen. En desarrollo, Vite hace de proxy.
 - **Formato de error:** `{"detail": {"error": "<código>", "message": "<texto en castellano>"}}`. Los errores de validación
   de FastAPI (422) usan el formato estándar `{"detail": [{"type", "loc", "msg", "input"}]}`.
@@ -29,6 +36,9 @@ fichero se actualiza en la misma operación.
 | `KROOMIX_RUN_TIMEOUT_S` | `420` | Tiempo máximo de una ejecución. Al superarlo termina con `status="error"`. |
 | `KROOMIX_MAX_EXTRACTION_ATTEMPTS` | `3` | Reintentos de extracción por documento antes de derivarlo a revisión. |
 | `KROOMIX_MANUAL_MINUTES` / `KROOMIX_REVIEW_MINUTES` | `15` / `2` | Hipótesis comerciales (estimaciones, no mediciones). |
+| `KROOMIX_SESSION_TTL_H` | `12` | Horas de validez de una sesión. En prod, `168` (igual que la cookie de la web). |
+| `KROOMIX_LOGIN_MAX_FAILURES` | `5` | Intentos fallidos por usuario (15 min) antes de bloquear el inicio de sesión (`429`). |
+| `KROOMIX_TRUST_PROXY` | vacío | `1` = fiarse de `X-Forwarded-For`/`X-Forwarded-Proto` (detrás de un proxy TLS) para la IP y la cookie `Secure`. |
 | `KROOMIX_USD_EUR` | `0.92` | Tipo de cambio fijo para mostrar el coste de IA en euros (estimación, no cotización). |
 | `KROOMIX_FAULTS` | `{}` | JSON `{"herramienta": n}`: las n primeras llamadas a esa herramienta fallan (para evals). |
 
@@ -182,7 +192,7 @@ curl -s -o cartera.pdf "http://127.0.0.1:15600/api/sources/cartera/pdf?agent_id=
 
 Bandeja de correo externo (IMAP). Se activa con `KROOMIX_IMAP_USER`, `KROOMIX_IMAP_PASSWORD` (contraseña de aplicación) y `KROOMIX_IMAP_ALIAS` (ver `backend/.env.example`); sin ellas `enabled` es `false`. Solo se procesan los correos **no leídos enviados al alias**; cada uno se guarda como petición (`scenario: external`, adjuntos PDF/JPG/PNG validados por contenido) y el coordinador elige el agente, que se lanza con ese correo como entrada.
 
-- **Auth y CORS:** público (demo local). Nunca devuelve credenciales.
+- **Auth y CORS:** sesión; solo `admin` (a un cliente, `GET` le devuelve `{enabled:false, alias:null, items:[]}` y `POST …/launch` da `403 forbidden`, porque es el correo real del dueño). Nunca devuelve credenciales.
 - **`GET /api/inbox` → `200`:** `{enabled, alias, items[]}`; cada ítem `{email_id, status, agent_id, run_id, note, from_name, from_address, subject, received_at, attachments}`. `status`: `pendiente` | `lanzado` | `respondido` (el coordinador no supo asignarlo; `note` es su respuesta) | `ignorado` (remitente no permitido o límite por hora) | `error`. Lectura pura.
 - **`POST /api/inbox/{email_id}/launch`:** body `{"agent_id": "presupuestos"}`; lanza a mano un correo ya recibido. `202 {run_id, events_url}`. Errores: `404 email_not_found`, `404 agent_not_found`, `409 agent_unavailable`, `409 run_in_progress`. No idempotente (crea una ejecución).
 - **Entorno:** `KROOMIX_IMAP_HOST` (`imap.gmail.com`), `KROOMIX_INBOX_POLL_S` (20), `KROOMIX_INBOX_MAX_RUNS_PER_HOUR` (6), `KROOMIX_INBOX_MAX_ATTACHMENT_MB` (10), `KROOMIX_INBOX_ALLOWED_SENDERS` (vacío = cualquiera).
@@ -484,6 +494,43 @@ curl -s -w " %{http_code}\n" -X POST http://127.0.0.1:15600/api/drafts/BOR-15572
 ```
 {"detail":{"error":"draft_closed","message":"El borrador ya está aprobado."}} 409
 ```
+
+---
+
+## Acceso y trazabilidad
+
+Usuarios en la tabla `users` (contraseña con scrypt), sesiones en `sessions` (solo se guarda el hash del token), actividad en
+`activity`. `uv run python -m app.seed.generate` **conserva** estas tres tablas al regenerar los datos de demo.
+Gestión desde terminal: `uv run python -m app.auth.cli create|passwd|list` (en `backend/`).
+
+### `POST /api/auth/login`
+- **Auth/CORS:** público, mismo origen. **Body:** `{"username": str, "password": str}`.
+- **200:** `{"user": {id, username, display_name, company, role, active, created_at, last_login_at}}` + cabecera `Set-Cookie: kroomix_session=…`.
+- **Errores:** `401 invalid_credentials`; `429 too_many_attempts` (tras `KROOMIX_LOGIN_MAX_FAILURES` fallos del usuario o 4× por IP, aunque acierte después).
+- **Ejemplo:** `curl -c jar -X POST $B/api/auth/login -H 'content-type: application/json' -d '{"username":"acme","password":"…"}'`
+- **Precondiciones:** el usuario existe y está activo. **Idempotencia:** no idempotente (cada llamada abre una sesión nueva). Registra `login` / `login_failed`.
+
+### `POST /api/auth/logout` · `GET /api/auth/me`
+- Requieren sesión. `logout` borra la sesión y la cookie (`{"ok": true}`) y registra `logout`. `me` devuelve `{"user": {...}}`; sin sesión, `401`. Ambos sin efectos más allá de lo dicho; `me` es lectura pura.
+
+### `POST /api/track`
+- **Auth:** sesión. **Body:** `{"event": str ≤60, "detail": {"label": "texto legible", …}}`. **204** sin cuerpo.
+- Registra una acción de interfaz que no genera petición propia (abrir la guía, volver al inicio…) como `kind="ui"`. Solo escritura en `activity`; no idempotente.
+- **Ejemplo:** `curl -b jar -X POST $B/api/track -H 'content-type: application/json' -d '{"event":"open_guide","detail":{"label":"Abrió la guía"}}'`
+
+### `GET /api/admin/users` · `POST /api/admin/users` · `PATCH /api/admin/users/{id}` · `POST /api/admin/users/{id}/reset-password`
+- **Auth:** solo `admin`.
+- `GET` → `{"users": [{…usuario, open_sessions, logins, actions, runs, chats, last_activity}]}` (lectura pura).
+- `POST` body `{"username": "3-40 de [a-z0-9._-]", "display_name", "company", "role": "client"|"admin", "password"?}` → **201** `{"user", "password"}`; si no se envía `password` se genera una de 12 caracteres, **que solo se devuelve aquí**. Errores: `422 invalid_user`, `409 user_exists`.
+- `PATCH` body `{"active": bool}` → `{"user"}`. Desactivar cierra sus sesiones y le impide entrar. Errores: `404 user_not_found`, `409 self_deactivate`. Idempotente.
+- `reset-password` → `{"password": "…"}` (nueva, única vez visible); cierra las sesiones del usuario. No idempotente.
+
+### `GET /api/admin/activity` · `GET /api/admin/activity/{id}`
+- **Auth:** solo `admin`. Lectura pura.
+- **Query:** `user_id`, `kind` (`api`|`ui`|`login`|`login_failed`|`logout`), `q` (busca en resumen, ruta y usuario), `before_id` (paginación), `limit` (1–500, def. 100).
+- **200 lista:** `{"items": [{id, at, user_id, username, session_id, kind, method, path, status, duration_ms, ip, summary, run_id}]}` ordenados del más reciente al más antiguo. `summary` es una frase en castellano («Ejecutó el agente «presupuestos»», «Chat: «…» → lanzó el agente …»). `run_id` enlaza con `GET /api/runs/{run_id}/events.json` para ver qué hizo el agente.
+- **200 detalle:** la fila completa con `request`, `response` (JSON en texto) y `user_agent`. `404 activity_not_found`.
+- **Ejemplo:** `curl -b jar "$B/api/admin/activity?user_id=2&kind=api&limit=20"`
 
 ---
 

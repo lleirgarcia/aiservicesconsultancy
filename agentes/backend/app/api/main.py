@@ -3,20 +3,22 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import hmac
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response as FResponse
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.agent.orchestrator import AgentUnavailable, RunBusy, RunManager
 from app.agents.registry import AGENTS_BY_ID, list_agents
+from app.auth.middleware import COOKIE, AuthActivityMiddleware, client_ip, is_https
+from app.auth.store import AuthStore
 from app.config import get_settings
 from app.coordinator.coordinator import Coordinator, build_coordinator
 from app.mail.imap import ImapSource
@@ -45,6 +47,28 @@ class InboxLaunch(BaseModel):
     agent_id: str
 
 
+class Login(BaseModel):
+    username: str = Field(min_length=1, max_length=80)
+    password: str = Field(min_length=1, max_length=200)
+
+
+class Track(BaseModel):
+    event: str = Field(min_length=1, max_length=60)
+    detail: dict = Field(default_factory=dict)
+
+
+class NewUser(BaseModel):
+    username: str
+    display_name: str = ""
+    company: str = ""
+    role: str = "client"
+    password: str | None = None
+
+
+class UserPatch(BaseModel):
+    active: bool
+
+
 class ChatMessage(BaseModel):
     message: str = Field(min_length=1, max_length=1000)
 
@@ -56,6 +80,7 @@ def create_app(manager: RunManager | None = None, coordinator: Coordinator | Non
     async def lifespan(app: FastAPI):
         db = Database(settings.db_path)
         app.state.db = db
+        app.state.store = AuthStore(db, settings.session_ttl_h, settings.login_max_failures)
         app.state.runs = manager or RunManager(db, settings)
         app.state.coordinator = coordinator or build_coordinator(settings)
         source = ImapSource(settings.imap_host, settings.imap_user, settings.imap_password, settings.imap_alias) if settings.inbox_enabled else None
@@ -69,6 +94,9 @@ def create_app(manager: RunManager | None = None, coordinator: Coordinator | Non
 
     app = FastAPI(title="Kroomix · Agente de gestión documental", lifespan=lifespan)
 
+    app.add_middleware(AuthActivityMiddleware, fastapi_app=app, settings=settings)
+
+    # Va DESPUÉS de add_middleware de auth: en Starlette el último añadido es el más externo, así rechaza antes que nada.
     # Con AGENTES_SECRET definida, solo atiende peticiones que traigan esa clave en `x-agentes-key`
     # (la añade el proxy de Next). Evita que cualquiera lance agentes con la suscripción. Sin variable: abierto (local).
     secreto = os.environ.get("AGENTES_SECRET", "")
@@ -81,6 +109,96 @@ def create_app(manager: RunManager | None = None, coordinator: Coordinator | Non
 
     def db() -> Database:
         return app.state.db
+
+    def is_admin(request: Request) -> bool:
+        user = getattr(request.state, "user", None)
+        return not settings.auth_enabled or bool(user and user["role"] == "admin")
+
+    # --- acceso y trazabilidad ---------------------------------------------------------------
+    @app.post("/api/auth/login")
+    def login(body: Login, request: Request, response: FResponse):
+        store: AuthStore = app.state.store
+        ip = client_ip(request.scope, settings.trust_proxy)
+        ua = request.headers.get("user-agent", "")
+        if store.locked(ip, body.username):
+            store.log(kind="login_failed", username=body.username.strip().lower(), ip=ip, user_agent=ua, summary="Inicio de sesión bloqueado por demasiados intentos")
+            raise HTTPException(429, {"error": "too_many_attempts", "message": "Demasiados intentos. Espera unos minutos."})
+        res = store.login(body.username, body.password, ip, ua)
+        if not res:
+            store.log(kind="login_failed", username=body.username.strip().lower(), ip=ip, user_agent=ua, summary="Contraseña o usuario incorrectos")
+            raise HTTPException(401, {"error": "invalid_credentials", "message": "Usuario o contraseña incorrectos."})
+        user, token = res
+        sid = store.session(token)[1]
+        store.log(kind="login", user=user, session_id=sid, ip=ip, user_agent=ua, summary="Inició sesión")
+        response.set_cookie(COOKIE, token, max_age=settings.session_ttl_h * 3600, httponly=True, samesite="lax",
+                            secure=is_https(request.scope, settings.trust_proxy), path="/")
+        return {"user": user}
+
+    @app.post("/api/auth/logout")
+    def logout(request: Request, response: FResponse):
+        user = getattr(request.state, "user", None)
+        token = request.cookies.get(COOKIE)
+        if token:
+            app.state.store.logout(token)
+        if user:
+            app.state.store.log(kind="logout", user=user, session_id=request.state.session_id, ip=client_ip(request.scope, settings.trust_proxy),
+                                user_agent=request.headers.get("user-agent", ""), summary="Cerró sesión")
+        response.delete_cookie(COOKIE, path="/")
+        return {"ok": True}
+
+    @app.get("/api/auth/me")
+    def me(request: Request):
+        return {"user": getattr(request.state, "user", None)}
+
+    @app.post("/api/track", status_code=204)
+    def track(body: Track, request: Request):
+        """Acciones de la interfaz que no generan una petición propia (abrir la guía, volver al inicio…)."""
+        user = getattr(request.state, "user", None)
+        if user:
+            app.state.store.log(kind="ui", user=user, session_id=request.state.session_id, method="UI", path=body.event,
+                                ip=client_ip(request.scope, settings.trust_proxy), user_agent=request.headers.get("user-agent", ""),
+                                summary=str(body.detail.get("label") or body.event)[:200], request=json.dumps(body.detail, ensure_ascii=False)[:2000])
+
+    # --- administración (solo rol admin; lo impone el middleware) ---------------------------
+    @app.get("/api/admin/users")
+    def admin_users():
+        return {"users": app.state.store.users_with_stats()}
+
+    @app.post("/api/admin/users", status_code=201)
+    def admin_create_user(body: NewUser):
+        try:
+            user, password = app.state.store.create_user(body.username, body.display_name, body.company, body.role, body.password)
+        except ValueError as e:
+            raise HTTPException(422, {"error": "invalid_user", "message": str(e)})
+        except KeyError:
+            raise HTTPException(409, {"error": "user_exists", "message": "Ya existe un usuario con ese nombre."})
+        return {"user": user, "password": password}
+
+    @app.patch("/api/admin/users/{user_id}")
+    def admin_patch_user(user_id: int, body: UserPatch, request: Request):
+        if not app.state.store.get_user(user_id):
+            raise HTTPException(404, {"error": "user_not_found", "message": "Usuario no encontrado."})
+        if user_id == request.state.user["id"] and not body.active:
+            raise HTTPException(409, {"error": "self_deactivate", "message": "No puedes desactivarte a ti mismo."})
+        app.state.store.set_active(user_id, body.active)
+        return {"user": app.state.store.get_user(user_id)}
+
+    @app.post("/api/admin/users/{user_id}/reset-password")
+    def admin_reset_password(user_id: int):
+        if not app.state.store.get_user(user_id):
+            raise HTTPException(404, {"error": "user_not_found", "message": "Usuario no encontrado."})
+        return {"password": app.state.store.reset_password(user_id)}
+
+    @app.get("/api/admin/activity")
+    def admin_activity(user_id: int | None = None, kind: str | None = None, q: str | None = None, before_id: int | None = None, limit: int = 100):
+        return {"items": app.state.store.activity(user_id, kind, before_id, q, limit)}
+
+    @app.get("/api/admin/activity/{activity_id}")
+    def admin_activity_detail(activity_id: int):
+        row = app.state.store.activity_detail(activity_id)
+        if not row:
+            raise HTTPException(404, {"error": "activity_not_found", "message": "Registro no encontrado."})
+        return row
 
     @app.get("/api/health")
     def health():
@@ -198,12 +316,16 @@ def create_app(manager: RunManager | None = None, coordinator: Coordinator | Non
         return out
 
     @app.get("/api/inbox")
-    def inbox():
+    def inbox(request: Request):
+        if not is_admin(request):  # la bandeja es tu correo real: los clientes no la ven
+            return {"enabled": False, "alias": None, "items": []}
         return {"enabled": settings.inbox_enabled, "alias": settings.imap_alias if settings.inbox_enabled else None,
                 "items": app.state.inbox.list()}
 
     @app.post("/api/inbox/{email_id}/launch", status_code=202)
-    async def inbox_launch(email_id: str, body: InboxLaunch):
+    async def inbox_launch(email_id: str, body: InboxLaunch, request: Request):
+        if not is_admin(request):
+            raise HTTPException(403, {"error": "forbidden", "message": "La bandeja solo está disponible para el administrador."})
         try:
             run_id = app.state.inbox.launch_manual(email_id, body.agent_id)
         except KeyError:

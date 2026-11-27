@@ -46,7 +46,7 @@ def settings(tmp_path):
         pytest.skip("Faltan los datos de demo: uv run python -m app.seed.generate")
     dst = tmp_path / "test.db"
     shutil.copy(src, dst)
-    return replace(Settings(), db_path=dst, data_dir=DATA_DIR, fault_injection={}, quotes_dir_override=tmp_path / "quotes")
+    return replace(Settings(), db_path=dst, data_dir=DATA_DIR, fault_injection={}, auth_enabled=False, quotes_dir_override=tmp_path / "quotes")
 
 
 @pytest.fixture
@@ -54,7 +54,8 @@ def db(settings):
     db = Database(settings.db_path)
     # Partimos de cero: sin ejecuciones previas copiadas.
     for t in ("runs", "run_events", "cases", "extractions", "duplicate_checks", "case_documents", "incidents",
-              "review_tasks", "email_drafts", "draft_actions", "audit_log", "quote_lines", "renewal_reviews", "audit_reviews"):
+              "review_tasks", "email_drafts", "draft_actions", "audit_log", "quote_lines", "renewal_reviews", "audit_reviews",
+              "users", "sessions", "activity"):
         db.execute(f"DELETE FROM {t}")
     return db
 

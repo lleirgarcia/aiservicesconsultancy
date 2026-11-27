@@ -139,6 +139,23 @@ CREATE TABLE IF NOT EXISTS draft_actions (
 CREATE TABLE IF NOT EXISTS audit_log (
     case_id TEXT, run_id TEXT, at TEXT, actor TEXT, action TEXT, detail TEXT
 );
+-- Acceso de clientes y trazabilidad de su uso ---
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, display_name TEXT, company TEXT,
+    password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'client', active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT, last_login_at TEXT
+);
+CREATE TABLE IF NOT EXISTS sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, token_hash TEXT UNIQUE NOT NULL, user_id INTEGER NOT NULL,
+    created_at TEXT, expires_at TEXT, last_seen_at TEXT, ip TEXT, user_agent TEXT
+);
+CREATE TABLE IF NOT EXISTS activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, user_id INTEGER, username TEXT, session_id INTEGER,
+    kind TEXT, method TEXT, path TEXT, status INTEGER, duration_ms INTEGER, ip TEXT, user_agent TEXT,
+    summary TEXT, request TEXT, response TEXT, run_id TEXT
+);
+CREATE INDEX IF NOT EXISTS activity_user ON activity (user_id, id);
+CREATE INDEX IF NOT EXISTS activity_run ON activity (run_id);
 """
 
 

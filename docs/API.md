@@ -31,30 +31,42 @@ Base URL en desarrollo: `http://localhost:3003` (puerto configurado del dev serv
 | GET | `/api/demos/asesoria-emails/escenarios` | Lista la biblioteca de escenarios guardados |
 | PATCH/DELETE | `/api/demos/asesoria-emails/escenarios/{id}` | Activa o elimina un escenario guardado |
 | PUT | `/api/demos/asesoria-emails/bandeja-estado` | Persiste la bandeja procesada del escenario activo |
-| POST | `/api/demos-login` | Inicia sesión en las demos (`/demos`, `/agentes-app`): comprueba usuario y contraseña y setea cookie de sesión |
+| POST | `/api/demos-login` | Inicia sesión en las demos (`/demos`, `/agentes-app`): valida usuario y contraseña contra el backend de agentes y setea las cookies de sesión |
+| GET | `/demos/logout` | Cierra la sesión de las demos y redirige a `/demos/login` |
 | POST | `/api/save-lead` | Extrae email del historial de chat y guarda un lead en Supabase |
 
 ## POST /api/demos-login
 
-Inicia sesión en las demos privadas. Tras el login, el navegador puede abrir `/demos/*` y llamar a `/agentes-app/api/*`
-(la API del backend de agentes, reenviada por `src/proxy.ts`). Sin sesión: las páginas redirigen a `/demos/login?next=…` y
-`/agentes-app/*` responde `401` con `{"detail":{"code":"unauthorized","message":"Sesión no iniciada."}}` (sin diálogo del navegador).
+Inicia sesión en las demos privadas. Los usuarios (uno por cliente) **viven en el backend de agentes** (tabla `users`, se gestionan desde
+el panel «Uso de clientes» o con `python -m app.auth.cli`); este endpoint le pasa usuario y contraseña a `POST {AGENTES_URL}/api/auth/login`
+(con `x-agentes-key`) y, si los acepta, emite las dos cookies. Tras el login, el navegador puede abrir `/demos/*` y llamar a
+`/agentes-app/api/*` (reenviada por `src/proxy.ts`). Sin sesión: las páginas redirigen a `/demos/login?next=…` y `/agentes-app/*` responde
+`401` con `{"detail":{"code":"unauthorized","message":"Sesión no iniciada."}}` (sin diálogo del navegador).
 
 - **Auth/CORS:** público, mismo origen.
-- **Body (JSON):** `{"usuario": "kroomix", "contrasena": "…"}`. Se ignoran espacios alrededor de ambos campos y las mayúsculas del usuario.
-- **Respuesta 200:** `{"ok": true}` y `Set-Cookie: kroomix_demo=<exp>.<hmac>; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800` (+`Secure` en producción).
-- **Errores:** `401 {"error":"Usuario o contraseña incorrectos."}` (tarda ~0,8 s a propósito para frenar la fuerza bruta).
-- **Efectos colaterales:** solo la cookie. Es una firma HMAC-SHA256 con `DEMO_PASSWORD`: cambiarla invalida todas las sesiones.
-- **Variables de entorno:** `DEMO_USER`, `DEMO_PASSWORD`. Si `DEMO_PASSWORD` no está definida, las demos no piden sesión.
-- **Precondiciones:** ninguna. **Idempotencia:** seguro reintentar; cada llamada válida emite una cookie nueva (7 días).
+- **Body (JSON):** `{"usuario": "acme", "contrasena": "…"}`. Se ignoran espacios alrededor de ambos campos y las mayúsculas del usuario.
+- **Respuesta 200:** `{"ok": true}` y dos `Set-Cookie` (`HttpOnly; SameSite=Lax; Path=/; Max-Age=604800`, +`Secure` en producción):
+  `kroomix_demo=<exp>.<hmac>` (sesión de la web) y `kroomix_session=<token>` (sesión del backend, que registra la actividad del usuario).
+- **Errores:** `401 {"error":"Usuario o contraseña incorrectos."}` (tarda ~0,8 s a propósito); `429 {"error":"Demasiados intentos. Espera unos minutos."}`
+  (el backend bloquea tras 5 fallos por usuario en 15 min, aunque luego acierte); `502 {"error":"No se ha podido conectar con el servidor de la demo…"}`.
+- **Efectos colaterales:** las dos cookies y una fila `login`/`login_failed` en la tabla `activity` del backend (con la IP real, de `x-forwarded-for`).
+  `kroomix_demo` es una firma HMAC-SHA256 con `DEMO_PASSWORD`: cambiarla invalida todas las sesiones.
+- **Variables de entorno:** `DEMO_PASSWORD` (clave de firma; sin ella las demos no piden sesión), `AGENTES_URL`, `AGENTES_SECRET`. `DEMO_USER` ya no se usa.
+- **Precondiciones:** el usuario existe y está activo en el backend. **Idempotencia:** seguro reintentar; cada login válido abre una sesión nueva (7 días).
 
 ```bash
 curl -i -X POST https://www.kroomix.com/api/demos-login -H 'Content-Type: application/json' \
-  -d '{"usuario":"kroomix","contrasena":"<contraseña>"}'
+  -d '{"usuario":"acme","contrasena":"<contraseña>"}'
 # HTTP/2 200
 # set-cookie: kroomix_demo=1796000000.3f9a…; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=lax
+# set-cookie: kroomix_session=Zk3…; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=lax
 # {"ok":true}
 ```
+
+## GET /demos/logout
+
+Cierra la sesión: borra `kroomix_demo` y `kroomix_session` y redirige (307) a `/demos/login`. Lo llama el botón «Salir» de la plataforma de agentes
+(tras `POST /agentes-app/api/auth/logout`). Sin parámetros; seguro reintentar.
 
 ---
 
@@ -882,6 +894,6 @@ curl -s -X POST http://localhost:3003/api/save-lead \
 | `BLOG_ADMIN_SESSION_SECRET` | blog auth + todos los endpoints admin del blog |
 | `ANTHROPIC_API_KEY` | chat, chat/summary, demos clasificar, demos escenario/chat |
 | `GMAIL_USER` / `GMAIL_APP_PASSWORD` | demos bandeja y limpiar (IMAP Gmail), demos enviar (SMTP Gmail) |
-| `DEMO_USER` / `DEMO_PASSWORD` | acceso a las demos: `/api/demos-login` y sesión en `src/proxy.ts` (`/demos/*`, `/agentes-app/*`); sin `DEMO_PASSWORD`, abierto |
+| `DEMO_PASSWORD` | clave de firma de la sesión de las demos (`/api/demos-login`, `src/proxy.ts`: `/demos/*`, `/agentes-app/*`); sin ella, abierto. `DEMO_USER` ya no se usa: los usuarios están en el backend de agentes |
 | `AGENTES_URL` / `AGENTES_SECRET` | proxy de `/agentes-app/*` al backend de agentes (VPS) y clave `x-agentes-key` que este exige |
 | `NODE_ENV` | flag `Secure` de la cookie admin |
