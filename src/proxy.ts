@@ -14,6 +14,9 @@ function reenviarAgentes(req: NextRequest) {
   headers.delete("authorization"); // la contraseña de la demo no se la pasamos al backend
   const clave = process.env.AGENTES_SECRET;
   if (clave) headers.set("x-agentes-key", clave);
+  // IP real del cliente para el registro de actividad del backend (en un rewrite, Vercel no conserva x-forwarded-for).
+  const ip = (req.headers.get("x-vercel-forwarded-for") ?? req.headers.get("x-real-ip") ?? "").split(",")[0].trim();
+  if (ip) headers.set("x-forwarded-for", ip);
   const ruta = req.nextUrl.pathname.slice("/agentes-app".length);
   return NextResponse.rewrite(new URL(ruta + req.nextUrl.search, destino), { request: { headers } });
 }
