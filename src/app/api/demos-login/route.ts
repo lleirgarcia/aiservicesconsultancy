@@ -21,7 +21,10 @@ export async function POST(req: Request) {
     "User-Agent": req.headers.get("user-agent") ?? "",
   };
   const ip = (req.headers.get("x-vercel-forwarded-for") ?? req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
-  if (ip) headers["X-Forwarded-For"] = ip; // el backend registra la IP real del cliente, no la de Vercel
+  if (ip) {
+    headers["X-Forwarded-For"] = ip;
+    headers["X-Client-IP"] = ip;
+  } // el backend registra la IP real del cliente, no la de Vercel
   if (process.env.AGENTES_SECRET) headers["x-agentes-key"] = process.env.AGENTES_SECRET;
 
   let respuesta: Response;

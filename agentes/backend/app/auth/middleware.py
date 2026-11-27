@@ -25,7 +25,9 @@ _SKIP = {("GET", "/api/health"), ("GET", "/api/inbox")}
 
 def client_ip(scope, trust_proxy: bool) -> str:
     if trust_proxy:
-        fwd = dict(scope["headers"]).get(b"x-forwarded-for", b"").decode().split(",")[0].strip()
+        h = dict(scope["headers"])
+        # x-client-ip lo pone la web (Vercel) y no lo toca el proxy intermedio; x-forwarded-for puede venir sobrescrito.
+        fwd = (h.get(b"x-client-ip") or h.get(b"x-forwarded-for", b"")).decode().split(",")[0].strip()
         if fwd:
             return fwd
     return (scope.get("client") or ("", 0))[0]
